@@ -1,0 +1,77 @@
+//
+//  DynaModel.h
+//  JYEX
+//
+//  Created by slovelys on 15/7/20.
+//  Copyright © 2015年 广州洋基. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import "GiftModel.h"
+#import "CommentModel.h"
+#import "AttachModel.h"
+#import "Dynamic.h"
+
+
+@interface DynaModel : NSObject
+
+@property (strong, nonatomic) NSMutableArray *attachinfo;
+@property (copy, nonatomic) NSArray *giftdata;
+@property (strong, nonatomic) NSMutableArray *reply;
+@property (copy, nonatomic) NSNumber *creuid;
+@property (copy, nonatomic) NSString *baobaousername;
+@property (copy, nonatomic) NSString *content;
+@property (copy, nonatomic) NSString *crenickname;
+@property (copy, nonatomic) NSString *dynatag;
+@property (copy, nonatomic) NSString *fbztx;
+@property (copy, nonatomic) NSString *guid;
+@property (copy, nonatomic) NSString *gxname;
+@property (copy, nonatomic) NSString *localid;
+@property (copy, nonatomic) NSString *position;
+@property (copy, nonatomic) NSString *shareusergxname;
+@property (copy, nonatomic) NSString *shareusername;
+@property (copy, nonatomic) NSString *tradetable;
+@property (copy, nonatomic) NSString *user_type;
+@property (copy, nonatomic) NSArray *localattachinfo;
+@property (strong, nonatomic) NSNumber *baobaouid;
+@property (strong, nonatomic) NSNumber *classuid;
+@property (strong, nonatomic) NSNumber *commentcount;
+@property (strong, nonatomic) NSNumber *commentupdate;
+@property (strong, nonatomic) NSNumber *contentupdate;
+@property (strong, nonatomic) NSNumber *dateline;
+@property (strong, nonatomic) NSNumber *dtype;
+@property (strong, nonatomic) NSNumber *editflag;
+@property (strong, nonatomic) NSNumber *flag;
+@property (strong, nonatomic) NSNumber *giftcount;
+@property (strong, nonatomic) NSNumber *giftupdate;
+@property (strong, nonatomic) NSNumber *graphtime;
+@property (strong, nonatomic) NSNumber *ispajs;
+@property (strong, nonatomic) NSNumber *piccount;
+@property (strong, nonatomic) NSNumber *schoolid;
+@property (strong, nonatomic) NSNumber *shareflag;
+@property (strong, nonatomic) NSNumber *updatetime;
+@property (strong, nonatomic) NSNumber *upflag;
+@property (strong, nonatomic) NSNumber *videocount;
+//2015.8.26 add
+@property (copy, nonatomic) NSString *schoolname;
+@property (copy, nonatomic) NSString *classname;
+@property (strong, nonatomic) NSNumber *groupkey;
+@property (strong, nonatomic) NSNumber *gxid;
+@property (copy, nonatomic) NSString *baobaoname;
+
+@property (strong, nonatomic) NSNumber *fb_flag;
+@property (strong, nonatomic) NSNumber *oldcreuid;
+@property (copy, nonatomic) NSString *oldcrenickname;
+
+@property (strong, nonatomic) NSMutableArray *selectedAssetURLs;
+@property (assign, nonatomic) BBQDynamicMediaType mediaType;
+
+- (instancetype)init;
+- (instancetype)initWithDic:(NSDictionary *)dic;
+- (instancetype)initWithMediaType:(BBQDynamicMediaType)mediaType;
+
+- (void)addASelectedAssetURL:(NSURL *)assetURL;
+- (void)deleteASelectedAssetURL:(NSURL *)assetURL;
+- (void)deleteAAttach:(AttachModel *)attach;
+
+@end

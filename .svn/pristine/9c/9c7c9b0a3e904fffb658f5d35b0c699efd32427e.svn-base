@@ -1,0 +1,13 @@
+//
+//  CateModel.m
+//  JYEX
+//
+//  Created by slovelys on 15/7/21.
+//  Copyright © 2015年 广州洋基. All rights reserved.
+//
+
+#import "CateModel.h"
+
+@implementation CateModel
+
+@end

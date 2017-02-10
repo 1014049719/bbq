@@ -1,0 +1,55 @@
+//
+//  ItemModel.h
+//  JYEX
+//
+//  Created by slovelys on 15/7/21.
+//  Copyright (c) 2015年 广州洋基. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface ItemModel : NSObject
+
+/// 用户编号
+@property (copy, nonatomic) NSNumber *user_id;
+/// 当前版本号
+@property (copy, nonatomic) NSNumber *curr_ver;
+/// 创建版本号
+@property (copy, nonatomic) NSNumber *create_ver;
+/// 创建时间
+@property (copy, nonatomic) NSString *create_time;
+/// 修改时间
+@property (copy, nonatomic) NSString *modify_time;
+/// 删除状态
+@property (copy, nonatomic) NSNumber *delete_state;
+/// 编辑状态
+@property (copy, nonatomic) NSNumber *edit_state;
+/// 冲突状态
+@property (copy, nonatomic) NSNumber *conflict_state;
+/// 同步状态，1表示正在同步
+@property (copy, nonatomic) NSNumber *sync_state;
+/// 是否上传
+@property (copy, nonatomic) NSNumber *need_upload;
+/// 项目编号
+@property (copy, nonatomic) NSString *item_id;
+/// 项目编号
+@property (copy, nonatomic) NSString *note_id;
+/// ITEM创建者编号,备用
+@property (copy, nonatomic) NSNumber *creator_id;
+/// ITEM的类型
+@property (copy, nonatomic) NSNumber *item_type;
+/// ITEM的扩展名
+@property (copy, nonatomic) NSString *item_ext;
+/// 项目大小
+@property (copy, nonatomic) NSNumber *item_size;
+/// 加密标识
+@property (copy, nonatomic) NSNumber *encrypt_flag;
+/// 文件名
+@property (copy, nonatomic) NSString *item_title;
+///
+@property (copy, nonatomic) NSNumber *upload_size;
+/// 家园e线
+@property (copy, nonatomic) NSString *server_path;
+
+
+@end

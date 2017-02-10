@@ -1,0 +1,36 @@
+//
+//  UserDataModel.m
+//  BBQ
+//
+//  Created by slovelys on 15/8/17.
+//  Copyright (c) 2015年 bbq. All rights reserved.
+//
+
+#import "UserDataModel.h"
+
+@implementation UserDataModel
+
+- (instancetype)initWithDic:(NSDictionary *)dic {
+    self = [super init];
+    if (self) {
+//        self.uid = pickJsonStrValue(dic, @"uid");
+//        self.fbztx = pickJsonStrValue(dic, @"fbztx");
+//        self.realName = pickJsonStrValue(dic, @"realname");
+//        self.nickName = pickJsonStrValue(dic, @"nickname");
+//        
+//        self.fbdt_num = pickJsonStrValue(dic, @"bbq_fdt_num");
+//        self.pic_num = pickJsonStrValue(dic, @"bbq_pic_num");
+//        self.gxid = pickJsonStrValue(dic, @"gxid");
+//        self.gxName = pickJsonStrValue(dic, @"gxname");
+//        self.isQzk = pickJsonStrValue(dic, @"isqzk");
+//        
+//        self.bbq_jifen_num = pickJsonStrValue(dic, @"bbq_jifen_num");
+//        self.bbq_ld_num = pickJsonStrValue(dic, @"bbq_ld_num");
+//        self.groupkey = pickJsonStrValue(dic, @"groupkey");
+//        self.schoolname = pickJsonStrValue(dic, @"schoolname");
+//        self.classname = pickJsonStrValue(dic, @"classname");
+    }
+    return self;
+}
+
+@end

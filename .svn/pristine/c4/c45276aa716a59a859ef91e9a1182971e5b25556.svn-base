@@ -1,0 +1,100 @@
+//
+//  BBQDynamicLayoutStyleTimeline.m
+//  BBQ
+//
+//  Created by 朱琨 on 16/1/13.
+//  Copyright © 2016年 bbq. All rights reserved.
+//
+
+#import "BBQDynamicLayoutTimeline.h"
+#import "BBQTextLinePositionModifier.h"
+
+@implementation BBQDynamicLayoutTimeline
+
+- (void)layout {
+    self.marginTop = kDynamicCellTopMargin;
+    self.funcHeight = kDynamicCellFuncHeight;
+    self.marginBottom = kDynamicCellToolbarBottomMargin;
+    
+    [self layoutDateView];
+    [self layoutProfile];
+    [super layoutTagWithWidth:kDynamicCellProfileWidth - kDynamicCellPadding * 2 - 24 - 5];
+    [super layoutTextWithWidth:kDynamicCellContentWidth];
+    [self layoutMedia];
+    [self layoutGiftsWithWidth:kDynamicCellContentWidth - 35];
+    [self layoutComments];
+
+    self.height = 0;
+    self.height += self.marginTop;
+    self.height += self.profileHeight;
+    self.height += self.tagHeight;
+    self.height += self.textHeight;
+    self.height += self.mediaHeight;
+    self.height += kDynamicCellFuncHeight;
+    self.height += self.giftHeight;
+    self.height += self.commentHeight;
+    self.height += kDynamicCellToolbarHeight;
+    self.height += self.marginBottom;
+    if ((!self.tagHeight && !self.textHeight) || (self.tagHeight && !self.textHeight)) {
+        self.height += 15;
+    }
+}
+
+- (void)layoutProfile {
+    [self layoutName];
+    [self layoutSource];
+    [self layoutPostTime];
+    self.profileHeight = kDynamicCellProfileHeight;
+}
+
+- (void)layoutMedia {
+    self.mediaSize = CGSizeZero;
+    self.mediaHeight = 0;
+    if (!self.dynamic.attachinfo.count) {
+        self.mediaType = BBQDynamicMediaTypeNone;
+        return;
+    }
+    self.mediaType = BBQDynamicMediaTypePhoto;
+    CGSize mediaSize = CGSizeZero;
+    CGFloat mediaHeight = 0;
+    switch (self.dynamic.attachinfo.count) {
+        case 1: {
+            Attachment *model = self.dynamic.attachinfo.firstObject;
+            if (model.itype.integerValue == BBQAttachmentTypeVideo) {
+                self.mediaType = BBQDynamicMediaTypeVideo;
+                mediaHeight = CGFloatPixelRound(kDynamicCellContentWidth * 3 / 4.0);
+                mediaSize = CGSizeMake(kDynamicCellContentWidth, mediaHeight);
+            } else {
+                mediaHeight = CGFloatPixelRound(kDynamicCellContentWidth * 7 / 6.0);
+                mediaSize = CGSizeMake(kDynamicCellContentWidth, mediaHeight);
+            }
+        } break;
+        case 2: {
+            mediaHeight = CGFloatPixelRound((kDynamicCellContentWidth - kDynamicCellPaddingPic) / 2.0);
+            mediaSize = CGSizeMake(mediaHeight, mediaHeight);
+        } break;
+        case 3: case 4: {
+            CGFloat height = CGFloatPixelRound((kDynamicCellContentWidth - kDynamicCellPaddingPic) / 2.0);
+            mediaSize = CGSizeMake(height, height);
+            mediaHeight = height * 2 + kDynamicCellPaddingPic;
+        } break;
+        case 5: case 6: {
+            CGFloat height = CGFloatPixelRound((kDynamicCellContentWidth - kDynamicCellPaddingPic * 2) / 3.0);
+            mediaSize = CGSizeMake(height, height);
+            mediaHeight = height * 2 + kDynamicCellPaddingPic;
+        } break;
+        default: {
+            CGFloat height = CGFloatPixelRound((kDynamicCellContentWidth - kDynamicCellPaddingPic * 2) / 3.0);
+            mediaSize = CGSizeMake(height, height);
+            mediaHeight = height * 3 + kDynamicCellPaddingPic * 2;
+        } break;
+    }
+    self.mediaSize = mediaSize;
+    self.mediaHeight = mediaHeight;
+}
+
+- (void)layoutTag {
+    [super layoutTagWithWidth:kDynamicCellProfileWidth - kDynamicCellPadding * 2 - 24 - 5];
+}
+
+@end

@@ -1,0 +1,430 @@
+///*
+// *  Note2ItemMgr.cpp
+// *  NoteBook
+// *
+// *  Created by wangsc on 10-9-15.
+// *  Copyright 2010 ND. All rights reserved.
+// *
+// */
+//
+//#import "Note2ItemMgr.h"
+//#import "ItemMgr.h"
+////#import "CfgMgr.h"
+//
+//#import "Global.h"
+//#import "logging.h"
+//
+//#import "CommonDateTime.h"
+////#import "CommonNoteOpr.h"
+//
+//#define GUID_ZERO @"00000000-0000-0000-0000-000000000000"
+//#define isGuidNull(p) (p == nil || [p isEqualToString:GUID_ZERO])
+//
+//@implementation AstroDBMng (ForNote2ItemMgr)
+//
+//+ (TNoteXItem *)getNote2Item:(NSString *)guidNote itemID:(NSString *)guidItem {
+//  NSString *sql = [NSString
+//      stringWithFormat:
+//          @"SELECT * FROM tb_note_x_item WHERE note_id='%@' AND item_id='%@';",
+//          guidNote, guidItem];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    Note2ItemModel *model = [self getNote2ItemModelWith:resultSet];
+//
+//    TRecHead *pHead = [TRecHead new];
+//    TNoteXItem *pInfo = [TNoteXItem new];
+//    pInfo.tHead = pHead;
+//    [self objFromFMDBQuery_Note2ItemMgr:pInfo model:model];
+//
+//    [fmdb close];
+//    return pInfo;
+//  }
+//  return nil;
+//}
+//
+//+ (BOOL)deleteNote2Item:(NSString *)guidNote itemID:(NSString *)guidItem {
+//  // MLOG(@"need implemention");
+//  return YES;
+//}
+//
+//+ (BOOL)deleteNote2Item:(TNoteXItem *)pInfo {
+//  if (pInfo.tHead.nCurrVerID == 0) {
+//    return [self deleteNote2ItemFromDB:pInfo];
+//  }
+//
+//  //[CommonFunc updateHead:pInfo.tHead];
+//  pInfo.tHead.nEditState = 1;
+//  pInfo.tHead.strModTime = [CommonFunc getCurrentTime];
+//
+//  pInfo.tHead.nDelState = DELETESTATE_DELETE;
+//
+//  //[super updateHead:&a2bInfo.tHead];
+//  // a2bInfo.tHead.nDelState = STATE_DELETE;
+//  return [self saveToDB_Note2ItemMgr:pInfo];
+//}
+//
+//+ (BOOL)deleteNote2ItemFromDB:(TNoteXItem *)pInfo {
+//  NSString *sql = [NSString
+//      stringWithFormat:
+//          @"DELETE FROM tb_note_x_item WHERE note_id='%@' AND item_id='%@';",
+//          pInfo.strNoteIdGuid, pInfo.strItemIdGuid];
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    BOOL ret = [fmdb executeUpdate:sql];
+//
+//    [fmdb close];
+//    return ret;
+//  }
+//  return NO;
+//}
+//
+//+ (void)updateNote2Item:(TNoteXItem *)pInfo {
+//  //[CommonFunc updateHead:pInfo.tHead];
+//
+//  [self saveToDB_Note2ItemMgr:pInfo];
+//}
+//
+//+ (BOOL)saveNote2Item:(TNoteXItem *)pInfo {
+//  return [self saveToDB_Note2ItemMgr:pInfo];
+//}
+//
+//+ (NSArray *)getNote2ItemListBySQL:(NSString *)strSQL {
+//  NSMutableArray *aryData = [NSMutableArray array];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:strSQL];
+//    Note2ItemModel *model = [self getNote2ItemModelWith:resultSet];
+//
+//    TRecHead *pHead = [TRecHead new];
+//    TNoteXItem *pInfo = [TNoteXItem new];
+//    pInfo.tHead = pHead;
+//    [self objFromFMDBQuery_Note2ItemMgr:pInfo model:model];
+//
+//    [aryData addObject:pInfo];
+//    [fmdb close];
+//    return aryData;
+//  }
+//  return nil;
+//}
+//
+////查询某条笔记需上传的笔记关联项
+//+ (NSArray *)getNeedUploadNote2ItemListByNote:(NSString *)guidNote {
+//
+//  NSString *strSQL;
+//  strSQL = [NSString
+//      stringWithFormat:
+//          @"SELECT * FROM tb_note_x_item WHERE note_id='%@' AND edit_state=%d;",
+//          guidNote, EDITSTATE_EDITED];
+//
+//  return [self getNote2ItemListBySQL:strSQL];
+//}
+//
+////查询需下载的笔记关联项
+//+ (NSArray *)getNeedDownloadNote2ItemListByNote:(NSString *)guidNote {
+//
+//  NSString *strSQL;
+//  if (guidNote)
+//    strSQL = [NSString
+//        stringWithFormat:@"SELECT * FROM tb_note_x_item WHERE note_id='%@' AND "
+//                         @"need_downlord=%d AND delete_state=%d;",
+//                         guidNote, DOWNLOAD_NEED, DELETESTATE_NODELETE];
+//  else
+//    strSQL =
+//        [NSString stringWithFormat:@"SELECT * FROM tb_note_x_item WHERE "
+//                                   @"need_downlord=%d AND delete_state=%d;",
+//                                   DOWNLOAD_NEED, DELETESTATE_NODELETE];
+//
+//  return [self getNote2ItemListBySQL:strSQL];
+//}
+//
+//+ (NSArray *)getNote2ItemList:(NSString *)guidNote
+//                includeDelete:(BOOL)includeDelete {
+//
+//  NSString *strSQL;
+//  if (includeDelete)
+//    strSQL = [NSString
+//        stringWithFormat:@"select * from tb_note_x_item where note_id='%@';",
+//                         guidNote];
+//  else
+//    strSQL = [NSString stringWithFormat:@"select * from tb_note_x_item where "
+//                                        @"note_id='%@' AND delete_state=%d;",
+//                                        guidNote, DELETESTATE_NODELETE];
+//
+//  return [self getNote2ItemListBySQL:strSQL];
+//}
+//
+////删除某条笔记的所有item和NoteXItem(只修改标志，不删除记录和文件)
+//+ (BOOL)DeleteAllItemNoFileByNote:(NSString *)guidNote
+//                    includeDelete:(BOOL)includeDelete {
+//  NSArray *arrNote2Item =
+//      [self getNote2ItemList:guidNote includeDelete:includeDelete];
+//  if (!arrNote2Item)
+//    return NO;
+//
+//  for (id obj in arrNote2Item) {
+//    TNoteXItem *pNoteXItem = (TNoteXItem *)obj;
+//
+//    TItemInfo *pItemInfo = [AstroDBMng getItem:pNoteXItem.strItemIdGuid];
+//    if (pItemInfo) { //删除
+//      pItemInfo.tHead.nEditState = EDITSTATE_EDITED;
+//      pItemInfo.tHead.nDelState = DELETESTATE_DELETE;
+//      [AstroDBMng saveItem:pItemInfo];
+//    }
+//
+//    //修改Note2Item标记
+//    pNoteXItem.tHead.nEditState = EDITSTATE_EDITED;
+//    pNoteXItem.tHead.nDelState = DELETESTATE_DELETE;
+//    [self saveNote2Item:pNoteXItem];
+//  }
+//
+//  return YES;
+//}
+//
+//+ (NSArray *)getNeedUploadItemList:(NSString *)guidNote {
+//  //本地新建已删除,不需要上传
+//  NSString *strSQL = [NSString
+//      stringWithFormat:
+//          @"select * from tb_note_x_item where note_id='%@' AND curr_ver!=0;",
+//          guidNote];
+//  return [self getNote2ItemListBySQL:strSQL];
+//}
+//
+////获取某个笔记的笔记与笔记关联项的最大版本号
+//+ (int)getNote2ItemMaxVersionByNoteGuid:(NSString *)guidNote {
+//  NSString *sql;
+//  if (isGuidNull(guidNote))
+//    sql =
+//        [NSString stringWithFormat:@"SELECT max(curr_ver) as currver FROM %@;",
+//                                   TB_NOTE_X_ITEM];
+//  else
+//    sql = [NSString
+//        stringWithFormat:
+//            @"SELECT max(curr_ver) as currver FROM %@ where note_id='%@';",
+//            TB_NOTE_X_ITEM, guidNote];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    int max_ver = [resultSet intForColumn:@"currver"];
+//    [fmdb close];
+//    return max_ver;
+//  }
+//  return 0;
+//}
+//
+////获取某个笔记的笔记项的最大order号
+//+ (int)getNote2ItemMaxOrderByNoteGuid:(NSString *)guidNote {
+//  NSString *sql;
+//  if (isGuidNull(guidNote))
+//    sql = [NSString
+//        stringWithFormat:@"SELECT max(item_order) as itemorder FROM %@;",
+//                         TB_NOTE_X_ITEM];
+//  else
+//    sql = [NSString
+//        stringWithFormat:
+//            @"SELECT max(item_order) as itemorder FROM %@ where note_id='%@';",
+//            TB_NOTE_X_ITEM, guidNote];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    int max_ver = [resultSet intForColumn:@"itemorder"];
+//    [fmdb close];
+//    return max_ver;
+//  }
+//  return 0;
+//}
+//
+//+ (BOOL)deleteNote2ItemAndItemByNote:(NSString *)guidNote {
+//  NSArray *arrNote2Item = [self getNote2ItemList:guidNote includeDelete:NO];
+//  if (!arrNote2Item)
+//    return NO;
+//
+//  for (int index = 0; index < [arrNote2Item count]; index++) {
+//    TNoteXItem *pInfo = [arrNote2Item objectAtIndex:index];
+//
+//    //[CommonFunc updateHead:pInfo.tHead];  //需要跟踪
+//    pInfo.tHead.nDelState = DELETESTATE_DELETE;
+//    [self saveToDB_Note2ItemMgr:pInfo];
+//
+//    [AstroDBMng deleteItem:pInfo.strItemIdGuid];
+//  }
+//
+//  return YES;
+//
+//  /*
+//  std::list<A2BInfo> note2ItemList;
+//  [self getNote2ItemList:guidNote a2bList:&note2ItemList includeDelete:NO];
+//
+//  for (list<A2BInfo>::iterator itor = note2ItemList.begin();
+//       itor != note2ItemList.end(); ++itor)
+//  {
+//      A2BInfo a2bInfo = *itor;
+//      [super updateHead:&a2bInfo.tHead];
+//      a2bInfo.tHead.nDelState = STATE_DELETE;
+//      [self saveToDB:a2bInfo];
+//
+//      [ItemMgr deleteItem:a2bInfo.guidSecond];
+//  }
+//
+//  return YES;
+//  */
+//}
+//
+//+ (BOOL)deleteNote2ItemAndItemByNoteFromDB:(NSString *)guidNote {
+//  NSArray *arrNote2Item = [self getNote2ItemList:guidNote includeDelete:NO];
+//  if (!arrNote2Item)
+//    return NO;
+//
+//  for (int index = 0; index < [arrNote2Item count]; index++) {
+//    TNoteXItem *pInfo = [arrNote2Item objectAtIndex:index];
+//
+//    [AstroDBMng deleteItemFromDB:pInfo.strItemIdGuid];
+//    [self deleteNote2ItemFromDB:pInfo];
+//  }
+//
+//  return YES;
+//
+//  /*
+//  std::list<A2BInfo> note2ItemList;
+//  [self getNote2ItemList:guidNote a2bList:&note2ItemList includeDelete:NO];
+//
+//  for (list<A2BInfo>::iterator itor = note2ItemList.begin();
+//       itor != note2ItemList.end(); ++itor)
+//  {
+//      [ItemMgr deleteItemFromDB:itor->guidSecond];
+//      [self deleteNote2ItemFromDB:*itor];
+//  }
+//
+//  return YES;
+//  */
+//}
+//
+////数据库操作
+//+ (int)saveToDB_Note2ItemMgr:(TNoteXItem *)obj {
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    [fmdb executeUpdate:@"replace into %@"
+//                         "( [user_id],"
+//                         "[curr_ver], "
+//                         "[create_ver], "
+//                         "[create_time], "
+//                         "[modify_time], "
+//                         "[delete_state], "
+//                         "[edit_state], "
+//                         "[conflict_state], "
+//                         "[sync_state], "
+//                         "[need_upload], "
+//
+//                         "[note_id], "
+//                         "[item_id], "
+//                         "[item_creator], "
+//                         "[catalog_belong_to], "
+//                         "[item_ver], "
+//                         "[need_downlord], "
+//                         "[item_order])"
+//                         "values(?,?,?,?,?, ?,?,?,?,?,  ?,?,?,?,?, ?,?);",
+//                        TB_NOTE_X_ITEM, obj.tHead.nUserID, obj.tHead.nCurrVerID,
+//                        obj.tHead.nCreateVerID,
+//                        [obj.tHead.strCreateTime UTF8String],
+//                        [obj.tHead.strModTime UTF8String], obj.tHead.nDelState,
+//                        obj.tHead.nEditState, obj.tHead.nConflictState,
+//                        obj.tHead.nSyncState, obj.tHead.nNeedUpload,
+//                        [obj.strNoteIdGuid UTF8String],
+//                        [obj.strItemIdGuid UTF8String], obj.nCreatorID,
+//                        [obj.strCatalogBelongToGuid UTF8String], obj.nItemVer,
+//                        obj.nNeedDownlord, obj.nItemOrder];
+//
+//    [fmdb close];
+//    return 1;
+//  }
+//  return -1;
+//}
+//
+//+ (Note2ItemModel *)getNote2ItemModelWith:(FMResultSet *)resultSet {
+//  Note2ItemModel *model = [[Note2ItemModel alloc] init];
+//  while ([resultSet next]) {
+//    model.user_id =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"user_id"]];
+//    model.curr_ver =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"curr_ver"]];
+//    model.create_ver =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"create_ver"]];
+//    model.create_time = [resultSet stringForColumn:@"create_time"];
+//    model.modify_time = [resultSet stringForColumn:@"modify_time"];
+//
+//    model.delete_state =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"delete_state"]];
+//    model.edit_state =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"edit_state"]];
+//    model.conflict_state =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"conflict_state"]];
+//    model.sync_state =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"sync_state"]];
+//    model.need_upload =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"need_upload"]];
+//
+//    model.note_id = [resultSet stringForColumn:@"note_id"];
+//    model.item_id = [resultSet stringForColumn:@"item_id"];
+//    model.item_creator =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"item_creator"]];
+//    model.catalog_belong_to = [resultSet stringForColumn:@"catalog_belong_to"];
+//    model.item_ver =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"item_ver"]];
+//    model.need_downlord =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"need_downlord"]];
+//    model.item_order =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"item_order"]];
+//  }
+//  return model;
+//}
+//
+//+ (BOOL)objFromFMDBQuery_Note2ItemMgr:(TNoteXItem *)obj
+//                                model:(Note2ItemModel *)model {
+//  obj.tHead.nUserID = [model.user_id intValue];         // 用户编号
+//  obj.tHead.nCurrVerID = [model.curr_ver intValue];     // 当前版本号
+//  obj.tHead.nCreateVerID = [model.create_ver intValue]; // 创建版本号
+//
+//  obj.tHead.strCreateTime = model.create_time; // 创建时间
+//  obj.tHead.strModTime = model.modify_time;    // 修改时间
+//
+//  obj.tHead.nDelState = [model.delete_state intValue];        // 删除状态
+//  obj.tHead.nEditState = [model.edit_state intValue];         // 编辑状态
+//  obj.tHead.nConflictState = [model.conflict_state intValue]; // 冲突状态
+//  obj.tHead.nSyncState = [model.sync_state intValue]; // 同步状态，1表示正在同步
+//  obj.tHead.nNeedUpload = [model.need_upload intValue]; // 是否上传
+//
+//  obj.strNoteIdGuid = model.note_id; //笔记编号
+//  obj.strItemIdGuid = model.item_id;
+//  obj.nCreatorID = [model.item_creator intValue];
+//
+//  obj.strCatalogBelongToGuid = model.catalog_belong_to; // 目录编号;
+//  obj.nItemVer = [model.item_ver intValue];
+//  obj.nNeedDownlord = [model.need_downlord intValue];
+//  obj.nItemOrder = [model.item_order intValue];
+//
+//  return YES;
+//}
+//
+//+ (int)getNoteXItemMaxVersion:(NSString *)strNoteGuid {
+//  NSString *strValue;
+//  //    if ( ![AstroDBMng getCfg_cfgMgr:TB_NOTE_X_ITEM name:strNoteGuid
+//  //    value:strValue] )
+//  //        return 0;
+//
+//  int maxVer = [strValue intValue];
+//  return maxVer;
+//}
+//
+//+ (BOOL)setNoteXItemMaxVersion:(NSString *)strNoteGuid version:(int)version {
+//  //    NSString *strValue = [NSString stringWithFormat:@"%d",version];
+//  //    return [AstroDBMng setCfg_cfgMgr:TB_NOTE_X_ITEM name:strNoteGuid
+//  //    value:strValue];
+//  return NO;
+//}
+//
+//@end

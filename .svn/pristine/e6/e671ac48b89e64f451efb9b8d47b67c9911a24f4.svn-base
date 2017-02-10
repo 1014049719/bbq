@@ -1,0 +1,145 @@
+//
+//  MainViewController.m
+//  BBQ
+//
+//  Created by wth on 15/8/6.
+//  Copyright (c) 2015年 bbq. All rights reserved.
+//
+
+#import "MainViewController.h"
+
+#import "ResetPassKeyTableViewController.h"
+#include "MessageViewController.h"
+#import "BBQDynamicEditViewController.h"
+#import "AppMacro.h"
+#import "AppDelegate.h"
+#import <UINavigationBar+Awesome.h>
+#import <WZLBadgeImport.h>
+#import <UINavigationController+FDFullscreenPopGesture.h>
+#import "User.h"
+
+@interface MainViewController ()
+
+@property(weak, nonatomic) IBOutlet UIView *takePhotoView;
+
+@property(weak, nonatomic) IBOutlet UIView *dailyReportView;
+
+@property(weak, nonatomic) IBOutlet UIButton *cameraButton;
+@property(weak, nonatomic) IBOutlet UILabel *cameraLabel;
+@property(weak, nonatomic) IBOutlet UIButton *reportButton;
+@property(weak, nonatomic) IBOutlet UILabel *reportLabel;
+
+//上方红背景高度
+@property (weak, nonatomic) IBOutlet UIView *RedView;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *Layout_RedViewHeight;
+
+@property(nonatomic, copy) NSString *uploadTitle;
+@property(assign, nonatomic) UploadItemType uploadType;
+
+//刷新页面计数值
+@property(nonatomic, assign) int nRefreshPageCount;
+//本页面是否是当前页面
+@property(nonatomic, assign) BOOL isCurrentPage;
+
+@end
+
+@implementation MainViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.edgesForExtendedLayout=UIRectEdgeNone;
+    
+    if (TheCurUser.schooltype.integerValue == 3) {
+        _Layout_RedViewHeight.constant = 0;
+    }
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    self.title=@"家园";
+    if (TheCurUser.schooltype.integerValue != 3) {
+        [self.navigationController setNavigationBarHidden:YES animated:animated];
+    }
+    [self photoRemindRequest];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    
+    self.isCurrentPage = NO;
+}
+
+- (BOOL)fd_prefersNavigationBarHidden {
+    if (TheCurUser.schooltype.integerValue!=3) {
+        return YES;
+    }else{
+        return NO;
+    }
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    self.isCurrentPage = YES;
+    [self procYinDao];
+}
+
+- (void)editDynamicWithMorePhoto {
+    self.uploadTitle = @"批量上传";
+    self.uploadType = UploadItemTypeAll;
+    
+}
+
+- (void)procYinDao {
+    if (![BBQLoginManager isLogin])
+        return;
+    //提取提醒消息数
+    [self photoRemindRequest];
+}
+
+/*
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little
+ preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+#pragma mark - 网络请求
+
+/// 任务数提醒
+- (void)photoRemindRequest {
+    if (![BBQLoginManager isLogin] || !TheCurUser.classdata ||
+        !TheCurUser.classdata.count)
+        return;
+    
+    BBQClassDataModel *classModel = TheCurUser.classdata[0];
+    
+    NSDictionary *params = @{ @"classid" : classModel.classid };
+    [BBQHTTPRequest
+     queryWithType:BBQHTTPRequestTypeGetRemindTaskNum
+     param:params
+     successHandler:^(AFHTTPRequestOperation *operation,
+                      NSDictionary *responseObject, bool apiSuccess) {
+         self.cameraButton.badgeBgColor = [UIColor yellowColor];
+         self.cameraButton.badgeTextColor = [UIColor colorWithHexString:@"ff6440"];
+         [self.cameraButton showBadgeWithStyle:WBadgeStyleNumber
+                                         value:[responseObject[@"data"][
+                                                                        @"pztx_num"] integerValue]
+                                 animationType:WBadgeAnimTypeNone];
+         self.reportButton.badgeBgColor = [UIColor yellowColor];
+         self.reportButton.badgeTextColor = [UIColor colorWithHexString:@"ff6440"];
+         dispatch_async_on_main_queue(^{
+             [self.reportButton showBadgeWithStyle:WBadgeStyleNumber
+                                             value:[responseObject[@"data"][
+                                                                            @"baogao_num"] integerValue]
+                                     animationType:WBadgeAnimTypeNone];
+         });
+     } errorHandler:nil
+     failureHandler:nil];
+}
+
+@end

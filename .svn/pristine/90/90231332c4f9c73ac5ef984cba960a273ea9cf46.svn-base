@@ -1,0 +1,143 @@
+////
+////  BizLogic_JYEX.m
+////  NoteBook
+////
+////  Created by cyl on 13-3-29.
+////  Copyright (c) 2013年 洋基科技. All rights reserved.
+////
+//
+//#import "BizLogicAll.h"
+//
+//#import "DbMngDataDef.h"
+//
+//#import "CommonDateTime.h"
+////#import "CommonNoteOpr.h"
+//#import "CommonDirectory.h"
+//
+//#import "Global.h"
+//#import "logging.h"
+//#import "PubFunction.h"
+//
+//
+//#import "GlobalVar.h"
+//
+//#import "DataSync.h"
+//#import "DBMngAll.h"
+//
+//#import "AppMacro.h"
+//
+//@implementation BizLogic (JYEX)
+//
+//+ (BOOL)procJYEXLoginSuccess:(TJYEXLoginUserInfo *)lgnUser
+//                  baobaodata:(NSArray *)arrBaobao
+//                     qntoken:(NSString *)qntoken
+//                       qndns:(NSString *)qndns
+//                   classdata:(NSArray *)arrClassData
+//                  schooldata:(NSArray *)arrSchoolData
+//                     tagdata:(NSArray *)tagdata {
+//
+//  BOOL bIsSameUser = [TheCurUser.member.username isEqualToString:lgnUser.sUserName];
+//
+//  [[GlobalVar getInstance] setArrDynaTag:tagdata];
+//  [[GlobalVar getInstance] setSchooldata:arrSchoolData];
+//  [[GlobalVar getInstance] setClassData:arrClassData];
+//  [[GlobalVar getInstance] setBaobaoData:arrBaobao qntoken:qntoken qndns:qndns];
+//  if ([arrBaobao count] > 0) {
+//    [[GlobalVar getInstance] setCurBaobao:[arrBaobao firstObject]];
+//  } else {
+//    [[GlobalVar getInstance] setCurBaobao:nil];
+//  }
+//  TheCurUser = lgnUser;
+//
+//  LOG_DEBUG(
+//      @"当前登录用户：name=%@,nick=%@, pswd=%@, uid=%@, SID=%@ 91uid=%@",
+//      TheCurUser.member.nickname, TheCurUser.member.username, TheCurUser.sPassword,
+//      TheCurUser.member.uid, TheCurUser.sSID, TheCurUser.sNoteUserId);
+//
+//  //当登录帐号改变时，必须要切换数据库
+//  if (!bIsSameUser || !arrBaobao || arrBaobao.count == 0) {
+//    [self procCurAccount];
+//    //[_GLOBAL clearAllMessageNum];
+//  }
+//
+//  //读取原来保存的消息数
+//  [_GLOBAL readMesageNum];
+//
+//  //设置登录时间
+//  [_GLOBAL setLoginTime];
+//
+//  //更新刷新页面计数值
+//  
+//
+//  //发登录成功消息
+//  [[NSNotificationCenter defaultCenter]
+//      postNotificationName:NOTIFICATION_LOGIN_SUCCESS
+//                    object:@"登录成功"
+//                  userInfo:nil];
+//
+//#ifdef TARGET_PARENT
+//  //获取已删除的动态
+//  [[DataSync instance] syncRequest:BIZ_SYNC_GET_DELETED_DYNA:nil:nil:nil];
+//#endif
+//
+//  //    [[DataSync instance] syncRequest:BIZ_SYNC_GetNewMsg :nil :nil :nil];
+//
+//  [[DataSync instance] syncRequest:BIZ_SYNC_UPLOAD_DYNA:nil:nil:nil];
+//
+//  //仅在wifi打开时同步
+//  /*
+//  NSString *strValue=@"YES";
+//  [AstroDBMng getCfg_cfgMgr:@"CommonCfg" name:@"DINoteWifioNoly"
+//  value:strValue];
+//  if ( [strValue isEqualToString:@"YES"] && [[Global instance] getNetworkStatus]
+//  != ReachableViaWiFi)
+//  {
+//      return YES;
+//  }*/
+//
+//  return YES;
+//}
+//
+//+ (BOOL)updateUserAppList:(NSArray *)appList
+//             WithUserName:(NSString *)sUserName {
+//  [AstroDBMng deleteJYEXAppListByUserName:sUserName];
+//  [AstroDBMng insertAppListByUserName:sUserName AppList:appList];
+//  return YES;
+//}
+//
+//+ (NSArray *)getAppListByUserName:(NSString *)sUserName
+//                          AppType:(UserAppType)appType {
+//  NSArray *array = [AstroDBMng getAppListByUserName:sUserName AppType:appType];
+//  return array;
+//}
+//
+//+ (JYEXUserAppInfo *)getAppListByUserName:(NSString *)sUserName
+//                                  AppCode:(NSString *)appCode {
+//  return [AstroDBMng getAppListByUserName:sUserName AppCode:appCode];
+//}
+//
+//+ (NSArray *)getLanmuList {
+//  NSArray *array = [AstroDBMng getLanmuList];
+//  return array;
+//}
+//
+//+ (BOOL)cleanLanmuList {
+//  return [AstroDBMng cleanLanmuList];
+//}
+//
+//+ (int)insertLanmuListByUserName:(NSArray *)lanmuList {
+//  return [AstroDBMng insertLanmuListByUserName:lanmuList];
+//}
+//
+//+ (NSArray *)getClassList {
+//  NSArray *array = [AstroDBMng getClassList];
+//  return array;
+//}
+//+ (BOOL)cleanClassList {
+//  return [AstroDBMng cleanClassList];
+//}
+//+ (int)insertClassListByUserName:(NSArray *)classList {
+//  return [AstroDBMng insertClassListByUserName:classList];
+//}
+//
+//@end

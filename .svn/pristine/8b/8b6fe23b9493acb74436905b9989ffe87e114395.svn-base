@@ -1,0 +1,161 @@
+//
+//  AttachModel.m
+//  JYEX
+//
+//  Created by slovelys on 15/7/20.
+//  Copyright © 2015年 广州洋基. All rights reserved.
+//
+
+#import "AttachModel.h"
+#import <AVFoundation/AVFoundation.h>
+#import "CommonJson.h"
+#import "NSDictionary+RequestEncoding.h"
+#import "NSObject+SBJson.h"
+#import "UIImage+Common.h"
+
+@implementation AttachModel
+
+- (id)init {
+  self = [super init];
+
+  self.guid = @"";
+  self.localid = @"";
+  self.attachid = @"";
+  self.itype = @0;
+  self.remote = @0;
+  self.orgpath = @"";
+  self.filepath = @"";
+  self.serverip = @"";
+  self.graphtime = @0;
+  self.size = @0;
+  self.width = @0;
+  self.height = @0;
+  self.data = [NSDictionary dictionary];
+  self.dateline = @0;
+  self.upflag = @0;
+  self.flag = @0;
+
+  return self;
+}
+
+- (id)initWithDic:(NSDictionary *)dic {
+  self = [super init];
+
+  self.guid = pickJsonStrValue(dic, @"guid");
+  self.localid =
+      [JsonManager replaceNullValue:pickJsonStrValue(dic, @"localid") def:@""];
+  self.attachid =
+      [JsonManager replaceNullValue:pickJsonStrValue(dic, @"attachid")
+                                def:@""];
+  self.itype = [NSNumber numberWithInt:[[dic objectForKey:@"itype"] intValue]];
+  self.remote =
+      [NSNumber numberWithInt:[[dic objectForKey:@"remote"] intValue]];
+  self.orgpath = pickJsonStrValue(dic, @"orgpath");
+  self.filepath = pickJsonStrValue(dic, @"filepath");
+  self.serverip = pickJsonStrValue(dic, @"serverip");
+  self.graphtime =
+      [NSNumber numberWithInt:[[dic objectForKey:@"graphtime"] intValue]];
+  self.size = [NSNumber numberWithInt:[[dic objectForKey:@"size"] intValue]];
+  self.width = [NSNumber numberWithInt:[[dic objectForKey:@"width"] intValue]];
+  self.height =
+      [NSNumber numberWithInt:[[dic objectForKey:@"height"] intValue]];
+  self.data = [dic objectForKey:@"data"];
+  self.dateline =
+      [NSNumber numberWithInt:[[dic objectForKey:@"dateline"] intValue]];
+  self.upflag =
+      [NSNumber numberWithInt:[[dic objectForKey:@"upflag"] intValue]];
+  self.flag = [NSNumber numberWithInt:[[dic objectForKey:@"flag"] intValue]];
+
+  return self;
+}
+
++ (instancetype)attachWithAssetURL:(NSURL *)assetURL {
+    AttachModel *model = [[AttachModel alloc] init];
+    model.uploadState = BBQAttachUploadStateInit;
+    model.assetURL = assetURL;
+    
+    void (^selectAsset)(ALAsset *) = ^(ALAsset *asset){
+        if (asset) {
+            NSString *type = [asset valueForProperty:ALAssetPropertyType];
+            if ([type isEqualToString:ALAssetTypePhoto]) {
+                UIImage *highQualityImage = [UIImage fullScreenImageALAsset:asset];
+                UIImage *thumbnailImage = [UIImage imageWithCGImage:[asset thumbnail]];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    model.image = highQualityImage;
+                    model.thumbnailImage = thumbnailImage;
+                });
+            } else if ([type isEqualToString:ALAssetTypeVideo]) {
+                model.itype = @1;
+                AVURLAsset *AV = [[AVURLAsset alloc] initWithURL:[NSURL fileURLWithPath:[asset valueForKeyPath:ALAssetPropertyAssetURL]] options:nil];
+                AVAssetImageGenerator *gen = [[AVAssetImageGenerator alloc] initWithAsset:AV];
+                gen.appliesPreferredTrackTransform = YES;
+                CMTime time = CMTimeMakeWithSeconds(0.0, 600);
+                NSError *error = nil;
+                CMTime actualTime;
+                CGImageRef image = [gen copyCGImageAtTime:time actualTime:&actualTime error:&error];
+                UIImage *thumb = [[UIImage alloc] initWithCGImage:image];
+                CGImageRelease(image);
+                model.thumbnailImage = thumb;
+            }
+        }
+    };
+    
+    ALAssetsLibrary *assetsLibrary = [[ALAssetsLibrary alloc] init];
+    @weakify(assetsLibrary);
+    [assetsLibrary assetForURL:assetURL resultBlock:^(ALAsset *asset) {
+        if (asset) {
+            selectAsset(asset);
+        }else{
+            @strongify(assetsLibrary);
+            [assetsLibrary enumerateGroupsWithTypes:ALAssetsGroupPhotoStream usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
+                [group enumerateAssetsUsingBlock:^(ALAsset *result, NSUInteger index, BOOL *stopG) {
+                    if([result.defaultRepresentation.url isEqual:assetURL]) {
+                        selectAsset(result);
+                        *stop = YES;
+                        *stopG = YES;
+                    }
+                }];
+            } failureBlock:^(NSError *error) {
+//                [NSObject showHudTipStr:@"读取图片失败"];
+            }];
+        }
+    }failureBlock:^(NSError *error) {
+//        [NSObject showHudTipStr:@"读取图片失败"];
+    }];
+    return model;
+}
+
+- (NSDictionary *)toDictionary {
+  if (!self.guid)
+    self.guid = @"";
+  if (!self.localid)
+    self.localid = @"";
+  if (!self.orgpath)
+    self.orgpath = @"";
+  if (!self.serverip)
+    self.serverip = @"";
+  if (!self.data)
+    self.data = [NSDictionary dictionary];
+
+  NSDictionary *dic = @{
+    @"guid" : self.guid,
+    @"localid" : self.localid,
+    @"attachid" : self.attachid,
+    @"itype" : self.itype,
+    @"remote" : self.remote,
+    @"orgpath" : self.orgpath,
+    @"filepath" : self.filepath,
+    @"serverip" : self.serverip,
+    @"graphtime" : self.graphtime,
+    @"size" : self.size,
+    @"width" : self.width,
+    @"height" : self.height,
+    @"data" : self.data,
+    @"dateline" : self.dateline,
+    @"upflag" : self.upflag,
+    @"flag" : self.flag
+  };
+  return dic;
+}
+
+@end

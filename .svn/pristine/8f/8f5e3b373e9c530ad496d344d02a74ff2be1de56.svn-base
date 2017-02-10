@@ -1,0 +1,49 @@
+//
+//  Note2ItemModel.h
+//  JYEX
+//
+//  Created by slovelys on 15/7/21.
+//  Copyright (c) 2015年 广州洋基. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface Note2ItemModel : NSObject
+
+/// 用户编号
+@property (copy, nonatomic) NSNumber *user_id;
+/// 当前版本号
+@property (copy, nonatomic) NSNumber *curr_ver;
+/// 创建版本号
+@property (copy, nonatomic) NSNumber *create_ver;
+/// 创建时间
+@property (copy, nonatomic) NSString *create_time;
+/// 修改时间
+@property (copy, nonatomic) NSString *modify_time;
+/// 删除状态
+@property (copy, nonatomic) NSNumber *delete_state;
+/// 编辑状态
+@property (copy, nonatomic) NSNumber *edit_state;
+/// 冲突状态
+@property (copy, nonatomic) NSNumber *conflict_state;
+/// 同步状态，1表示正在同步
+@property (copy, nonatomic) NSNumber *sync_state;
+/// 是否上传
+@property (copy, nonatomic) NSNumber *need_upload;
+/// 笔记编号
+@property (copy, nonatomic) NSString *note_id;
+///
+@property (copy, nonatomic) NSString *item_id;
+///
+@property (copy, nonatomic) NSNumber *item_creator;
+/// 目录编号
+@property (copy, nonatomic) NSString *catalog_belong_to;
+///
+@property (copy, nonatomic) NSNumber *item_ver;
+///
+@property (copy, nonatomic) NSNumber *need_downlord;
+
+@property (copy, nonatomic) NSNumber *item_order;
+
+
+@end

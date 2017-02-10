@@ -1,0 +1,191 @@
+////
+////  NoteMgr.m
+////  NoteBook
+////
+////  Created by wangsc on 10-9-15.
+////  Copyright 2010 ND. All rights reserved.
+////
+//
+//#import "AttachMgr.h"
+//
+//#import "NSObject+SBJson.h"
+//
+//#include "logging.h"
+////#import "CommonNoteOpr.h"
+//#import "CommonDirectory.h"
+//#import "GlobalVar.h"
+//
+//#import "AppMacro.h"
+//
+//@implementation AstroDBMng (ForAttachMgr)
+//
+////增加1条附件
+//+ (BOOL)addAttach:(AttachModel *)attModel {
+//  [self saveToDB_AttachMgr:attModel];
+//  return YES;
+//}
+//
+//+ (BOOL)updateAttach:(AttachModel *)attModel {
+//  [self saveToDB_AttachMgr:attModel];
+//  return YES;
+//}
+//
+//+ (BOOL)deleteAttach:(AttachModel *)attModel {
+//  [self saveToDB_AttachMgr:attModel];
+//  return YES;
+//}
+//
+////查询某条动态需上传的附件关联项
+//+ (NSArray *)getNeedUploadAttachListByDynaLocalId:(NSString *)localid {
+//  //根据更新时间排序
+//  NSString *strSQL = [NSString
+//      stringWithFormat:
+//          @"SELECT * FROM %@ WHERE localid='%@' AND flag=%d AND upflag=%d;",
+//          TB_ATTACH_INFO, localid, DYNA_FLAG_NORMAL, DYNA_NEED_UPLOAD];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//
+//  NSMutableArray *aryData = [NSMutableArray array];
+//
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:strSQL];
+//
+//    while ([resultSet next]) {
+//      AttachModel *attModel = [self saveAttachToModel:resultSet];
+//
+//      [aryData addObject:attModel];
+//    }
+//
+//    [fmdb close];
+//  }
+//
+//  return aryData;
+//}
+//
+//+ (AttachModel *)saveAttachToModel:(FMResultSet *)resultSet {
+//  AttachModel *attModel = [[AttachModel alloc] init];
+//
+//  attModel.guid = [resultSet stringForColumn:@"guid"];
+//  attModel.localid = [resultSet stringForColumn:@"localid"];
+//  attModel.attachid = [resultSet stringForColumn:@"attachid"];
+//  attModel.itype = [NSNumber numberWithInt:[resultSet intForColumn:@"itype"]];
+//  attModel.remote = [NSNumber numberWithInt:[resultSet intForColumn:@"remote"]];
+//  attModel.orgpath = [resultSet stringForColumn:@"orgpath"];
+//  attModel.filepath = [resultSet stringForColumn:@"filepath"];
+//  attModel.serverip =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"serverip"]
+//                                def:@""];
+//  attModel.graphtime =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"graphtime"]];
+//  attModel.size = [NSNumber numberWithInt:[resultSet intForColumn:@"size"]];
+//  attModel.width = [NSNumber numberWithInt:[resultSet intForColumn:@"width"]];
+//  attModel.height = [NSNumber numberWithInt:[resultSet intForColumn:@"height"]];
+//  attModel.data =
+//      [[JsonManager replaceNullValue:[resultSet stringForColumn:@"data"]
+//                                 def:@"[]"] JSONValue];
+//  attModel.dateline =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"dateline"]];
+//  attModel.upflag = [NSNumber numberWithInt:[resultSet intForColumn:@"upflag"]];
+//  attModel.flag = [NSNumber numberWithInt:[resultSet intForColumn:@"flag"]];
+//
+//  return attModel;
+//}
+//
+////查询某条动态所有的附件关联项
+//+ (NSArray *)getAttachListByDynalocalid:(NSString *)localid {
+//
+//  NSMutableArray *aryData = [NSMutableArray array];
+//
+//  //根据更新时间排序
+//  NSString *strSQL = [NSString
+//      stringWithFormat:@"SELECT * FROM %@ WHERE localid='%@' AND flag=%d;",
+//                       TB_ATTACH_INFO, localid, DYNA_FLAG_NORMAL];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:strSQL];
+//
+//    while ([resultSet next]) {
+//      AttachModel *attModel = [self saveAttachToModel:resultSet];
+//
+//      [aryData addObject:attModel];
+//    }
+//
+//    [fmdb close];
+//  }
+//
+//  return aryData;
+//}
+//
+//+ (BOOL)updateAttach:(NSString *)attachid
+//                guid:(NSString *)attachguid
+//            serverip:(NSString *)serverip
+//            filepath:(NSString *)strFilePath
+//              remote:(NSNumber *)remote
+//                data:(NSDictionary *)data
+//                size:(NSNumber *)size
+//               width:(NSNumber *)width
+//              height:(NSNumber *)height {
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    NSString *sql = [NSString
+//        stringWithFormat:@"UPDATE pre_bbq_dynamic_attachment SET "
+//                         @"guid=?,filepath=?,serverip=?,remote=?,size=?,width="
+//                         @"?,height=?,upflag=?,data=? WHERE attachid='%@';",
+//                         attachid];
+//
+//    BOOL ret = [fmdb executeUpdate:sql, attachguid, strFilePath, serverip,
+//                                   remote, size, width, height,
+//                                   [NSNumber numberWithInt:DYNA_UPLOAD_FINISH],
+//                                   [data JSONRepresentation]];
+//
+//    [fmdb close];
+//    return ret;
+//  }
+//  return NO;
+//}
+//
+////数据库操作
+//+ (BOOL)saveToDB_AttachMgr:(AttachModel *)attModel {
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//
+//  if ([fmdb open]) {
+//    BOOL ret = [fmdb
+//        executeUpdate:@"replace into pre_bbq_dynamic_attachment"
+//                       "( guid,"
+//                       "localid, "
+//                       "attachid, "
+//                       "itype, "
+//                       "remote,"
+//
+//                       "orgpath, "
+//                       "filepath, "
+//                       "serverip, "
+//                       "graphtime, "
+//                       "size, "
+//                       "width, "
+//
+//                       "height, "
+//                       "data, "
+//                       "dateline, "
+//                       "upflag, "
+//                       "flag) "
+//                       "values(?,?,?,?,?, ?,?,?,?,?,?, ?,?,?,?,?)",
+//
+//                      attModel.guid, attModel.localid, attModel.attachid,
+//                      attModel.itype, attModel.remote,
+//
+//                      attModel.orgpath, attModel.filepath, attModel.serverip,
+//                      attModel.graphtime, attModel.size, attModel.width,
+//
+//                      attModel.height, [attModel.data JSONRepresentation],
+//                      attModel.dateline, attModel.upflag, attModel.flag];
+//
+//    [fmdb close];
+//    return ret;
+//  }
+//  return NO;
+//}
+//
+//@end

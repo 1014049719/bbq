@@ -1,0 +1,31 @@
+//
+//  UploadViewController.h
+//  JYEX
+//
+//  Created by anymuse on 15/7/9.
+//  Copyright (c) 2015年 广州洋基. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+#import "AppMacro.h"
+
+typedef void(^DidMakeAChoice)(UIImage *img,NSArray *photosArray, NSArray *selectedAssetURLs);
+typedef void(^DidCancelChoice)();
+
+@interface UploadViewController : MTABaseViewController
+
+@property (strong, nonatomic) DidMakeAChoice finishblock;
+@property (strong, nonatomic) DidCancelChoice cancelblock;
+@property (copy, nonatomic) NSArray *groupTypes;
+
+@property (nonatomic, copy) NSString *navTitle;
+@property (nonatomic) UploadItemType itemType;
+@property (assign,nonatomic) int imaxnum;
+
+
+@property (strong, nonatomic) NSMutableArray *selectedAssetURLs;
+@property (copy, nonatomic) NSMutableArray *photosArray;
+@property (strong, nonatomic) UIImage *photoimg;
+
+@end

@@ -1,0 +1,21 @@
+//
+//  BBQDynamicViewSquareTimeline.m
+//  BBQ
+//
+//  Created by 朱琨 on 16/1/14.
+//  Copyright © 2016年 bbq. All rights reserved.
+//
+
+#import "BBQDynamicViewSquareTimeline.h"
+
+@implementation BBQDynamicViewSquareTimeline
+
+/*
+// Only override drawRect: if you perform custom drawing.
+// An empty implementation adversely affects performance during animation.
+- (void)drawRect:(CGRect)rect {
+    // Drawing code
+}
+*/
+
+@end

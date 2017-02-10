@@ -1,0 +1,718 @@
+///*
+// *  CateMgr.cpp
+// *  NoteBook
+// *
+// *  Created by wangsc on 10-9-15.
+// *  Copyright 2010 ND. All rights reserved.
+// *
+// */
+//
+//#import "DBMngAll.h"
+//#import "CfgMgr.h"
+//
+//#include <algorithm>
+////#import "Global.h"
+//
+//#import "DbMngDataDef.h"
+//
+////#import "ComCustomConstantDef.h"
+//#import "PubFunction.h"
+//#import "GlobalVar.h"
+////#import "BussComdIDDef.h"
+//#import "CommonAll.h"
+//#import "BizLogicAll.h"
+//
+//#define GUID_ZERO @"00000000-0000-0000-0000-000000000000"
+//#define isGuidNull(p) (p == nil || [p isEqualToString:GUID_ZERO])
+//#pragma mark -
+//#pragma mark CateMgr类封装
+//
+///*
+//bool compareByName(CateInfo ele1, CateInfo ele2)
+//{
+////    return ele1.strName < ele2.strName;
+//    NSString* strName1 = [NSString stringWithUnistring:ele1.strName];
+//    NSString* strName2 = [NSString stringWithUnistring:ele2.strName];
+//    if ([strName1 compare:strName2 options:NSCaseInsensitiveSearch
+//range:NSMakeRange(0, [strName1 length]) locale:[NSLocale currentLocale]] < 0)
+//        return true;
+//    return false;
+//}
+//
+//static std::map<GUID, CateInfo> cateMap;
+//*/
+//
+//@implementation AstroDBMng (ForCateMgr)
+//
+//+ (TCateInfo *)getCate_CateMgr:(NSString *)strCateGuid {
+//  //未整理文件夹
+//  //    if ( [strCateGuid isEqualToString:GUID_ZERO] )
+//  //    {
+//  //        //生成未整理文件夹
+//  //        int nNoteCount = [AstroDBMng getNoteCountByCate:strCateGuid];
+//  //        TCateInfo * pCateInfo = [BizLogic createCateInfo];
+//  //        pCateInfo.strCatalogName = @"未整理文件夹";
+//  //        pCateInfo.nNoteCount = nNoteCount;
+//  //        return pCateInfo;
+//  //    }
+//
+//  NSString *sql = [NSString
+//      stringWithFormat:@"SELECT * FROM tb_catalog_info WHERE catalog_id='%@';",
+//                       strCateGuid];
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    CateModel *moel = [self getCateModelWith:resultSet];
+//
+//    TRecHead *pHead = [TRecHead new];
+//    TCateInfo *pCateInfo = [TCateInfo new];
+//    pCateInfo.tHead = pHead;
+//    [self objFromFMDBQuery_CateMgr:pCateInfo model:moel];
+//
+//    [fmdb close];
+//    return pCateInfo;
+//  }
+//  return nil;
+//}
+//
+//+ (int)addCate_CateMgr:(TCateInfo *)cateInfo {
+//  // cateMap[objCate.guid] = objCate;
+//  return [self saveToDB_CateMgr:cateInfo];
+//}
+//
+//+ (int)updateCate_CateMgr:(TCateInfo *)cateInfo {
+//  // cateMap[objCate.guid] = objCate;
+//  return [self saveToDB_CateMgr:cateInfo];
+//}
+//
+//+ (int)saveCate_CateMgr:(TCateInfo *)cateInfo {
+//  // cateMap[objCate.guid] = objCate;
+//  return [self saveToDB_CateMgr:cateInfo];
+//}
+//
+////更改某个目录的记录总数
+//+ (int)updateCateNoteCount_CateMgr:(NSString *)strCateGuid
+//                         notecount:(int)count {
+//  NSString *sql = [NSString
+//      stringWithFormat:
+//          @"UPDATE tb_catalog_info set note_count=%d WHERE catalog_id='%@';",
+//          count, strCateGuid];
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    [fmdb executeUpdate:sql];
+//    [fmdb close];
+//  }
+//  // return [[AstroDBMng getDb91Note] execDML:sql];
+//  return 0;
+//}
+//
+////获取某个目录的下一级所有目录列表
+//
+//+ (NSArray *)getCateList_CateMgr:(NSString *)strCateGuid {
+//  NSMutableArray *aryData = [NSMutableArray array];
+//  for (int jj = 0; jj < 3; jj++) {
+//    if (0 == jj) {
+//      if (![strCateGuid isEqualToString:GUID_ZERO])
+//        continue;
+//
+//      //生成未整理文件夹
+//      int nNoteCount = [AstroDBMng getNoteCountByCate:strCateGuid];
+//      if (nNoteCount <= 0)
+//        continue;
+//
+//      TCateInfo *pCateInfo = [BizLogic createCateInfo];
+//      pCateInfo.strCatalogIdGuid = GUID_ZERO;
+//      pCateInfo.strCatalogName = @"未整理文件夹";
+//      pCateInfo.nNoteCount = nNoteCount;
+//      [aryData addObject:pCateInfo];
+//      continue;
+//    }
+//
+//    NSString *sql;
+//    if (1 == jj)
+//      sql = [NSString stringWithFormat:@"SELECT * FROM tb_catalog_info WHERE "
+//                                       @"catalog_belong_to='%@' AND "
+//                                       @"delete_state=%d AND mobile_flag=1;",
+//                                       strCateGuid, DELETESTATE_NODELETE];
+//    else if (2 == jj) //本地的
+//      sql = [NSString
+//          stringWithFormat:@"SELECT * FROM tb_catalog_info WHERE "
+//                           @"catalog_belong_to='%@' AND delete_state=%d AND "
+//                           @"mobile_flag!=1 ORDER BY catalog_order "
+//                           @"asc,catalog_name asc;",
+//                           strCateGuid,
+//                           DELETESTATE_NODELETE]; // AND mobile_flag>=10, order
+//                                                  // by mobile_flag asc,
+//    // else if ( jj == 2)  //PC的
+//    //     sql = [NSString stringWithFormat:@"SELECT * FROM tb_catalog_info
+//    //     WHERE catalog_belong_to='%@' AND delete_state=%d AND mobile_flag<=0
+//    //     ORDER BY catalog_order asc,catalog_name
+//    //     asc;",strCateGuid,DELETESTATE_NODELETE];
+//    // else
+//    //    sql = [NSString stringWithFormat:@"SELECT * FROM tb_catalog_info;"];
+//
+//    NSString *dbPath = [AstroDBMng getDb91NoteFileName];
+//    FMDatabase *fmdb = [FMDatabase databaseWithPath:dbPath];
+//    if ([fmdb open]) {
+//      FMResultSet *resultSet = [fmdb executeQuery:sql];
+//      CateModel *model = [self getCateModelWith:resultSet];
+//
+//      TRecHead *tHead = [TRecHead new];      // autorelease];
+//      TCateInfo *cateInfo = [TCateInfo new]; // autorelease];
+//      cateInfo.tHead = tHead;
+//      [self objFromFMDBQuery_CateMgr:cateInfo model:model];
+//      [aryData addObject:cateInfo];
+//
+//      [fmdb close];
+//      return aryData;
+//    }
+//  }
+//
+//  return nil;
+//}
+//
+////获取所有有效目录
+//+ (NSArray *)getAllCateList_CateMgr {
+//  NSMutableArray *aryData = [NSMutableArray array];
+//
+//  NSString *sql = [NSString
+//      stringWithFormat:@"SELECT * FROM tb_catalog_info WHERE delete_state=%d;",
+//                       DELETESTATE_NODELETE];
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    CateModel *model = [self getCateModelWith:resultSet];
+//
+//    TRecHead *tHead = [TRecHead new];
+//    TCateInfo *cateInfo = [TCateInfo new];
+//    cateInfo.tHead = tHead;
+//
+//    [self objFromFMDBQuery_CateMgr:cateInfo model:model];
+//
+//    [aryData addObject:cateInfo];
+//
+//    [fmdb close];
+//    return aryData;
+//  }
+//  return nil;
+//}
+//
+////获取需上传的目录列表
+//+ (NSArray *)getNeedUploadCateList_CateMgr {
+//  NSMutableArray *aryData = [NSMutableArray array];
+//  NSString *sql = [NSString
+//      stringWithFormat:
+//          @"SELECT catalog_id FROM tb_catalog_info WHERE edit_state=%d;",
+//          EDITSTATE_EDITED];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    NSString *strNoteIdGuid = [resultSet stringForColumn:@"catalog_id"];
+//    [aryData addObject:strNoteIdGuid];
+//
+//    [fmdb close];
+//    return aryData;
+//  }
+//  return nil;
+//}
+//
+////更改某个目录下的所有子目录(包括子子目录)到另外一个目录
+//+ (void)updateCateListIncludeSubDir_CateMgr:(NSString *)strCateGuid
+//                                         to:(NSString *)strDestGuid {
+//  NSString *sql;
+//  sql = [NSString stringWithFormat:@"SELECT * FROM tb_catalog_info;"];
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    TRecHead *tHead = [TRecHead new];
+//    TCateInfo *cateInfo = [TCateInfo new];
+//    cateInfo.tHead = tHead;
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    CateModel *model = [self getCateModelWith:resultSet];
+//    [self objFromFMDBQuery_CateMgr:cateInfo model:model];
+//
+//    int flag = 0;
+//    for (int i = 0; i < 7; i++) {
+//      NSString *strGuid;
+//      if (i == 0)
+//        strGuid = cateInfo.strCatalogBelongToGuid;
+//      else if (i == 1)
+//        strGuid = cateInfo.strCatalogPaht1Guid;
+//      else if (i == 2)
+//        strGuid = cateInfo.strCatalogPaht2Guid;
+//      else if (i == 3)
+//        strGuid = cateInfo.strCatalogPaht3Guid;
+//      else if (i == 4)
+//        strGuid = cateInfo.strCatalogPaht4Guid;
+//      else if (i == 5)
+//        strGuid = cateInfo.strCatalogPaht5Guid;
+//      else
+//        strGuid = cateInfo.strCatalogPaht6Guid;
+//
+//      if ([strGuid isEqualToString:GUID_ZERO])
+//        break;
+//
+//      if ([strGuid isEqualToString:strCateGuid]) {
+//        flag = 1;
+//        if (i == 0)
+//          cateInfo.strCatalogBelongToGuid = strDestGuid;
+//        else if (i == 1)
+//          cateInfo.strCatalogPaht1Guid = strDestGuid;
+//        else if (i == 2)
+//          cateInfo.strCatalogPaht2Guid = strDestGuid;
+//        else if (i == 3)
+//          cateInfo.strCatalogPaht3Guid = strDestGuid;
+//        else if (i == 4)
+//          cateInfo.strCatalogPaht4Guid = strDestGuid;
+//        else if (i == 5)
+//          cateInfo.strCatalogPaht5Guid = strDestGuid;
+//        else if (i == 6)
+//          cateInfo.strCatalogPaht6Guid = strDestGuid;
+//      }
+//    }
+//
+//    if (1 == flag) {
+//      cateInfo.tHead.nEditState = EDITSTATE_EDITED;
+//      cateInfo.tHead.strModTime = [CommonFunc getCurrentTime]; //需要跟踪
+//      [self updateCate_CateMgr:cateInfo];
+//    }
+//
+//    [fmdb close];
+//    return;
+//  }
+//  return;
+//}
+//
+////删除某个目录下的所有子目录(包括子子目录)
+//+ (int)deleteCateListIncludeSubDir_CateMgr:(NSString *)strCateGuid {
+//  int count = 0;
+//
+//  NSString *sql;
+//  sql = [NSString stringWithFormat:@"SELECT * FROM tb_catalog_info;"];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    TRecHead *tHead = [TRecHead new];
+//    TCateInfo *cateInfo = [TCateInfo new];
+//    cateInfo.tHead = tHead;
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    CateModel *model = [self getCateModelWith:resultSet];
+//    [self objFromFMDBQuery_CateMgr:cateInfo model:model];
+//
+//    int flag = 0;
+//    for (int i = 0; i < 7; i++) {
+//      NSString *strGuid;
+//      if (i == 0)
+//        strGuid = cateInfo.strCatalogBelongToGuid;
+//      else if (i == 1)
+//        strGuid = cateInfo.strCatalogPaht1Guid;
+//      else if (i == 2)
+//        strGuid = cateInfo.strCatalogPaht2Guid;
+//      else if (i == 3)
+//        strGuid = cateInfo.strCatalogPaht3Guid;
+//      else if (i == 4)
+//        strGuid = cateInfo.strCatalogPaht4Guid;
+//      else if (i == 5)
+//        strGuid = cateInfo.strCatalogPaht5Guid;
+//      else
+//        strGuid = cateInfo.strCatalogPaht6Guid;
+//
+//      if ([strGuid isEqualToString:GUID_ZERO])
+//        break;
+//
+//      if ([strGuid isEqualToString:strCateGuid]) {
+//        flag = 1;
+//        if (i == 0)
+//          cateInfo.strCatalogBelongToGuid = GUID_ZERO;
+//        else if (i == 1)
+//          cateInfo.strCatalogPaht1Guid = GUID_ZERO;
+//        else if (i == 2)
+//          cateInfo.strCatalogPaht2Guid = GUID_ZERO;
+//        else if (i == 3)
+//          cateInfo.strCatalogPaht3Guid = GUID_ZERO;
+//        else if (i == 4)
+//          cateInfo.strCatalogPaht4Guid = GUID_ZERO;
+//        else if (i == 5)
+//          cateInfo.strCatalogPaht5Guid = GUID_ZERO;
+//        else if (i == 6)
+//          cateInfo.strCatalogPaht6Guid = GUID_ZERO;
+//      }
+//    }
+//
+//    if (1 == flag) {
+//      cateInfo.tHead.nEditState = EDITSTATE_EDITED;
+//      cateInfo.tHead.strModTime = [CommonFunc getCurrentTime]; //需要跟踪
+//      cateInfo.tHead.nDelState = DELETESTATE_DELETE;
+//      [self updateCate_CateMgr:cateInfo];
+//      count++;
+//    }
+//
+//    [fmdb close];
+//    return count;
+//  }
+//  return 0;
+//}
+//
+////搜索目录的标题是否含有关键字
+//+ (NSArray *)getCateListBySearch_CateMgr:(NSString *)strKey
+//                                 catalog:(NSString *)strCatalog {
+//
+//  NSMutableArray *aryData = [NSMutableArray array];
+//  NSString *sql = [NSString stringWithFormat:@"SELECT * FROM tb_catalog_info "
+//                                             @"WHERE delete_state=%d AND "
+//                                             @"catalog_name like '%%%@%%';",
+//                                             DELETESTATE_NODELETE, strKey];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    TRecHead *tHead = [TRecHead new];
+//    TCateInfo *cateInfo = [TCateInfo new];
+//    cateInfo.tHead = tHead;
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    CateModel *model = [self getCateModelWith:resultSet];
+//    [self objFromFMDBQuery_CateMgr:cateInfo model:model];
+//
+//    if (strCatalog && strCatalog.length > 0) {
+//      if ([strCatalog isEqualToString:cateInfo.strCatalogPaht1Guid] ||
+//          [strCatalog isEqualToString:cateInfo.strCatalogPaht2Guid] ||
+//          [strCatalog isEqualToString:cateInfo.strCatalogPaht3Guid] ||
+//          [strCatalog isEqualToString:cateInfo.strCatalogPaht4Guid] ||
+//          [strCatalog isEqualToString:cateInfo.strCatalogPaht5Guid] ||
+//          [strCatalog isEqualToString:cateInfo.strCatalogPaht6Guid])
+//        [aryData addObject:cateInfo];
+//    } else {
+//      [aryData addObject:cateInfo];
+//    }
+//
+//    [fmdb close];
+//    return aryData;
+//  }
+//  return nil;
+//}
+//
+////获取指定mobile_flag 的文件夹
+//+ (NSArray *)getCateListByMobileFlag_CateMgr:(int)mobile_flag {
+//  NSMutableArray *aryData = [NSMutableArray array];
+//  NSString *sql =
+//      [NSString stringWithFormat:@"SELECT * FROM tb_catalog_info WHERE "
+//                                 @"delete_state=%d AND mobile_flag=%d;",
+//                                 DELETESTATE_NODELETE, mobile_flag];
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    TRecHead *tHead = [TRecHead new];
+//    TCateInfo *cateInfo = [TCateInfo new];
+//    cateInfo.tHead = tHead;
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    CateModel *model = [self getCateModelWith:resultSet];
+//    [self objFromFMDBQuery_CateMgr:cateInfo model:model];
+//    [aryData addObject:cateInfo];
+//
+//    [fmdb close];
+//    return aryData;
+//  }
+//  return nil;
+//}
+//
+//+ (int)getCateCount {
+//  NSString *sql = [NSString
+//      stringWithFormat:@"SELECT count(*) AS count FROM tb_catalog_info ;"];
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    int count = [resultSet intForColumn:@"count"];
+//    [fmdb close];
+//    return count;
+//  }
+//  return 0;
+//}
+//
+//+ (int)getNoteCountInCate_CateMgr:(NSString *)strCateGuid
+//                    includeSubDir:(BOOL)includeSubDir {
+//  int noteCount = 0;
+//  TCateInfo *cateInfo = [self getCate_CateMgr:strCateGuid];
+//  if (!cateInfo)
+//    return 0;
+//
+//  NSMutableArray *aryData = [NSMutableArray array];
+//  [aryData addObject:cateInfo];
+//
+//  for (int i = 0; i < [aryData count]; i++) {
+//    TCateInfo *curCateInfo = [aryData objectAtIndex:i];
+//    if (includeSubDir) //包括子文件夹
+//    {
+//      NSArray *arrSubCate =
+//          [self getCateList_CateMgr:curCateInfo.strCatalogIdGuid];
+//      if ([arrSubCate isKindOfClass:[NSArray class]] &&
+//          [arrSubCate count] > 0) {
+//        [aryData addObjectsFromArray:arrSubCate];
+//      }
+//    }
+//
+//    //获取笔记数量
+//    NSString *sql = [NSString
+//        stringWithFormat:@"SELECT count(*) AS count FROM tb_note_info WHERE "
+//                         @"catalog_id='%@' AND delete_state=%d;",
+//                         curCateInfo.strCatalogIdGuid, DELETESTATE_NODELETE];
+//
+//    FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//    if ([fmdb open]) {
+//      FMResultSet *resultSet = [fmdb executeQuery:sql];
+//      noteCount = [resultSet intForColumn:@"count"];
+//    }
+//    [fmdb close];
+//  }
+//  return noteCount;
+//}
+//
+//+ (BOOL)isSubCate_CateMgr:(NSString *)strParentGuid
+//                  subCate:(NSString *)strSubGuid {
+//  BOOL bRet = NO;
+//
+//  TCateInfo *cateInfo = [self getCate_CateMgr:strSubGuid];
+//  if (!cateInfo)
+//    return NO;
+//
+//  if ([strParentGuid isEqualToString:cateInfo.strCatalogPaht1Guid] ||
+//      [strParentGuid isEqualToString:cateInfo.strCatalogPaht2Guid] ||
+//      [strParentGuid isEqualToString:cateInfo.strCatalogPaht3Guid] ||
+//      [strParentGuid isEqualToString:cateInfo.strCatalogPaht4Guid] ||
+//      [strParentGuid isEqualToString:cateInfo.strCatalogPaht5Guid] ||
+//      [strParentGuid isEqualToString:cateInfo.strCatalogPaht6Guid]) {
+//    bRet = YES;
+//  }
+//
+//  return bRet;
+//}
+//
+//+ (int)getCateMaxVersion_CateMgr {
+//  NSString *strValue;
+//  if (![AstroDBMng getCfg_cfgMgr:@"tb_catalog_info"
+//                            name:@"tableMaxVer"
+//                           value:strValue])
+//    return 0;
+//
+//  int maxVer = [strValue intValue];
+//  return maxVer;
+//}
+//
+//+ (BOOL)setCateMaxVersion_CateMgr:(int)version {
+//  NSString *strValue = [NSString stringWithFormat:@"%d", version];
+//  return [AstroDBMng setCfg_cfgMgr:@"tb_catalog_info"
+//                              name:@"tableMaxVer"
+//                             value:strValue];
+//}
+//
+//+ (int)getTableDirVersion_CateMgr:(NSString *)strCateGuid
+//                        tableName:(NSString *)strTableName {
+//  NSString *sql = [NSString
+//      stringWithFormat:@"SELECT * FROM tb_catalog_version_info WHERE "
+//                       @"catalog_belong_to='%@' AND table_name='%@';",
+//                       strCateGuid, strTableName];
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    int version = 0;
+//    version = [resultSet intForColumn:@"max_ver"];
+//    [fmdb close];
+//    return version;
+//  }
+//  return 0;
+//}
+//
+////更改文件夹版本信息表
+//+ (int)setTableDirVersion_CateMgr:(TCatalogVersionInfo *)obj {
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    BOOL ret = [fmdb executeUpdate:@"replace into ?"
+//                                    "( [user_id],"
+//                                    "[catalog_belong_to], "
+//                                    "[table_name], "
+//                                    "[max_ver] )"
+//                                    "values(?,?,?,?);",
+//                                   TB_CATALOG_VERSION_INFO,
+//                                   [NSNumber numberWithInt:obj.nUserID],
+//                                   obj.strCatalogBelongToGuid, obj.strTableName,
+//                                   [NSNumber numberWithInt:obj.nMaxVer]];
+//
+//    [fmdb close];
+//    if (ret == YES) {
+//      return 1;
+//    }
+//  }
+//  return -1;
+//}
+//
+////数据库操作
+//+ (int)saveToDB_CateMgr:(TCateInfo *)obj {
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    BOOL ret = [fmdb
+//        executeUpdate:@"replace into tb_catalog_info"
+//                       "([user_id],"
+//                       "[curr_ver], "
+//                       "[create_ver], "
+//                       "[create_time], "
+//                       "[modify_time], "
+//
+//                       "[delete_state], "
+//                       "[edit_state], "
+//                       "[conflict_state], "
+//                       "[sync_state], "
+//                       "[need_upload], "
+//
+//                       "[catalog_id], "
+//                       "[catalog_belong_to], "
+//                       "[catalog_path1], "
+//                       "[catalog_path2], "
+//                       "[catalog_path3], "
+//
+//                       "[catalog_path4], "
+//                       "[catalog_path5], "
+//                       "[catalog_path6], "
+//                       "[catalog_order], "
+//                       "[catalog_name], "
+//
+//                       "[encrypt_flag], "
+//                       "[verify_data], "
+//                       "[server_type], "
+//                       "[catalog_color], "
+//                       "[catalog_icon], "
+//
+//                       "[mobile_flag], "
+//                       "[note_count] )"
+//                       " values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, "
+//                       "?,?,?,?,?, ?,?);",
+//                      [NSNumber numberWithInt:obj.tHead.nUserID],
+//                      [NSNumber numberWithInt:obj.tHead.nCurrVerID],
+//                      [NSNumber numberWithInt:obj.tHead.nCreateVerID],
+//                      obj.tHead.strCreateTime, obj.tHead.strModTime,
+//
+//                      [NSNumber numberWithInt:obj.tHead.nDelState],
+//                      [NSNumber numberWithInt:obj.tHead.nEditState],
+//                      [NSNumber numberWithInt:obj.tHead.nConflictState],
+//                      [NSNumber numberWithInt:obj.tHead.nSyncState],
+//                      [NSNumber numberWithInt:obj.tHead.nNeedUpload],
+//
+//                      obj.strCatalogIdGuid, obj.strCatalogBelongToGuid,
+//                      obj.strCatalogPaht1Guid, obj.strCatalogPaht2Guid,
+//                      obj.strCatalogPaht3Guid,
+//
+//                      obj.strCatalogPaht4Guid, obj.strCatalogPaht5Guid,
+//                      obj.strCatalogPaht6Guid,
+//                      [NSNumber numberWithInt:obj.nOrder], obj.strCatalogName,
+//
+//                      [NSNumber numberWithInt:obj.nEncryptFlag],
+//                      obj.strVerifyData,
+//                      [NSNumber numberWithInt:obj.nCatalogType],
+//                      [NSNumber numberWithInt:obj.nCatalogColor],
+//                      [NSNumber numberWithInt:obj.nCatalogIcon],
+//
+//                      [NSNumber numberWithInt:obj.nMobileFlag],
+//                      [NSNumber numberWithInt:obj.nNoteCount]];
+//
+//    [fmdb close];
+//    if (ret == YES) {
+//      return 1;
+//    }
+//  }
+//  return -1;
+//}
+//
+//+ (CateModel *)getCateModelWith:(FMResultSet *)resultSet {
+//  CateModel *model = [[CateModel alloc] init];
+//  while ([resultSet next]) {
+//    model.user_id =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"user_id"]];
+//    model.curr_ver =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"curr_ver"]];
+//    model.create_ver =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"create_ver"]];
+//    model.create_time = [resultSet stringForColumn:@"create_time"];
+//    model.modify_time = [resultSet stringForColumn:@"modify_time"];
+//
+//    model.delete_state =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"delete_state"]];
+//    model.edit_state =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"edit_state"]];
+//    model.conflict_state =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"conflict_state"]];
+//    model.sync_state =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"sync_state"]];
+//    model.need_upload =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"need_upload"]];
+//
+//    model.catalog_id = [resultSet stringForColumn:@"catalog_id"];
+//    model.catalog_belong_to = [resultSet stringForColumn:@"catalog_belong_to"];
+//    model.catalog_path1 = [resultSet stringForColumn:@"catalog_path1"];
+//    model.catalog_path2 = [resultSet stringForColumn:@"catalog_path2"];
+//    model.catalog_path3 = [resultSet stringForColumn:@"catalog_path3"];
+//    model.catalog_path4 = [resultSet stringForColumn:@"catalog_path4"];
+//    model.catalog_path5 = [resultSet stringForColumn:@"catalog_path5"];
+//    model.catalog_path6 = [resultSet stringForColumn:@"catalog_path6"];
+//
+//    model.catalog_order =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"catalog_order"]];
+//    model.catalog_name = [resultSet stringForColumn:@"catalog_name"];
+//    model.encrypt_flag =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"encrypt_flag"]];
+//    model.verify_data = [resultSet stringForColumn:@"verify_data"];
+//    model.server_type =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"server_type"]];
+//    model.catalog_color =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"catalog_color"]];
+//    model.catalog_icon =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"catalog_icon"]];
+//    model.mobile_flag =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"mobile_flag"]];
+//    model.note_count =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"note_count"]];
+//  }
+//
+//  return model;
+//}
+//
+//+ (BOOL)objFromFMDBQuery_CateMgr:(TCateInfo *)cateInfo
+//                           model:(CateModel *)model {
+//  cateInfo.tHead.nUserID = [model.user_id intValue];         // 用户编号
+//  cateInfo.tHead.nCurrVerID = [model.curr_ver intValue];     // 当前版本号
+//  cateInfo.tHead.nCreateVerID = [model.create_ver intValue]; // 创建版本号
+//
+//  cateInfo.tHead.strCreateTime = model.create_time; // 创建时间
+//  cateInfo.tHead.strModTime = model.modify_time;    // 修改时间
+//
+//  cateInfo.tHead.nDelState = [model.delete_state intValue]; // 删除状态
+//  cateInfo.tHead.nEditState = [model.edit_state intValue];  // 编辑状态
+//  cateInfo.tHead.nConflictState = [model.conflict_state intValue]; // 冲突状态
+//  cateInfo.tHead.nSyncState =
+//      [model.sync_state intValue]; // 同步状态，1表示正在同步
+//  cateInfo.tHead.nNeedUpload = [model.need_upload intValue]; // 是否上传
+//
+//  cateInfo.strCatalogIdGuid = model.catalog_id; // 目录编号;
+//  cateInfo.strCatalogBelongToGuid =
+//      model.catalog_belong_to; //当前目录上一级目录
+//  cateInfo.strCatalogPaht1Guid = model.catalog_path1; //第一级目录位置
+//  cateInfo.strCatalogPaht2Guid = model.catalog_path2; //第二级目录位置
+//  cateInfo.strCatalogPaht3Guid = model.catalog_path3; //第三级目录位置
+//  cateInfo.strCatalogPaht4Guid = model.catalog_path4; //第四级目录位置
+//  cateInfo.strCatalogPaht5Guid = model.catalog_path5; //第五级目录位置
+//  cateInfo.strCatalogPaht6Guid = model.catalog_path6; //第六级目录位置
+//
+//  cateInfo.nOrder = [model.catalog_order intValue]; // 排列位置
+//  cateInfo.strCatalogName = model.catalog_name;
+//  ;                                                      // 目录名称
+//  cateInfo.nEncryptFlag = [model.encrypt_flag intValue]; // 加密标识(是否加密)
+//  cateInfo.strVerifyData = model.verify_data;            // 验证密码
+//
+//  cateInfo.nCatalogType =
+//      [model.server_type intValue]; //目录类型  (以下为新增的)
+//  cateInfo.nCatalogColor = [model.catalog_color intValue]; //目录颜色
+//  cateInfo.nCatalogIcon = [model.catalog_icon intValue];   //目录图标
+//  cateInfo.nMobileFlag = [model.mobile_flag intValue];     //手机目录标志
+//  cateInfo.nNoteCount = [model.note_count intValue];       //笔记数量
+//
+//  cateInfo.nCurdayNoteCount = 0; //不是从数据库中读出来的。
+//
+//  return YES;
+//}
+//
+//@end

@@ -1,0 +1,278 @@
+///*
+// *  ItemMgr.cpp
+// *  NoteBook
+// *
+// *  Created by wangsc on 10-9-15.
+// *  Copyright 2010 ND. All rights reserved.
+// *
+// */
+//
+//#import "ItemMgr.h"
+////#import "CfgMgr.h"
+//
+//#import "DbMngDataDef.h"
+////#import "ComCustomConstantDef.h"
+//#import "PubFunction.h"
+//#import "GlobalVar.h"
+////#import "BussComdIDDef.h"
+//
+//#import "Common.h"
+//
+//#import "CommonDirectory.h"
+//
+//#define HASH_LEN 16
+//#define MAX_FINGERPRINTER_LEN 1024 * 1024
+//
+//// 指纹信息，前两个字节是长度，包括自身长度
+//// static unsigned char m_ucFingerPrinter[MAX_FINGERPRINTER_LEN];
+//
+//@implementation AstroDBMng (ForItemMgr)
+//
+//+ (TItemInfo *)getItem:(NSString *)strItemGuid {
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//
+//  NSString *sql = [NSString
+//      stringWithFormat:@"SELECT * FROM tb_item_info WHERE item_id='%@';",
+//                       strItemGuid];
+//
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    ItemModel *model = [self getItemModelWith:resultSet];
+//    TRecHead *pHead = [TRecHead new];
+//    TItemInfo *pItemInfo = [TItemInfo new];
+//    pItemInfo.tHead = pHead;
+//    [self objFromFMDBQuery_ItemMgr:pItemInfo model:model];
+//
+//    [fmdb close];
+//    return pItemInfo;
+//  }
+//  return nil;
+//}
+//
+//+ (NSArray *)getItemListBySQL:(NSString *)strSQL {
+//  NSMutableArray *aryData = [NSMutableArray array];
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:strSQL];
+//    ItemModel *model = [self getItemModelWith:resultSet];
+//    TRecHead *pHead = [TRecHead new];
+//    TItemInfo *pInfo = [TItemInfo new];
+//    pInfo.tHead = pHead;
+//    [self objFromFMDBQuery_ItemMgr:pInfo model:model];
+//    [aryData addObject:pInfo];
+//
+//    [fmdb close];
+//    return aryData;
+//  }
+//  return nil;
+//}
+//
+////某条笔记需上传的笔记项
+//+ (NSArray *)getNeedUploadItemListByNote:(NSString *)guidNote {
+//
+//  NSString *strSQL;
+//  strSQL = [NSString
+//      stringWithFormat:
+//          @"SELECT * FROM tb_item_info WHERE note_id='%@' AND edit_state=%d;",
+//          guidNote, EDITSTATE_EDITED];
+//  return [self getItemListBySQL:strSQL];
+//}
+//
+//+ (NSArray *)getItemListByNote:(NSString *)guidNote
+//                 includeDelete:(BOOL)includeDelete {
+//
+//  NSString *strSQL;
+//  if (includeDelete)
+//    strSQL = [NSString
+//        stringWithFormat:@"select * from tb_item_info where note_id='%@';",
+//                         guidNote];
+//  else
+//    strSQL = [NSString stringWithFormat:@"select * from tb_item_info where "
+//                                        @"note_id='%@' AND delete_state=%d;",
+//                                        guidNote, DELETESTATE_NODELETE];
+//
+//  return [self getItemListBySQL:strSQL];
+//}
+//
+//+ (BOOL)addItem:(TItemInfo *)pItemInfo {
+//  return [self saveItem:pItemInfo];
+//  ;
+//}
+//
+//+ (BOOL)deleteItem:(NSString *)strItemGuid {
+//  TItemInfo *itemInfo = [self getItem:strItemGuid];
+//  if (!itemInfo) {
+//    return NO;
+//  }
+//
+//  NSFileManager *fileManager = [NSFileManager defaultManager];
+//  NSString *filePath =
+//      [CommonFunc getItemPath:strItemGuid fileExt:itemInfo.strItemExt];
+//  if ([fileManager fileExistsAtPath:filePath]) {
+//    [fileManager removeItemAtPath:filePath error:NULL];
+//  }
+//
+//  if (itemInfo.tHead.nCreateVerID == 0) {
+//    return [self deleteItemFromDB:strItemGuid];
+//  } else {
+//    itemInfo.tHead.nEditState = EDITSTATE_EDITED;
+//    itemInfo.tHead.nDelState = DELETESTATE_DELETE;
+//    return [self saveItem:itemInfo];
+//  }
+//}
+//
+//+ (BOOL)deleteItemFromDB:(NSString *)strItemGuid {
+//  TItemInfo *itemInfo = [self getItem:strItemGuid];
+//  if (!itemInfo) {
+//    return NO;
+//  }
+//
+//  NSFileManager *fileManager = [NSFileManager defaultManager];
+//  NSString *filePath =
+//      [CommonFunc getItemPath:strItemGuid fileExt:itemInfo.strItemExt];
+//  if ([fileManager fileExistsAtPath:filePath]) {
+//    [fileManager removeItemAtPath:filePath error:NULL];
+//  }
+//
+//  NSString *sql =
+//      [NSString stringWithFormat:@"DELETE FROM tb_item_info WHERE item_id='%@'",
+//                                 strItemGuid];
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    BOOL ret = [fmdb executeUpdate:sql];
+//    [fmdb close];
+//    return ret;
+//  }
+//  return NO;
+//}
+//
+//+ (BOOL)saveItem:(TItemInfo *)itemInfo {
+//  return [self saveToDB_ItemMgr:itemInfo];
+//}
+//
+////数据库操作
+//+ (int)saveToDB_ItemMgr:(TItemInfo *)obj {
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    BOOL ret = [fmdb
+//        executeUpdate:@"replace into %@"
+//                       "( [user_id],"
+//                       "[curr_ver], "
+//                       "[create_ver], "
+//                       "[create_time], "
+//                       "[modify_time], "
+//                       "[delete_state], "
+//                       "[edit_state], "
+//                       "[conflict_state], "
+//                       "[sync_state], "
+//                       "[need_upload], "
+//
+//                       "[item_id], "
+//                       "[note_id], "
+//                       "[creator_id], "
+//                       "[item_type], "
+//                       "[item_ext], "
+//                       "[item_size], "
+//                       "[encrypt_flag], "
+//                       "[item_title], "
+//                       "[upload_size],"
+//                       "[server_path])"
+//                       "values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?);",
+//                      TB_ITEM_INFO, obj.tHead.nUserID, obj.tHead.nCurrVerID,
+//                      obj.tHead.nCreateVerID,
+//                      [obj.tHead.strCreateTime UTF8String],
+//                      [obj.tHead.strModTime UTF8String], obj.tHead.nDelState,
+//                      obj.tHead.nEditState, obj.tHead.nConflictState,
+//                      obj.tHead.nSyncState, obj.tHead.nNeedUpload,
+//
+//                      [obj.strItemIdGuid UTF8String],
+//                      [obj.strNoteIdGuid UTF8String], obj.nCreatorID,
+//                      obj.nItemType, [obj.strItemExt UTF8String], obj.nItemSize,
+//                      obj.nEncryptFlag, [obj.strItemTitle UTF8String],
+//                      obj.nUploadSize, [obj.strServerPath UTF8String]];
+//
+//    [fmdb close];
+//    if (ret == YES) {
+//      return 1;
+//    }
+//  }
+//  [fmdb close];
+//  return -1;
+//}
+//
+//+ (ItemModel *)getItemModelWith:(FMResultSet *)resultSet {
+//  ItemModel *model = [[ItemModel alloc] init];
+//
+//  while ([resultSet next]) {
+//    model.user_id =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"user_id"]];
+//    model.curr_ver =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"curr_ver"]];
+//    model.create_ver =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"create_ver"]];
+//    model.create_time = [resultSet stringForColumn:@"create_time"];
+//    model.modify_time = [resultSet stringForColumn:@"modify_time"];
+//
+//    model.delete_state =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"delete_state"]];
+//    model.edit_state =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"edit_state"]];
+//    model.conflict_state =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"conflict_state"]];
+//    model.sync_state =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"sync_state"]];
+//    model.need_upload =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"need_upload"]];
+//
+//    model.item_id = [resultSet stringForColumn:@"item_id"];
+//    model.note_id = [resultSet stringForColumn:@"note_id"];
+//    model.creator_id =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"creator_id"]];
+//    model.item_type =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"item_type"]];
+//    model.item_ext = [resultSet stringForColumn:@"item_ext"];
+//
+//    model.item_size =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"item_size"]];
+//    model.encrypt_flag =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"encrypt_flag"]];
+//    model.item_title = [resultSet stringForColumn:@"item_title"];
+//    model.upload_size =
+//        [NSNumber numberWithInt:[resultSet intForColumn:@"upload_size"]];
+//    model.server_path = [resultSet stringForColumn:@"server_path"];
+//  }
+//
+//  return model;
+//}
+//
+//+ (BOOL)objFromFMDBQuery_ItemMgr:(TItemInfo *)obj model:(ItemModel *)model {
+//  obj.tHead.nUserID = [model.user_id intValue];         // 用户编号
+//  obj.tHead.nCurrVerID = [model.curr_ver intValue];     // 当前版本号
+//  obj.tHead.nCreateVerID = [model.create_ver intValue]; // 创建版本号
+//
+//  obj.tHead.strCreateTime = model.create_time; // 创建时间
+//  obj.tHead.strModTime = model.modify_time;    // 修改时间
+//
+//  obj.tHead.nDelState = [model.delete_state intValue];        // 删除状态
+//  obj.tHead.nEditState = [model.edit_state intValue];         // 编辑状态
+//  obj.tHead.nConflictState = [model.conflict_state intValue]; // 冲突状态
+//  obj.tHead.nSyncState = [model.sync_state intValue]; // 同步状态，1表示正在同步
+//  obj.tHead.nNeedUpload = [model.need_upload intValue]; // 是否上传
+//
+//  obj.strItemIdGuid = model.item_id; //项目编号
+//  obj.strNoteIdGuid = model.note_id; //项目编号
+//  obj.nCreatorID = [model.creator_id intValue]; // ITEM创建者编号,备用
+//  obj.nItemType = [model.item_type intValue]; // ITEM的类型
+//  obj.strItemExt = model.item_ext; // ITEM的扩展名
+//  obj.nItemSize = [model.item_size intValue];       //项目大小
+//  obj.nEncryptFlag = [model.encrypt_flag intValue]; //加密标识
+//  obj.strItemTitle = model.item_title;              //文件名
+//  obj.nUploadSize = [model.upload_size intValue];
+//
+//  //家园e线
+//  obj.strServerPath = model.server_path;
+//
+//  return YES;
+//}
+//
+//@end

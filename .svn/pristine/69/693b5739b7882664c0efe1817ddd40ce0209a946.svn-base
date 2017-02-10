@@ -1,0 +1,32 @@
+//
+//  BBQDynamicViewDetail.m
+//  BBQ
+//
+//  Created by 朱琨 on 16/1/13.
+//  Copyright © 2016年 bbq. All rights reserved.
+//
+
+#import "BBQDynamicViewDetail.h"
+
+@implementation BBQDynamicViewDetail
+
+- (void)setupUI {
+    [self setupProfileView];
+    [self setupContentWithWidth:5];
+    [self setupMedia];
+    [self setupFuncView];
+    [self setupGiftView];
+}
+
+- (void)setupProfileView {
+    self.profileView = [[BBQDynamicProfileView alloc] initWithFrame:CGRectMake(0, 0, kScreenWidth, 61)];
+    [self addSubview:self.profileView];
+    self.profileView.avatarView.left = 15;
+    self.profileView.centerY = self.profileView.height / 2.0;
+    self.profileView.nameLabel.left = self.profileView.avatarView.right + 15;
+    self.profileView.sourceLabel.left = self.profileView.nameLabel.left;
+    self.profileView.postTimeLabel.right = kScreenWidth - 15;
+}
+
+
+@end

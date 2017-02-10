@@ -1,0 +1,24 @@
+////
+////  NoteMgr.h
+////  NoteBook
+////
+////  Created by wangsc on 10-9-15.
+////  Copyright 2010 ND. All rights reserved.
+////
+//
+//#import "DBMng.h"
+//
+//#pragma mark -
+//#pragma mark 数据库管理
+//@interface AstroDBMng (ForPhotoMgr)
+//{
+//    
+//}
+//
+////增加1条
+//+(BOOL)addPhotoRecord:(NSString *)photoid;
+//+(NSArray *)getPhotoRecordList;
+//
+//
+//
+//@end

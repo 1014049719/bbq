@@ -1,0 +1,222 @@
+//
+//  BBQDualListViewController.m
+//  BBQ
+//
+//  Created by 朱琨 on 15/12/28.
+//  Copyright © 2015年 bbq. All rights reserved.
+//
+
+#import "BBQDualListViewController.h"
+#import "BBQGetClassListApi.h"
+#import "BBQDualListPrimaryCell.h"
+#import "BBQDualListSecondaryCell.h"
+#import "BBQGetBaoBaoListApi.h"
+#import "BBQCalendarViewController.h"
+#import "QBImagePickerController.h"
+#import "BBQDynamicEditViewController.h"
+#import <UITableView+FDTemplateLayoutCell.h>
+
+@interface BBQDualListViewController () <UITableViewDataSource, UITableViewDelegate>
+
+@property (weak, nonatomic) IBOutlet UITableView *primaryTableView;
+@property (weak, nonatomic) IBOutlet UITableView *secondaryTableView;
+/// 一级tableview的数据源
+@property (nonatomic, strong) NSMutableArray * primaryDataSource;
+/// 二级tableview的数据源
+@property (nonatomic, strong) NSMutableArray * secondaryDataSource;
+
+@property (assign, nonatomic) BOOL defaultSelected;
+
+@end
+
+@implementation BBQDualListViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.edgesForExtendedLayout=UIRectEdgeNone;
+    
+    _primaryTableView.tableFooterView = [UIView new];
+    _secondaryTableView.tableFooterView = [UIView new];
+    _defaultSelected = NO;
+    switch (self.dualListType) {
+        case BBQDualListTypeDailyReport: {
+            [self.primaryDataSource addObjectsFromArray:TheCurUser.classdata];
+            self.navigationItem.title = @"选择宝宝";
+            [self downloadBaoBaoDataWtihClass:self.primaryDataSource[0]];
+            break;
+        }
+        case BBQDualListTypeDynamic: {
+            [self.primaryDataSource addObjectsFromArray:TheCurUser.schooldata];
+            [self.primaryDataSource addObjectsFromArray:TheCurUser.classdata];
+            [self downloadBaoBaoDataWtihClass:self.primaryDataSource[1]];
+            self.navigationItem.title = @"发表到";
+            break;
+        }
+        case BBQDualListTypeCheckDynamic: {
+            [self.primaryDataSource addObjectsFromArray:TheCurUser.schooldata];
+            [self.primaryDataSource addObjectsFromArray:TheCurUser.classdata];
+            self.navigationItem.title = @"选择动态";
+            [self downloadBaoBaoDataWtihClass:self.primaryDataSource[1]];
+            break;
+        }
+    }
+    [self.primaryTableView reloadData];
+}
+
+#pragma mark - UITabelView Datasource
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return tableView == _primaryTableView ? _primaryDataSource.count : _secondaryDataSource.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UITableViewCell *cell;
+    if (tableView == _primaryTableView) {
+        cell = [tableView dequeueReusableCellWithIdentifier:kDualListPrimaryCellIdentifier forIndexPath:indexPath];
+        if (_defaultSelected == NO) {
+            if (self.dualListType == BBQDualListTypeDynamic || self.dualListType == BBQDualListTypeCheckDynamic) {
+                if (indexPath.row == 1) {
+                    [tableView selectRowAtIndexPath:indexPath animated:YES scrollPosition:UITableViewScrollPositionNone];
+                    _defaultSelected = YES;
+                }
+            } else {
+                if (indexPath.row == 0) {
+                    [tableView selectRowAtIndexPath:indexPath animated:YES scrollPosition:UITableViewScrollPositionNone];
+                    _defaultSelected = YES;
+                }
+            }
+        }
+        ((BBQDualListPrimaryCell *)cell).model = self.primaryDataSource[indexPath.row];
+    } else if (tableView == _secondaryTableView) {
+        cell = [tableView dequeueReusableCellWithIdentifier:kDualListSecondaryCellIdentifier forIndexPath:indexPath];
+        ((BBQDualListSecondaryCell *)cell).model = self.secondaryDataSource[indexPath.row];
+    }
+    return cell;
+}
+
+#pragma mark - UITableView Delegate
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    CGFloat height;
+    if (tableView == self.primaryTableView) {
+        height = [tableView fd_heightForCellWithIdentifier:kDualListPrimaryCellIdentifier cacheByIndexPath:indexPath configuration:^(BBQDualListPrimaryCell *cell) {
+            cell.model = self.primaryDataSource[indexPath.row];
+        }];
+    } else {
+        height = [tableView fd_heightForCellWithIdentifier:kDualListSecondaryCellIdentifier cacheByIndexPath:indexPath configuration:^(BBQDualListSecondaryCell *cell) {
+            cell.model = self.secondaryDataSource[indexPath.row];
+        }];
+    }
+    return MAX(50, height);
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+    id model = [cell valueForKey:@"model"];
+    switch (self.dualListType) {
+        case BBQDualListTypeDailyReport: {
+            if (tableView == self.primaryTableView) {
+                [self downloadBaoBaoDataWtihClass:model];
+            } else {
+                BBQCalendarViewController *vc = [[BBQCalendarViewController alloc] initWithBaby:model];
+                [self.navigationController pushViewController:vc animated:YES];
+            }
+            break;
+        }
+        case BBQDualListTypeDynamic:
+        case BBQDualListTypeCheckDynamic: {
+            if (tableView == self.primaryTableView && [model isKindOfClass:[BBQClassDataModel class]]) {
+                [self downloadBaoBaoDataWtihClass:model];
+            } else {
+                if (tableView == self.primaryTableView) {
+                    [self.secondaryDataSource removeAllObjects];
+                    [self.secondaryTableView reloadData];
+                } else {
+                    if (_dynamic) {
+                        UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Dynamic" bundle:nil];
+                        BBQDynamicEditViewController *vc =
+                        [sb instantiateViewControllerWithIdentifier:@"DynamicEditVC"];
+                        if ([model isKindOfClass:[BBQClassDataModel class]]) {
+                            _dynamic.baobaoname = ((BBQClassDataModel *)model).classname;
+                            _dynamic.baobaouid = ((BBQClassDataModel *)model).classid;
+                        } else if ([model isKindOfClass:[BBQBabyModel class]]) {
+                            _dynamic.baobaoname = ((BBQBabyModel *)model).realname;
+                            _dynamic.baobaouid = ((BBQBabyModel *)model).uid;
+                            _dynamic.baobaousername = ((BBQBabyModel *)model).username;
+                        }
+                        vc.dynamic = _dynamic;
+                        [self.navigationController setViewControllers:@[
+                                                                        self.navigationController.viewControllers.firstObject,
+                                                                        vc
+                                                                        ]
+                                                             animated:YES];
+                    }
+                }
+                if (self.dualListType == BBQDualListTypeDynamic) {
+                    [self createNewDynamicWithObject:model];
+                } else {
+                    TheCurUser.curSelection = model;
+                    self.tabBarController.selectedIndex = 0;
+                    [self.navigationController popToRootViewControllerAnimated:YES];
+                }
+            }
+            break;
+        }
+    }
+}
+
+- (void)createNewDynamicWithObject:(id)object {
+    Dynamic *dynamic = [Dynamic dynamicWithMediaType:self.mediaType object:object];
+    if (_mediaType == BBQDynamicMediaTypeVideo || _mediaType == BBQDynamicMediaTypePhoto || _mediaType == BBQDynamicMediaTypeBatch) {
+        QBImagePickerController *imagePicker = [[QBImagePickerController alloc] initWithDynamic:dynamic];
+        [self.navigationController
+         pushViewController:imagePicker
+         animated:YES];
+    } else if (_mediaType == BBQDynamicMediaTypeNone) {
+        UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Dynamic" bundle:nil];
+        BBQDynamicEditViewController *vc = [sb instantiateViewControllerWithIdentifier:@"DynamicEditVC"];
+        vc.dynamic = dynamic;
+        [self.navigationController
+         pushViewController:vc
+         animated:YES];
+    }
+}
+
+#pragma mark - 网络请求
+- (void)downloadBaoBaoDataWtihClass:(BBQClassDataModel *)model {
+    BBQGetBaoBaoListApi *api = [[BBQGetBaoBaoListApi alloc] initWithClassid:model.classid];
+    @weakify(self)
+    [api startWithCompletionBlockWithSuccess:^(YTKBaseRequest *request) {
+        @strongify(self)
+        dispatch_async(
+                       dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                           NSArray *babyArray = [NSArray modelArrayWithClass:[BBQBabyModel class] json:request.responseJSONObject[@"data"][@"arr"]];
+                           dispatch_async_on_main_queue(^{
+                               [self.secondaryDataSource removeAllObjects];
+                               if (self.dualListType != BBQDualListTypeDailyReport) {
+                                   [self.secondaryDataSource addObject:model];
+                               }
+                               [self.secondaryDataSource addObjectsFromArray:babyArray];
+                               [_secondaryTableView reloadData];
+                           });
+                       });
+    } failure:^(YTKBaseRequest *request) {
+        ShowApiError;
+    }];
+}
+
+#pragma mark - Getter & Setter
+- (NSMutableArray *)primaryDataSource {
+    if (!_primaryDataSource) {
+        _primaryDataSource = [NSMutableArray array];
+    }
+    return _primaryDataSource;
+}
+
+- (NSMutableArray *)secondaryDataSource {
+    if (!_secondaryDataSource) {
+        _secondaryDataSource = [NSMutableArray array];
+    }
+    return _secondaryDataSource;
+}
+
+@end

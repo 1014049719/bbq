@@ -1,0 +1,53 @@
+////
+////  DBController.m
+////  SparkEnglish
+////
+////  Created by huanghb on 11-1-27.
+////  Copyright 2011 __MyCompanyName__. All rights reserved.
+////
+//
+//#import "CommonDirectory.h"
+//
+//#import "DBMng.h"
+//#import "PubFunction.h"
+//#import "GlobalVar.h"
+//
+//@implementation AstroDBMng
+//
+//#pragma mark -
+//#pragma mark 静态方法－－获取访问数据库的实例
+//
+//+ (NSString *)getDb91NoteFileName {
+//  //目标数据库文件路径
+//  NSString *path = [CommonFunc getDbFileFullName:EDbType91Note
+//                                        UserName:TheCurUser.member.username];
+//
+//  NSLog(@"%@", path);
+//  return path;
+//}
+//
+//+ (NSString *)getDbCommonFileName {
+//  NSString *path = [CommonFunc getCommonDataBaseDir];
+//  //数据库文件名
+//  NSString *dbname = [CommonFunc getDbFileNameBy:EDbTypeAstroCommon];
+//  //全路径
+//  NSString *fullPath = [path stringByAppendingPathComponent:dbname];
+//
+//  NSLog(@"%@", fullPath);
+//  return fullPath;
+//}
+//
+///// 初始化数据库
+//+ (FMDatabase *)getDb91DataBase {
+//  NSString *fullPath = [self getDb91NoteFileName];
+//  FMDatabase *fmdb = [FMDatabase databaseWithPath:fullPath];
+//  return fmdb;
+//}
+//
+//+ (FMDatabase *)getDbCommonDataBase {
+//  NSString *fullPath = [self getDbCommonFileName];
+//  FMDatabase *fmdb = [FMDatabase databaseWithPath:fullPath];
+//  return fmdb;
+//}
+//
+//@end

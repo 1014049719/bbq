@@ -1,0 +1,29 @@
+//
+//  DynamicCreateTableViewController.h
+//  BBQ
+//
+//  Created by anymuse on 15/7/22.
+//  Copyright (c) 2015年 bbq. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+
+
+@interface DynamicCreateTableViewController : UITableViewController<UIActionSheetDelegate>
+
+@property (assign, nonatomic) int itemType;
+
+@property (strong, nonatomic) NSMutableArray *curphotosArray;
+@property (strong, nonatomic) UIImage *photoImage;
+
+//启动方式
+@property (assign, nonatomic ) int nCallMode;
+
+@property (assign,nonatomic) int dtype;
+@property (copy,nonatomic)  NSString *baobaouid;
+@property (copy,nonatomic)  NSString *classuid;
+@property (copy,nonatomic)  NSString *schooluid;
+@property (copy,nonatomic)  NSString *strName;
+
+@end

@@ -1,0 +1,557 @@
+////
+////  BussMng.m
+////  Astro
+////
+////  Created by liuyfmac on 11-12-22.
+////  Copyright 2011 洋基科技. All rights reserved.
+////
+//
+//
+//
+//#import "NSObject+SBJson.h"
+//
+//#import "CommonAll.h"
+//#import "PubFunction.h"
+////#import "DBMngAll.h"
+//#import "GlobalVar.h"
+////#import "Calendar.h"
+//
+//@implementation BussMng
+//@synthesize imp;
+//@synthesize param;
+//@synthesize callbackObj;
+//
+//+ (BussMng *)bussWithType:(int)type {
+//  BussMng *mng = [[BussMng new] autorelease];
+//  mng->type = type;
+//  // LOG_DEBUG(@"BussMng对象创建:%@", mng);
+//  return mng;
+//}
+//
+//+ (id)loadWithType:(int)type {
+//  id data = nil;
+//  switch (type) {
+//  default:
+//    break;
+//  }
+//
+//  return data;
+//}
+//
+//+ (id)loadWithType:(int)type:(id)p {
+//  id data = nil;
+//  switch (type) {
+//  default:
+//    break;
+//  }
+//
+//  return data;
+//}
+//
+//- (void)dealloc {
+//  // LOG_DEBUG(@"BussMng对象dealloc:%@", self);
+//
+//  [self cancelBussRequest];
+//  //    [callbackObj release];
+//
+//  [super dealloc];
+//}
+//
+//- (void)cancelBussRequest {
+//  // LOG_DEBUG(@"BussMng对象释放: %@", self);
+//  // LOG_DEBUG(@"BussMng对象释放--imp: %@", imp);
+//
+//  if (imp) {
+//    BussInterImplBase *buss = (BussInterImplBase *)imp;
+//    if ([buss respondsToSelector:@selector(destroyBussReqObj)]) {
+//      [buss destroyBussReqObj];
+//    } else {
+//      //	LOG_DEBUG(@"BussInterImplBase对象: %@", buss);
+//    }
+//
+//    self.imp = nil;
+//  }
+//
+//  //    callbackObj = nil;
+//  callbackSel = nil;
+//  self.param = nil;
+//}
+//
+//+ (void)cancelBussRequest:(BussMng *)buss, ... {
+//  [buss cancelBussRequest];
+//
+//  // parameter list
+//  va_list argList;
+//  va_start(argList, buss);
+//  while (id arg = va_arg(argList, id)) {
+//    BussMng *bs = (BussMng *)arg;
+//    [bs cancelBussRequest];
+//  }
+//  va_end(argList);
+//}
+//
+//- (void)request:(id)obj:(SEL)sel:(id)p {
+//  NSLog(@"request:obj=%p,sel=%p,p=%p", obj, sel, p);
+//
+//  callbackObj = obj;
+//  callbackSel = sel;
+//  self.param = p;
+//
+//  switch (type) {
+//  case BMLogin:
+//  case BMJYEXUpdataSoft:
+//  case BMRegister:
+//  case BMCommonNoReg:
+//
+//    step = STEP_BUSS1;
+//    [self bussRequest];
+//    break;
+//
+//  case BMConsumeCheck:
+//  case BMConsumeRequest:
+//  case BMConsumePay:
+//  case BMServerDateTime: // add 2012.8.20
+//  default: {
+//    // check login
+//    if (![BBQLoginManager isLogin] && TheCurUser) {
+//      step = STEP_LOGIN;
+//    } else {
+//      step = STEP_BUSS1;
+//    }
+//
+//    [self bussRequest];
+//  } break;
+//  }
+//}
+//
+//- (void)bussRequest {
+//
+//  if (step == STEP_LOGIN) {
+//    if (didLogin) {
+//      TBussStatus *sts = [[TBussStatus new] autorelease];
+//      sts.iCode = 500;
+//      sts.sInfo = @"网络出错啦"; //;LOC_STR("bm_fwq_yc");
+//      [callbackObj performSelector:callbackSel withObject:sts];
+//    } else {
+//      didLogin = YES;
+//
+//      BussJYEXLogin *login = [BussJYEXLogin new];
+//      self.imp = login;
+//      [login release];
+////      [login Login:TheCurUser.member.username
+////                  Password:TheCurUser.sPassword
+////                   RemPswd:TheCurUser.iSavePasswd
+////                 AutoLogin:TheCurUser.iAutoLogin
+////            ResponseTarget:self
+////          ResponseSelector:@selector(bussRequestCallback:)];
+//    }
+//    return;
+//  }
+//
+//  switch (type) {
+//  case BMLogin: {
+//    BussJYEXLogin *login = [BussJYEXLogin new];
+//    self.imp = login;
+//    [login release];
+//    TParamLogin *p = (TParamLogin *)param;
+//    [login Login:p.user
+//                Password:p.pswd
+//                 RemPswd:p.remPswd
+//               AutoLogin:p.autoLogin
+//          ResponseTarget:self
+//        ResponseSelector:@selector(bussRequestCallback:)];
+//  } break;
+//
+//  /*
+//  case BMJYEXAutoLogin:
+//  {
+//      BussJYEXLogin* login = [BussJYEXLogin new];
+//                  self.imp = login;
+//                  [login release];
+//
+//                  [login Login:TheCurUser.member.username
+//  Password:TheCurUser.sPassword RemPswd:YES AutoLogin:NO ResponseTarget:self
+//  ResponseSelector:@selector(bussRequestCallback:)];
+//
+//      //BussJYEXLogin* login = [BussJYEXLogin new];
+//                  //self.imp = login;
+//                  //[login release];
+//                  //[login AutoLogin:self
+//  ResponseSelector:@selector(bussRequestCallback:)];
+//          }
+//                  break;
+//  */
+//
+//  case BMJYEXUpdataSoft: {
+//    BussJYEXSoftUpdata *obj = [BussJYEXSoftUpdata new];
+//    self.imp = obj;
+//    [obj release];
+//    [obj getSoftInfoFromVersion:APPLE_ID
+//                 ResponseTarget:self
+//               ResponseSelector:@selector(bussRequestCallback:)];
+//  } break;
+//  case BMRegister: {
+//    BussRegisterUser *reg = [BussRegisterUser new];
+//    self.imp = reg;
+//    [reg release];
+//    TParamRegister *p = (TParamRegister *)param;
+//    [reg registerUser:p.user
+//             Password:p.pswd
+//             Nickname:p.nick
+//           RespTarget:self
+//         RespSelector:@selector(bussRequestCallback:)];
+//  } break;
+//
+//  //----------------
+//
+//  case BMJYEXJYEXNote: {
+//    BussUploadJYEXNote *uploadnote = [BussUploadJYEXNote new];
+//    self.imp = uploadnote;
+//    [uploadnote release];
+//
+//    [uploadnote UploadNote:self.param
+//            ResponseTarget:self
+//          ResponseSelector:@selector(bussRequestCallback:)];
+//  } break;
+//
+//  case BMJYEXGetUpdateNumber: {
+//    BussJYEXGetUpdateNumber *updatenumber = [BussJYEXGetUpdateNumber new];
+//    self.imp = updatenumber;
+//    [updatenumber release];
+//
+//    [updatenumber getUpdateNumber:[(NSNumber *)self.param intValue]
+//                   ResponseTarget:self
+//                 ResponseSelector:@selector(bussRequestCallback:)];
+//  } break;
+//
+//  case BMJYEXQueryAlbumList: {
+//    BussJYEXQueryAlbumList *queryalbumlist = [BussJYEXQueryAlbumList new];
+//    self.imp = queryalbumlist;
+//    [queryalbumlist release];
+//
+//    [queryalbumlist QueryAlbumList:self
+//                  ResponseSelector:@selector(bussRequestCallback:)];
+//  } break;
+//
+//  case BMJYEXUploadPhoto: {
+//    BussJYEXUploadPhoto *uploadphoto = [BussJYEXUploadPhoto new];
+//    self.imp = uploadphoto;
+//    [uploadphoto release];
+//
+//    NSString *itemguid = [self.param objectForKey:@"itemguid"];
+//    NSString *albumid = [self.param objectForKey:@"albumid"];
+//    NSString *title = [self.param objectForKey:@"title"];
+//    NSString *albumname = [self.param objectForKey:@"albumname"];
+//    NSString *uid = [self.param objectForKey:@"uid"];
+//    NSString *username = [self.param objectForKey:@"username"];
+//
+//    [uploadphoto uploadPhoto:albumid
+//                       title:title
+//                   albumname:albumname
+//                    itemguid:itemguid
+//                         uid:uid
+//                    username:username
+//              ResponseTarget:self
+//            ResponseSelector:@selector(bussRequestCallback:)];
+//  } break;
+//
+//  case BMJYEXCreateAlbum: {
+//    BussJYEXCreateAlbum *createalbum = [BussJYEXCreateAlbum new];
+//    self.imp = createalbum;
+//    [createalbum release];
+//
+//    NSString *albumname = [self.param objectForKey:@"albumname"];
+//    NSNumber *spaceid = [self.param objectForKey:@"spaceid"];
+//
+//    [createalbum CreateAlbum:albumname
+//                       space:spaceid
+//              ResponseTarget:self
+//            ResponseSelector:@selector(bussRequestCallback:)];
+//
+//  } break;
+//
+//  case BMJYEXRegister: {
+//    BussJYEXRegister *registeruser = [BussJYEXRegister new];
+//    self.imp = registeruser;
+//    [registeruser release];
+//
+//    NSString *username = [self.param objectForKey:@"username"];
+//    NSString *password = [self.param objectForKey:@"password"];
+//    NSString *nickname = [self.param objectForKey:@"nickname"];
+//    NSString *realname = [self.param objectForKey:@"realname"];
+//    NSString *email = [self.param objectForKey:@"email"];
+//
+//    [registeruser RegisterUser:username
+//                      password:password
+//                      nickname:nickname
+//                     readlname:realname
+//                         email:email
+//                ResponseTarget:self
+//              ResponseSelector:@selector(bussRequestCallback:)];
+//
+//  } break;
+//
+//  case BMJYEXUpdateUserInfo: {
+//    BussJYEXUpdateUserInfo *updateuserinfo = [BussJYEXUpdateUserInfo new];
+//    self.imp = updateuserinfo;
+//    [updateuserinfo release];
+//
+//    NSString *uid = [self.param objectForKey:@"uid"];
+//    NSString *username = [self.param objectForKey:@"username"];
+//    NSString *oldpassword = [self.param objectForKey:@"oldpassword"];
+//    NSString *newpassword = [self.param objectForKey:@"newpassword"];
+//    NSString *nickname = [self.param objectForKey:@"nickname"];
+//    NSString *realname = [self.param objectForKey:@"realname"];
+//    NSString *email = [self.param objectForKey:@"email"];
+//    NSString *mobile = [self.param objectForKey:@"mobile"];
+//
+//    [updateuserinfo UpdateUserInfo:uid
+//                          username:username
+//                       oldpassword:oldpassword
+//                       newpassword:newpassword
+//                          nickname:nickname
+//                         readlname:realname
+//                             email:email
+//                            mobile:mobile
+//                    ResponseTarget:self
+//                  ResponseSelector:@selector(bussRequestCallback:)];
+//
+//  } break;
+//
+//  case BMJYEXGetAlbumPics: {
+//    BussJYEXGetAlbumPics *getalbumpics = [BussJYEXGetAlbumPics new];
+//    self.imp = getalbumpics;
+//    [getalbumpics release];
+//
+//    NSString *strAlbumId = [self.param objectForKey:@"albumid"];
+//
+//    [getalbumpics GetAlbumPics:strAlbumId
+//                ResponseTarget:self
+//              ResponseSelector:@selector(bussRequestCallback:)];
+//  } break;
+//
+//  case BMQueryAvatar: //查询头像是否存在
+//  {
+//    BussQueryAvatar *queryavatar = [BussQueryAvatar new];
+//    self.imp = queryavatar;
+//    [queryavatar release];
+//
+//    [queryavatar QueryAvatar:TheCurUser.member.uid
+//              ResponseTarget:self
+//            ResponseSelector:@selector(bussRequestCallback:)];
+//  } break;
+//
+//  case BMGetAvatar: //下载头像文件
+//  {
+//    BussGetAvatar *getavatar = [BussGetAvatar new];
+//    self.imp = getavatar;
+//    [getavatar release];
+//
+//    //下载临时文件
+//    NSString *strDownFile = [CommonFunc getAvatarDownloadPath];
+//    NSString *strContentType = [CommonFunc getStreamTypeByExt:@"jpg"];
+//    [getavatar GetAvatar:TheCurUser.member.uid
+//                filename:strDownFile
+//             contenttype:strContentType
+//          ResponseTarget:self
+//        ResponseSelector:@selector(bussRequestCallback:)];
+//  } break;
+//
+//  //-----------------------------------------------
+//
+//  case BMJYEXUploadItemFile: {
+//    BussJYEXUploadItemFile *uploaditemfile = [BussJYEXUploadItemFile new];
+//    self.imp = uploaditemfile;
+//    [uploaditemfile release];
+//
+//    [uploaditemfile UploadItemFile:self.param
+//                    ResponseTarget:self
+//                  ResponseSelector:@selector(bussRequestCallback:)];
+//  } break;
+//
+//  case BMJYEXDownloadFile: //下载文件
+//  {
+//    BussDownloadFile *downitemfile = [BussDownloadFile new];
+//    self.imp = downitemfile;
+//    [downitemfile release];
+//
+//    //下载临时文件
+//    NSString *strUrl = [self.param objectForKey:@"url"];
+//    NSString *strFilename = [self.param objectForKey:@"filename"];
+//    NSString *strContentType = [self.param objectForKey:@"contenttype"];
+//
+//    // TItemInfo *pItemInfo = (TItemInfo *)self.param;
+//    // NSString *strDownFile = [CommonFunc getTempDownDir];
+//    // strDownFile = [strDownFile
+//    // stringByAppendingFormat:@"/%@.%@",pItemInfo.strItemIdGuid,pItemInfo.strItemExt];
+//    // NSString *strContentType = [CommonFunc
+//    // getStreamTypeByExt:pItemInfo.strItemExt];
+//    [downitemfile DownloadFile:strUrl
+//                      filename:strFilename
+//                   contenttype:strContentType
+//                ResponseTarget:self
+//              ResponseSelector:@selector(bussRequestCallback:)];
+//  } break;
+//
+//  //
+//  case BMBbqUploadPic: // bbq上传图片到服务端
+//  {
+//    BussBbqUploadPic *bbquploadpic = [BussBbqUploadPic new];
+//    self.imp = bbquploadpic;
+//    [bbquploadpic release];
+//
+//    NSString *strLocalId = [self.param objectForKey:@"localid"];
+//    NSString *strFilename = [self.param objectForKey:@"filename"];
+//
+//    [bbquploadpic bbqUploadPic:strLocalId
+//                      filename:strFilename
+//                ResponseTarget:self
+//              ResponseSelector:@selector(bussRequestCallback:)];
+//  } break;
+//
+//  case BMCommonPostMsg: //通用调用
+//  {
+//    BussBbqPostMsg *bbqpostmsg = [BussBbqPostMsg new];
+//    self.imp = bbqpostmsg;
+//    [bbqpostmsg release];
+//
+//    NSString *strUrl = [self.param objectForKey:@"url"];
+//    NSDictionary *dicData = [self.param objectForKey:@"data"];
+//
+//    [bbqpostmsg bbqPostMsg:strUrl
+//                      data:dicData
+//            ResponseTarget:self
+//          ResponseSelector:@selector(bussRequestCallback:)];
+//
+//  } break;
+//
+//  default:
+//    break;
+//  }
+//}
+//
+//- (void)bussRequestCallback:(id)rcvData {
+//  TBussStatus *sts = nil;
+//  sts = [[TBussStatus new] autorelease];
+//
+//  sts.iCode = ((BussInterImplBase *)(self.imp)).iHttpCode; //正常时是200
+//
+//  if (rcvData != nil && [rcvData isKindOfClass:[NSError class]] &&
+//      sts.iCode != 200) {
+//    sts.iCode = (int)[(NSError *)rcvData code]; //错误http代码
+//
+//    if (step == STEP_LOGIN) {
+//      sts.sInfo =
+//          [NSString stringWithFormat:@"%@", [(NSError *)rcvData domain]];
+//    } else {
+//      if (BMLogin != type && BMRegister != type) {
+//        if (sts.iCode == 401 && !didLogin) {
+//          TheCurUser.iLoginType = ELoginType_OffLine; // add 2012.12.18
+//          step = STEP_LOGIN;
+//          [self bussRequest];
+//          return;
+//        }
+//      }
+//
+//      switch (type) {
+//      case BMLogin:
+//        sts.sInfo =
+//            [NSString stringWithFormat:@"%@", [(NSError *)rcvData domain]];
+//        break;
+//
+//      case BMRegister:
+//        sts.sInfo =
+//            [NSString stringWithFormat:@"%@", [(NSError *)rcvData domain]];
+//        break;
+//
+//      // case add...
+//      default: {
+//        sts.sInfo =
+//            [NSString stringWithFormat:@"%@", [(NSError *)rcvData domain]];
+//      } break;
+//      }
+//    }
+//  } else //成功的处理
+//  {
+//    if (step == STEP_LOGIN) {
+//      step = STEP_BUSS1;
+//      [self bussRequest];
+//      return;
+//    }
+//
+//    switch (type) {
+//    case BMServerDateTime: //要修改
+//    {
+//      NSDictionary *retJsObj = [(NSString *)rcvData JSONValue];
+//      sts.rtnData = retJsObj;
+//    } break;
+//
+//    //
+//
+//    default: //缺省处理
+//    {
+//      if ([self.imp
+//              respondsToSelector:@selector(unpackJsonForResult:Result:)]) {
+//        [self.imp unpackJsonForResult:(NSString *)rcvData Result:sts];
+//      } else {
+//        if ([rcvData isKindOfClass:[NSString class]]) {
+//          if (![(NSString *)rcvData hasPrefix:@"{"])
+//            sts.rtnData = nil;
+//          else {
+//            NSDictionary *retJsObj = [(NSString *)rcvData JSONValue];
+//            sts.rtnData = retJsObj;
+//          }
+//        }
+//      }
+//    } break;
+//    }
+//  }
+//
+//  //[self.imp destroyBussReqObj];
+//  // self.imp = nil;
+//
+//  if (callbackObj && callbackSel) {
+//    [callbackObj performSelector:callbackSel withObject:sts];
+//  }
+//
+//  // NSLog(@"sts2:%p  retaincount=%d",sts,[sts retainCount]);
+//}
+//
+//- (void)uiLoginCallback:(TBussStatus *)sts {
+//  if (sts.iCode == 1)
+//    [callbackObj performSelector:callbackSel withObject:nil];
+//  else {
+//    sts.sInfo = nil;
+//    [callbackObj performSelector:callbackSel withObject:sts];
+//  }
+//}
+//
+//@end
+//
+//@implementation TParamLogin
+//@synthesize user;
+//@synthesize pswd;
+//@synthesize remPswd;
+//@synthesize autoLogin;
+//
+//- (void)dealloc {
+//  self.user = nil;
+//  self.pswd = nil;
+//  [super dealloc];
+//}
+//
+//@end
+//
+//@implementation TParamRegister
+//@synthesize user;
+//@synthesize pswd;
+//@synthesize nick;
+//
+//- (void)dealloc {
+//  self.user = nil;
+//  self.pswd = nil;
+//  self.nick = nil;
+//  [super dealloc];
+//}
+//
+//@end

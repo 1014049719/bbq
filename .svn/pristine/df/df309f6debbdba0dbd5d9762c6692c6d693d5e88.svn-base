@@ -1,0 +1,436 @@
+//
+//  BBQDynamicPageController.m
+//  BBQ
+//
+//  Created by 朱琨 on 15/11/19.
+//  Copyright © 2015年 bbq. All rights reserved.
+//
+
+#import "BBQDynamicPageController.h"
+#import "BBQDynamicTableViewController.h"
+#import "BBQAttentionViewController.h"
+#import "BBQNewCardViewController.h"
+#import "BBQCalendarViewController.h"
+#import "BBQDynamicViewModel.h"
+#import "SendInvitationViewController.h"
+#import "GroupViewController.h"
+#import <WMPageConst.h>
+#import <BlocksKit.h>
+#import "BBQThemeManager.h"
+#import <WMMenuItem.h>
+#import <XHRealTimeBlur.h>
+#import <PopMenu.h>
+#import "QBImagePicker.h"
+#import "BBQDynamicEditViewController.h"
+#import "AuthorizationHelper.h"
+#import "BBQPublishStatusBar.h"
+#import "BBQPublishManager.h"
+#import "BBQDualListViewController.h"
+#import "User.h"
+#import "CardPreviewController.h"
+
+@interface BBQDynamicPageController ()
+
+@property (copy, nonatomic) NSArray *navTitles;
+@property (strong, nonatomic) PopMenu *popMenu;
+@property (strong, nonatomic) BBQPublishStatusBar *statusBar;
+@property (strong, nonatomic) UIButton *inviteButton;
+@property (strong, nonatomic) BBQBabyModel *baby;
+@property (strong, nonatomic) UIImageView *photoRemindView;
+@property (strong, nonatomic) UIImageView *czsPreview;
+
+@end
+
+@implementation BBQDynamicPageController
+
++ (instancetype)pageControllerForTeacher {
+    BBQDynamicPageController *pageController = [[BBQDynamicPageController alloc] initWithViewControllerClasses:@[[BBQDynamicTableViewController class], [BBQDynamicTableViewController class], [BBQDynamicTableViewController class], [BBQNewCardViewController class]] andTheirTitles:@[@"班级", @"宝宝", TheCurUser.curSchool.schoolTypeName, @"成长书"]];
+    NSArray *keys = @[@"viewModel", @"viewModel", @"viewModel", @""];
+    NSArray *values = @[[BBQDynamicViewModel viewModelForClass:TheCurUser.curClass.classid inSchool:TheCurUser.curSchool.schoolid], [BBQDynamicViewModel viewModelForBabiesInClass:TheCurUser.curClass.classid], [BBQDynamicViewModel viewModelForSchool:TheCurUser.curSchool.schoolid], @""];
+    pageController.keys = [NSMutableArray arrayWithArray:keys];
+    pageController.values = [NSMutableArray arrayWithArray:values];
+    [pageController onInit];
+    return pageController;
+}
+
+- (instancetype)initWithBaby:(BBQBabyModel *)baby {
+    NSMutableArray *classes = [NSMutableArray array];
+    NSMutableArray *labels = [NSMutableArray array];
+    NSMutableArray *tempNavTitles = [NSMutableArray array];
+    NSMutableArray *keys = [NSMutableArray array];
+    NSMutableArray *values = [NSMutableArray array];
+    [self.class setupClasses:classes labels:labels keys:keys values:values navTitles:tempNavTitles withBaby:baby];
+    
+    if (self = [super initWithViewControllerClasses:classes andTheirTitles:labels]) {
+        _baby = baby;
+        self.keys = keys;
+        self.values = values;
+        self.navTitles = tempNavTitles;
+        [self onInit];
+    }
+    return self;
+}
+
+- (void)onInit {
+    self.postNotification = YES;
+    self.menuViewStyle = WMMenuViewStyleLine;
+    self.menuHeight = 34;
+    self.menuBGColor = [UIColor whiteColor];
+    self.titleSizeNormal = 15;
+    self.bounces = YES;
+    self.titleSizeSelected = 15;
+    self.titleColorNormal = UIColorHex(999999);
+    NSString *colorStr = [[BBQThemeManager sharedInstance] getTheCurThemeType];
+    self.titleColorSelected = [UIColor colorWithHexString:colorStr];
+}
+
+#pragma mark - Life Cycle
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    @weakify(self)
+    [[BBQPublishManager sharedManager] bk_addObserverForKeyPath:@"working" options:NSKeyValueObservingOptionNew task:^(id obj, NSDictionary *change) {
+        if ([change[@"new"] boolValue]) {
+            @strongify(self)
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handlePublishDynamicNotification:) name:kPublishDynamicNotification object:nil];
+        }
+    }];
+    
+    self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didMoveToViewController:) name:WMControllerDidFullyDisplayedNotification object:nil];
+
+    self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
+#ifdef TARGET_PARENT
+    [[BBQLoginManager sharedManager] bk_addObserverForKeyPath:@"curUser.curBaby" options:NSKeyValueObservingOptionNew task:^(id obj, NSDictionary *change) {
+        @strongify(self)
+        if (change[@"new"] && ![change[@"new"] isEqual:[NSNull null]]) {
+            BBQBabyModel *baby = change[@"new"];
+            self.baby = baby;
+            if ([baby.qx isEqualToNumber:@1] || [baby.qx isEqualToNumber:@2] ) {
+                self.inviteButton.hidden = NO;
+                self.inviteButton.enabled = YES;
+            } else {
+                self.inviteButton.hidden = YES;
+                self.inviteButton.enabled = NO;
+            }
+            [self reloadDataWithBaby:baby];
+        }
+    }];
+    
+    if ([self.baby.qx isEqualToNumber:@1] || [self.baby.qx isEqualToNumber:@2] ) {
+        self.inviteButton.hidden = NO;
+        self.inviteButton.enabled = YES;
+    } else {
+        self.inviteButton.hidden = YES;
+        self.inviteButton.enabled = NO;
+    }
+    
+    UIButton *leftButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [leftButton setTitle:@" 切换宝宝" forState:UIControlStateNormal];
+    [leftButton addTarget:self action:@selector(babyList) forControlEvents:UIControlEventTouchUpInside];
+    leftButton.titleLabel.font = [UIFont systemFontOfSize:16];
+    [leftButton setImage:[UIImage imageNamed:@"nav_baby_list"] forState:UIControlStateNormal];
+    [leftButton sizeToFit];
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:leftButton];
+#else
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"nav_take_photo"] style:UIBarButtonItemStylePlain target:self action:@selector(showPopMenu)];
+    self.navigationItem.title = @"动态";
+#endif
+    
+}
+
+
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    if (!_statusBar) {
+        [self.view addSubview:self.statusBar];
+    }
+    if (!_czsPreview) {
+        [self.view addSubview:self.czsPreview];
+    }
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+#ifdef TARGET_PARENT
+    if (_czsPreview) {
+        [self.view bringSubviewToFront:_czsPreview];
+    }
+#endif
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [self.view bringSubviewToFront:self.statusBar];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    if (_popMenu) {
+        [_popMenu dismissMenu];
+    }
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+#pragma mark - Event Response
+- (void)handlePublishDynamicNotification:(NSNotification *)notification {
+    Dynamic *dynamic = notification.object;
+    if (!dynamic.fb_flag.boolValue) {
+        @weakify(self)
+        [Dynamic dynamicsNeedUploadWithCompletion:^(NSArray *dynamics) {
+            @strongify(self)
+            if (dynamics.count) {
+                self.statusBar.hidden = NO;
+                NSInteger uploadingCount = 0;
+                NSInteger failedCount = 0;
+                for (Dynamic *dynamic in dynamics) {
+                    if (dynamic.uploadState == BBQDynamicUploadStateFail) {
+                        failedCount++;
+                    } else {
+                        uploadingCount++;
+                    }
+                }
+                if (uploadingCount) {
+                    self.statusBar.statusLabel.text = [NSString stringWithFormat:@"%@条动态正在上传中", @(uploadingCount)];
+                } else {
+                    self.statusBar.statusLabel.text = [NSString stringWithFormat:@"%@条动态上传失败", @(failedCount)];
+                }
+            } else {
+                self.statusBar.hidden = YES;
+            }
+        }];
+    } else {
+        self.selectIndex = 0;
+    }
+}
+
+- (void)showPopMenu {
+    NSArray *menuItems = @[
+                           [MenuItem itemWithTitle:@"照片" iconName:@"popmenu_photo" index:0],
+                           [MenuItem itemWithTitle:@"视频" iconName:@"popmenu_video" index:1],
+                           [MenuItem itemWithTitle:@"文字" iconName:@"popmenu_text" index:2],
+                           [MenuItem itemWithTitle:@"批量导入照片" iconName:@"popmenu_batch" index:3],
+                           //                           [MenuItem itemWithTitle:@"安全求助" iconName:@"popmenu_help" index:4]
+                           ];
+    if (_popMenu.isShowed) {
+        [_popMenu dismissMenu];
+        return;
+    }
+    if (!_popMenu) {
+        _popMenu = [[PopMenu alloc] initWithFrame:kScreen_Bounds items:menuItems];
+        _popMenu.perRowItemCount = 3;
+        _popMenu.menuAnimationType = kPopMenuAnimationTypeSina;
+    }
+    
+    @weakify(self)
+    _popMenu.didSelectedItemCompletion = ^(MenuItem *selectedItem){
+        @strongify(self)
+        switch (selectedItem.index) {
+            case 0: {
+                //照片
+                if (![AuthorizationHelper checkPhotoLibraryAuthorizationStatus]) {
+                    return;
+                }
+                [self goToDualListWithMediaType:BBQDynamicMediaTypePhoto];
+            } break;
+            case 1: {
+                //视频
+                if (![AuthorizationHelper checkPhotoLibraryAuthorizationStatus]) {
+                    return;
+                }
+                [self goToDualListWithMediaType:BBQDynamicMediaTypeVideo];
+            } break;
+            case 2: {
+                //文字
+                [self goToDualListWithMediaType:BBQDynamicMediaTypeNone];
+            } break;
+            case 3: {
+                //批量
+                if (![AuthorizationHelper checkPhotoLibraryAuthorizationStatus]) {
+                    return;
+                }
+                [self goToDualListWithMediaType:BBQDynamicMediaTypeBatch];
+            } break;
+            case 4: {
+                //TODO:安全求助
+            } break;
+            default:
+                break;
+        }
+    };
+    [_popMenu showMenuAtView:kKeyWindow.rootViewController.view];
+    _popMenu.realTimeBlur.hasTapGestureEnable = YES;
+}
+
+
+- (void)previewClick {
+    //进入成长书预览
+    CardPreviewController *CardPreviewVcl =
+    [[UIStoryboard storyboardWithName:@"RootTabBar" bundle:nil]
+     instantiateViewControllerWithIdentifier:@"CardPreviewVcl"];
+    CardPreviewVcl.title = @"成长书";
+    CardPreviewVcl.accessType = @"从动态进入";
+    [self.navigationController pushViewController:CardPreviewVcl animated:YES];
+}
+
+- (void)goToDualListWithMediaType:(BBQDynamicMediaType)type {
+    BBQDualListViewController *vc = [[UIStoryboard storyboardWithName:@"Common" bundle:nil] instantiateViewControllerWithIdentifier:@"DualListVC"];
+    vc.dualListType = BBQDualListTypeDynamic;
+    vc.mediaType = type;
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)createNewDynamic:(Dynamic *)dynamic {
+    BBQDynamicMediaType mediaType = dynamic.mediaType;
+    if (mediaType == BBQDynamicMediaTypeVideo || mediaType == BBQDynamicMediaTypePhoto || mediaType == BBQDynamicMediaTypeBatch) {
+        QBImagePickerController *imagePicker = [[QBImagePickerController alloc] initWithDynamic:dynamic];
+        [self.navigationController
+         pushViewController:imagePicker
+         animated:YES];
+    } else if (mediaType == BBQDynamicMediaTypeNone) {
+        UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Dynamic" bundle:nil];
+        BBQDynamicEditViewController *vc = [sb instantiateViewControllerWithIdentifier:@"DynamicEditVC"];
+        vc.dynamic = dynamic;
+        [self.navigationController
+         pushViewController:vc
+         animated:YES];
+    }
+}
+
+- (void)babyList {
+    UIStoryboard *sb = [UIStoryboard storyboardWithName:@"RootTabBar" bundle:nil];
+    BBQAttentionViewController *vc = [sb instantiateViewControllerWithIdentifier:@"AttentionListBoard"];
+    vc.type = BBQAttentionViewTypeNormal;
+    @weakify(self)
+    vc.didSelectClassBlock = ^(NSString *name) {
+        @strongify(self)
+        [self.titles enumerateObjectsUsingBlock:^(NSString *title, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([title isEqualToString:name]) {
+                self.selectIndex = (int)idx;
+                *stop = YES;
+            }
+        }];
+    };
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)invite {
+    SendInvitationViewController *vc = [[UIStoryboard storyboardWithName:@"RootTabBar" bundle:nil]
+                                        instantiateViewControllerWithIdentifier:@"sendInvitationVC"];
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)reloadDataWithBaby:(BBQBabyModel *)baby {
+    dispatch_async_on_main_queue(^{
+        self.selectIndex = 0;
+        NSMutableArray *classes = [NSMutableArray array];
+        NSMutableArray *labels = [NSMutableArray array];
+        NSMutableArray *tempNavTitles = [NSMutableArray array];
+        NSMutableArray *keys = [NSMutableArray array];
+        NSMutableArray *values = [NSMutableArray array];
+        [self.class setupClasses:classes labels:labels keys:keys values:values navTitles:tempNavTitles withBaby:baby];
+        self.viewControllerClasses = classes;
+        self.titles = labels;
+        self.keys = keys;
+        self.values = values;
+        self.navTitles = tempNavTitles;
+        [self reloadData];
+    });
+}
+
++ (void)setupClasses:(NSMutableArray *)classes labels:(NSMutableArray *)labels keys:(NSMutableArray *)keys values:(NSMutableArray *)values navTitles:(NSMutableArray *)navTitles withBaby:(BBQBabyModel *)baby {
+    for (DynamicTag *tag in baby.dynamictags) {
+        [classes addObject:[BBQDynamicTableViewController class]];
+        [labels addObject:tag.label];
+        [navTitles addObject:tag.title];
+        [keys addObject:@"viewModel"];
+        BBQDynamicViewModel *viewModel;
+        if (tag.dtype.integerValue == BBQDynamicGroupTypeBaby) {
+            viewModel = [BBQDynamicViewModel viewModelForBaby:baby.uid];
+        } else if (tag.dtype.integerValue == BBQDynamicGroupTypeClass) {
+            viewModel = [BBQDynamicViewModel viewModelForClass:tag.classid inSchool:tag.schoolid];
+        } else {
+            viewModel = [BBQDynamicViewModel viewModelForSchool:tag.schoolid];
+        }
+        [values addObject:viewModel];
+    }
+    
+    [classes addObjectsFromArray:@[[BBQNewCardViewController class], [GroupViewController class]]];
+    [labels addObjectsFromArray:@[@"成长书", @"亲友团"]];
+    [navTitles addObjectsFromArray:@[baby.realname, baby.realname]];
+    [keys addObjectsFromArray:@[@"", @""]];
+    [values addObjectsFromArray:@[@"", @""]];
+    if (![baby.curSchool.schooltype isEqualToNumber:@3] && baby.baobaoschooldata.count) {
+        [classes addObject:[BBQCalendarViewController class]];
+        [labels addObject:@"成长报告"];
+        [navTitles addObject:baby.realname];
+        [keys addObject:@""];
+        [values addObject:@""];
+    }
+}
+
+- (void)didMoveToViewController:(NSNotification *)notification {
+#ifdef TARGET_PARENT
+    self.navigationItem.title = _navTitles[[notification.object[@"index"] integerValue]];
+    _czsPreview.hidden = [notification.object[@"index"] integerValue] > TheCurBaoBao.dynamictags.count - 1 ? YES : NO;
+    _czsPreview.userInteractionEnabled = [notification.object[@"index"] integerValue] > TheCurBaoBao.dynamictags.count ? NO : YES;
+#else
+    _czsPreview.hidden = [notification.object[@"index"] integerValue] > 2 ? YES : NO;
+    _czsPreview.userInteractionEnabled = [notification.object[@"index"] integerValue] > 2 ? NO : YES;
+#endif
+}
+
+#pragma mark - Getter & Setter
+- (NSArray *)itemsWidths {
+    return [self.titles bk_map:^id(NSString *title) {
+        CGFloat width = [title widthForFont:[UIFont systemFontOfSize:14]];
+        return @(width + kScaleFrom_iPhone6_Desgin(25));
+    }];
+}
+
+- (BBQPublishStatusBar *)statusBar {
+    if (!_statusBar) {
+        _statusBar = [[BBQPublishStatusBar alloc] initWithFrame:CGRectZero];
+        _statusBar.width = kScreenWidth;
+        _statusBar.height = 34;
+        _statusBar.top = self.menuHeight;
+        _statusBar.vc = self;
+    }
+    return _statusBar;
+}
+
+- (UIButton *)inviteButton {
+    if (!_inviteButton) {
+        _inviteButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_inviteButton addTarget:self action:@selector(invite) forControlEvents:UIControlEventTouchUpInside];
+        [_inviteButton setTitle:@" 邀请亲" forState:UIControlStateNormal];
+        [_inviteButton setImage:[UIImage imageNamed:@"nav_add"] forState:UIControlStateNormal];
+        _inviteButton.titleLabel.font = [UIFont systemFontOfSize:16];
+        [_inviteButton sizeToFit];
+        self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:self.inviteButton];
+    }
+    return _inviteButton;
+}
+
+- (UIImageView *)czsPreview {
+    if (!_czsPreview) {
+        _czsPreview = [[UIImageView alloc]
+                       initWithFrame:CGRectMake(3,  ViewHeight - 60, ViewWidth / 9,
+                                                (ViewWidth / 9) * 53 / 50)];
+        _czsPreview.layer.cornerRadius =
+        ((ViewWidth / 9) * 53 / 50) / (ViewWidth / 9) / 2;
+        _czsPreview.image = [UIImage imageNamed:@"czspreview"];
+        _czsPreview.userInteractionEnabled = YES;
+        UITapGestureRecognizer *tapPreview =
+        [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                action:@selector(previewClick)];
+        [_czsPreview addGestureRecognizer:tapPreview];
+        //        [self.view addSubview:_czsPreview];
+    }
+    return _czsPreview;
+}
+
+@end

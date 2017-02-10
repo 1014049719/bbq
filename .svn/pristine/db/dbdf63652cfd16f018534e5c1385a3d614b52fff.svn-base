@@ -1,0 +1,24 @@
+//
+//  TeacherModel.m
+//  BBQ
+//
+//  Created by mwt on 15/8/14.
+//  Copyright (c) 2015年 bbq. All rights reserved.
+//
+
+#import "ClassModel.h"
+#import "AppMacro.h"
+
+@implementation ClassModel
+
+- (instancetype)initWithDic:(NSDictionary *)dic {
+  self = [super init];
+  if (self) {
+    self.classname = pickJsonStrValue(dic, @"classname");
+    self.classuid = pickJsonStrValue(dic, @"classid");
+    self.dtype = DYNA_TYPE_CLASS;
+  }
+  return self;
+}
+
+@end

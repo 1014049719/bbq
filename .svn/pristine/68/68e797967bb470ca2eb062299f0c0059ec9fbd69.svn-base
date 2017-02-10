@@ -1,0 +1,480 @@
+////
+////  GlobalVar.m
+////  Astro
+////
+////  Created by root on 11-11-28.
+////  Copyright 2011 洋基科技. All rights reserved.
+////
+//
+//#import "CommonDirectory.h"
+//#import "CommonDateTime.h"
+//
+//#import "GlobalVar.h"
+//#import "PubFunction.h"
+////#import "NoteMgr.h"
+////#import "PFunctions.h"
+//#import "BussInterImpl.h"
+//#import "DBMngAll.h"
+//
+//#import "AppMacro.h"
+//#import "NSObject+SBJson.h"
+//
+//#import "BBQLoginSingle.h"
+//#import "BBQLoginManager.h"
+//
+//@implementation GlobalVar
+//
+////@synthesize dbMngSet;
+//@synthesize curUser;
+//@synthesize hLogFile;
+//@synthesize sUpdataSoftUrl;
+//@synthesize sUpdateDate;
+////@synthesize arrBaobaoData;
+////@synthesize curBaobao;
+//@synthesize qiniuToken;
+//@synthesize qiniuDNS;
+//
+//#pragma mark -
+////数据库
+//+ (GlobalVar *)getInstance {
+//    static GlobalVar *globalVar = nil; //全局变量
+//    
+//    if (nil == globalVar) {
+//        globalVar = [[GlobalVar alloc] init];
+//    }
+//    return globalVar;
+//}
+//
+//#pragma mark -
+//
+//- (id)init {
+//    self = [super init];
+//    
+//    return self;
+//}
+//
+//- (void)initGlobalVar {
+//    self.bNeedUpdataSoft = NO;
+//    
+//    self.m_arrBaobaoData = [NSMutableArray array];
+//    self.assetsLibrary = [[ALAssetsLibrary alloc] init];
+//}
+//
+////初始化当前帐号
+//- (void)initCurAccount {
+//    //最后一次登录帐号
+//    TJYEXLoginUserInfo *lgnuser = [[TJYEXLoginUserInfo alloc] init];
+//    
+//    NSString *datajson = [AstroDBMng getLastLoginUser:lgnuser];
+//    
+//    if (!datajson) {
+//        lgnuser = [GlobalVar initLoginUserInfo];
+//        return;
+//    }
+//    
+//    
+//    NSDictionary *dicData = [datajson JSONValue];
+//    
+//    TJYEXLoginUserInfo *jyexuser =
+//    [GlobalVar getLoginUserInfoFromDic:dicData
+//                              username:lgnuser.sUserName
+//                              password:lgnuser.sPassword];
+//    self.curUser = jyexuser;
+//    
+//    
+//    
+//    NSArray *baobaodata = [GlobalVar getBaobaoDataFromDic:dicData];
+//    NSString *qndns = [GlobalVar getQnDnsFromDic:dicData];
+//    NSString *qntoken = [GlobalVar getQnTokenFromDic:dicData];
+//    self.arrClassData = [GlobalVar getClassDataFromDic:dicData];
+//    self.schooldata = [GlobalVar getSchoolDataFromDic:dicData];
+//    self.arrDynaTag = [GlobalVar getDynaTag:dicData];
+//    
+//    if (!baobaodata || [baobaodata count] == 0)
+//        return;
+//    
+//    [self setBaobaoData:baobaodata qntoken:qndns qndns:qntoken];
+//    if (baobaodata.count ==1) {
+//        _curBaobao = [baobaodata firstObject];
+//    }else{
+//        if ([[BBQLoginManager readTheCurBaobaoUid] length] > 0) {
+//            _curBaobao = [self getOneBaoBao:[BBQLoginManager readTheCurBaobaoUid]];
+//        } else {
+//            _curBaobao = nil;
+//        }
+//    }
+//    
+//    
+//    //[self setCurrentBaobao:[baobaodata firstObject]];
+//}
+//
+//- (void)initCurAccountWithDic:(NSDictionary *)dicData {
+//    //    TJYEXLoginUserInfo *lgnuser = [[TJYEXLoginUserInfo alloc] init];
+//    NSDictionary *dicUsername = [BBQLoginManager readUsernameAndPassword];
+//    TJYEXLoginUserInfo *jyexuser =
+//    [GlobalVar getLoginUserInfoFromDic:dicData
+//                              username:dicUsername[@"username"]
+//                              password:dicUsername[@"password"]];
+//    self.curUser = jyexuser;
+//    
+//    
+//    
+//    NSArray *baobaodata = [GlobalVar getBaobaoDataFromDic:dicData];
+//    NSString *qndns = [GlobalVar getQnDnsFromDic:dicData];
+//    NSString *qntoken = [GlobalVar getQnTokenFromDic:dicData];
+//    self.arrClassData = [GlobalVar getClassDataFromDic:dicData];
+//    self.schooldata = [GlobalVar getSchoolDataFromDic:dicData];
+//    self.arrDynaTag = [GlobalVar getDynaTag:dicData];
+//    
+//    if (!baobaodata || [baobaodata count] == 0) {
+//        self.m_arrBaobaoData = [NSMutableArray arrayWithCapacity:0];
+//        return;
+//    }
+//    
+//    [self setBaobaoData:baobaodata qntoken:qndns qndns:qntoken];
+//    if (baobaodata.count ==1) {
+//        _curBaobao = [baobaodata firstObject];
+//    }else{
+//        if ([[BBQLoginManager readTheCurBaobaoUid] length] > 0) {
+//            _curBaobao = [self getOneBaoBao:[BBQLoginManager readTheCurBaobaoUid]];
+//        } else {
+//            _curBaobao = nil;
+//        }
+//    }
+//}
+//
+//- (void)setBaobaoData:(NSArray *)baobaodata
+//              qntoken:(NSString *)qntoken
+//                qndns:(NSString *)qndns {
+//    self.m_arrBaobaoData = [NSMutableArray arrayWithArray:baobaodata];
+//    
+//    self.qiniuToken = qntoken;
+//    self.qiniuDNS = qndns;
+//}
+//
+//- (void)setClassData:(NSArray *)arrdata {
+//    self.arrClassData = arrdata;
+//    
+//    if (arrdata && arrdata.count > 0)
+//        self.curClass = arrdata.firstObject;
+//}
+//
+//- (void)setSchooldata:(NSArray *)data {
+//    _schooldata = data;
+//    
+//    if (data && data.count > 0)
+//        self.curSchool = data.firstObject;
+//}
+//
+////添加一个宝宝数据
+//- (void)addOneBaoBao:(TJYEXBaoBaoData *)baobao {
+//    [TheCurUser.baobaodata addObject:baobao];
+//}
+////修改一个宝宝数据
+//- (void)updateOneBaoBao:(TJYEXBaoBaoData *)baobao {
+//    for (int jj = 0; jj < TheCurUser.baobaodata.count; jj++) {
+//        TJYEXBaoBaoData *baodata = TheCurUser.baobaodata[jj];
+//        if ([baobao.uid isEqualToString:baodata.sBaobaouid]) {
+//            [TheCurUser.baobaodata replaceObjectAtIndex:jj withObject:baobao];
+//            break;
+//        }
+//    }
+//    
+//    if ([baobao.uid isEqualToString:TheCurBaoBao.uid]) {
+//        TheCurBaoBao = baobao;
+//    }
+//}
+//
+////获得一个宝宝数据
+//- (TJYEXBaoBaoData *)getOneBaoBao:(NSString *)baobaouid {
+//    for (int jj = 0; jj < TheCurUser.baobaodata.count; jj++) {
+//        TJYEXBaoBaoData *baodata = TheCurUser.baobaodata[jj];
+//        if ([baobaouid isEqualToString:baodata.sBaobaouid]) {
+//            return baodata;
+//        }
+//    }
+//    return nil;
+//}
+//
+////根据班级id 匹配宝宝
+//- (TJYEXBaoBaoData *)getOneBaoBaoByClassUid:(NSString *)classuid {
+//    for (int jj = 0; jj < TheCurUser.baobaodata.count; jj++) {
+//        TJYEXBaoBaoData *baodata = TheCurUser.baobaodata[jj];
+//        if ([classuid isEqualToString:baodata.sClassuid]) {
+//            return baodata;
+//        }
+//    }
+//    return nil;
+//}
+////根据学校id 匹配宝宝
+//- (TJYEXBaoBaoData *)getOneBaoBaoBySchoolUid:(NSString *)schooluid {
+//    for (int jj = 0; jj < TheCurUser.baobaodata.count; jj++) {
+//        TJYEXBaoBaoData *baodata = TheCurUser.baobaodata[jj];
+//        if ([schooluid isEqualToString:baodata.sSchooluid]) {
+//            return baodata;
+//        }
+//    }
+//    return nil;
+//}
+//
+//
+//- (void)DispNetorLocalImg:(NSString *)avatarUrl imgview:(UIImageView *)imgView {
+//    if ([avatarUrl hasPrefix:@"http://"] || [avatarUrl isEqualToString:@""]) {
+//        [imgView setImageWithURL:[NSURL URLWithString:avatarUrl]
+//                     placeholder:Placeholder_avatar
+//                         options:YYWebImageOptionSetImageWithFadeAnimation
+//                      completion:nil];
+//    } else {
+//        imgView.image = [UIImage imageWithContentsOfFile:avatarUrl];
+//    }
+//}
+//
+//- (void)DispNetorLocalImg:(NSString *)avatarUrl imgview:(UIImageView *)imgView placeholderImage:(NSString*)imageName {
+//    if ([avatarUrl hasPrefix:@"http://"] || [avatarUrl isEqualToString:@""]) {
+//        [imgView setImageWithURL:[NSURL URLWithString:avatarUrl]
+//                     placeholder:[UIImage imageNamed:imageName]
+//                         options:YYWebImageOptionSetImageWithFadeAnimation
+//                      completion:nil];
+//    } else {
+//        imgView.image = [UIImage imageWithContentsOfFile:avatarUrl];
+//    }
+//}
+//
+//- (void)buttonDispNetorLocalImg:(NSString *)avatarUrl
+//                        imgview:(UIButton *)headbtn {
+//    if ([avatarUrl hasPrefix:@"http://"] || [avatarUrl isEqualToString:@""])
+//        [headbtn setBackgroundImageWithURL:[NSURL URLWithString:avatarUrl]
+//                                  forState:UIControlStateNormal
+//                               placeholder:[UIImage imageNamed:@"set_head_image_button@2x"]
+//                                   options:YYWebImageOptionSetImageWithFadeAnimation
+//                                completion:nil];
+//    else
+//        [headbtn setBackgroundImage:[UIImage imageWithContentsOfFile:avatarUrl]
+//                           forState:UIControlStateNormal];
+//}
+//
+//- (NSString *)getQnToken {
+//    return self.qiniuToken;
+//}
+//
+//- (void)setUpdataSoftFlag {
+//    self.bNeedUpdataSoft = YES;
+//    self.sUpdateDate = [CommonFunc getCurrentDate];
+//}
+//
+//- (void)resetUpdataSoftFlag {
+//    self.bNeedUpdataSoft = NO;
+//    self.sUpdateDate = [CommonFunc getCurrentDate];
+//}
+//
+//- (BOOL)getUpdataSoftFlag {
+//    return self.bNeedUpdataSoft;
+//}
+//
+//- (NSString *)getUpdateDate {
+//    return self.sUpdateDate;
+//}
+//
+//+ (TJYEXLoginUserInfo *)initLoginUserInfo {
+//    TJYEXLoginUserInfo *lgnuser = [TJYEXLoginUserInfo new];
+//    
+//    lgnuser.sUserName = @"guest"; // CS_DEFAULTACCOUNT_USERNAME;
+//    lgnuser.sPassword = @"123456"; // CS_DEFAULTACCOUNT_PASSWORD;
+//    
+//    lgnuser.iLoginType = ELoginType_NULL;
+//    lgnuser.sSID = @"";
+//    lgnuser.sSessionID = @"";
+//    lgnuser.sSrvTbName = @"";
+//    
+//    return lgnuser;
+//}
+//
+//+ (TJYEXLoginUserInfo *)getLoginUserInfoFromDic:(NSDictionary *)dicData
+//                                       username:(NSString *)username
+//                                       password:(NSString *)password {
+//    TJYEXLoginUserInfo *lgnuser = [TJYEXLoginUserInfo new];
+//    
+//    NSDictionary *dicMember = [dicData objectForKey:@"member"];
+//    if (!dicMember) {
+//        return nil;
+//    }
+//    
+//    lgnuser.sUserName = username;
+//    lgnuser.sPassword = password;
+//    
+//    lgnuser.sUserID = pickJsonStrValue(dicMember, @"uid");
+//    lgnuser.iGroupID = pickJsonIntValue(dicMember, @"groupid");
+//    lgnuser.sSessionID = pickJsonStrValue(dicMember, @"sessionid");
+//    // 2014.9.18
+//    lgnuser.sNoteUserId = pickJsonStrValue(dicMember, @"td_ip");
+//    
+//    lgnuser.sNickName = pickJsonStrValue(dicMember, @"nickname");
+//    lgnuser.sRealName = pickJsonStrValue(dicMember, @"realname");
+//    
+//    //家园e线新增的属性
+//    lgnuser.iSchoolType = pickJsonIntValue(dicMember, @"school_type");
+//    lgnuser.sEmail = pickJsonStrValue(dicMember, @"email");
+//    lgnuser.sMobilephone = pickJsonStrValue(dicMember, @"mobile");
+//    lgnuser.sTelephone = pickJsonStrValue(dicMember, @"telephone");
+//    lgnuser.sAddress = pickJsonStrValue(dicMember, @"address");
+//    
+//    //
+//    lgnuser.sAvatarUrl = pickJsonStrValue(dicMember, @"avartar");
+//    lgnuser.nAvatarStatus = pickJsonIntValue(dicMember, @"avatarstatus");
+//    lgnuser.groupkey = pickJsonIntValue(dicMember, @"groupkey");
+//    lgnuser.gender = pickJsonIntValue(dicMember, @"gender");
+//    lgnuser.schooltype = pickJsonIntValue([dicData[@"schooldata"] firstObject], @"schooltype");
+//    
+//    // 2014.9.26
+//    lgnuser.sAlbumIdPerson = @""; // 2014.9.26
+//    lgnuser.sAlbumNamePerson = @"";
+//    lgnuser.sAlbumUidPerson = @"";
+//    lgnuser.sAlbumUsernamePerson = @"";
+//    lgnuser.sAlbumIdClass = @""; // 2014.9.26
+//    lgnuser.sAlbumNameClass = @"";
+//    lgnuser.sAlbumUidClass = @"";
+//    lgnuser.sAlbumUsernameClass = @"";
+//    lgnuser.sAlbumIdSchool = @""; // 2014.9.26
+//    lgnuser.sAlbumNameSchool = @"";
+//    lgnuser.sAlbumUidSchool = @"";
+//    lgnuser.sAlbumUsernameSchool = @"";
+//    
+//    id ob = pickJsonValue(dicData, @"albumlist", nil);
+//    if (ob && [ob isKindOfClass:[NSArray class]]) {
+//        NSArray *arr = (NSArray *)ob;
+//        NSDictionary *dic = nil;
+//        for (int i = 0; i < [arr count]; ++i) {
+//            dic = [arr objectAtIndex:i];
+//            if (dic) {
+//                lgnuser.sAlbumIdPerson = pickJsonStrValue(dic, @"albumid");
+//                ;
+//                lgnuser.sAlbumNamePerson = pickJsonStrValue(dic, @"albumname");
+//                lgnuser.sAlbumUidPerson = pickJsonStrValue(dic, @"uid");
+//                lgnuser.sAlbumUsernamePerson = pickJsonStrValue(dic, @"username");
+//                break;
+//            }
+//        }
+//    }
+//    
+//    ob = pickJsonValue(dicData, @"classalbumlist", nil);
+//    if (ob && [ob isKindOfClass:[NSArray class]]) {
+//        NSArray *arr = (NSArray *)ob;
+//        NSDictionary *dic = nil;
+//        for (int i = 0; i < [arr count]; ++i) {
+//            dic = [arr objectAtIndex:i];
+//            if (dic) {
+//                lgnuser.sAlbumIdClass = pickJsonStrValue(dic, @"albumid");
+//                ;
+//                lgnuser.sAlbumNameClass = pickJsonStrValue(dic, @"albumname");
+//                lgnuser.sAlbumUidClass = pickJsonStrValue(dic, @"uid");
+//                lgnuser.sAlbumUsernameClass = pickJsonStrValue(dic, @"username");
+//                break;
+//            }
+//        }
+//    }
+//    ob = pickJsonValue(dicData, @"schoolalbumlist", nil);
+//    if (ob && [ob isKindOfClass:[NSArray class]]) {
+//        NSArray *arr = (NSArray *)ob;
+//        NSDictionary *dic = nil;
+//        for (int i = 0; i < [arr count]; ++i) {
+//            dic = [arr objectAtIndex:i];
+//            if (dic) {
+//                lgnuser.sAlbumIdSchool = pickJsonStrValue(dic, @"albumid");
+//                ;
+//                lgnuser.sAlbumNameSchool = pickJsonStrValue(dic, @"albumname");
+//                lgnuser.sAlbumUidSchool = pickJsonStrValue(dic, @"uid");
+//                lgnuser.sAlbumUsernameSchool = pickJsonStrValue(dic, @"username");
+//                break;
+//            }
+//        }
+//    }
+//    
+//    lgnuser.sSID = @"";
+//    lgnuser.sSessionID = @"";
+//    lgnuser.sSrvTbName = @"";
+//    
+//    //正确
+//    lgnuser.sLoginTime = [PubFunction getTimeStr1];
+//    lgnuser.iLoginType = ELoginType_OffLine;
+//    
+//    lgnuser.iLoginFlag = 1; //成功过登录标志
+//    
+//    
+//    return lgnuser;
+//}
+//
+//+ (NSArray *)getBaobaoDataFromDic:(NSDictionary *)dicData {
+//    NSArray *arrBaobao = [dicData objectForKey:@"baobaodata"];
+//    
+//    NSMutableArray *arrData = [NSMutableArray array];
+//    
+//    for (NSDictionary *dic in arrBaobao) {
+//        TJYEXBaoBaoData *baobao = [[TJYEXBaoBaoData alloc] initWithDic:dic];
+//        [arrData addObject:baobao];
+//    }
+//    
+//    return arrData;
+//}
+//
+//+ (NSString *)getQnTokenFromDic:(NSDictionary *)dicData {
+//    NSString *token = [dicData objectForKey:@"qntoken"];
+//    
+//    return token;
+//}
+//
+//+ (NSString *)getQnDnsFromDic:(NSDictionary *)dicData {
+//    NSString *qndns = [dicData objectForKey:@"qndns"];
+//    return qndns;
+//}
+//
+//+ (void)updateTheCurUserWithURLStr:(NSString *)avatarUrlStr {
+//    TheCurUser.member.avartar = avatarUrlStr;
+//}
+//
+//+ (void)updateTheCurBaoBaoWithURLStr:(NSString *)avatarUrlStr {
+//    TheCurBaoBao.avartar = avatarUrlStr;
+//}
+//
+//+ (NSArray *)getClassDataFromDic:(NSDictionary *)dicData {
+//    NSArray *arrClass = [dicData objectForKey:@"classdata"];
+//    
+//    NSMutableArray *arrData = [NSMutableArray array];
+//    
+//    for (NSDictionary *dic in arrClass) {
+//        BBQBabyModel *model = [BBQBabyModel new];
+//        model.classuid = dic[@"classid"];
+//        model.classname = dic[@"classname"];
+//        
+//        [arrData addObject:model];
+//    }
+//    
+//    return arrData;
+//}
+//
+//+ (NSArray *)getSchoolDataFromDic:(NSDictionary *)dic {
+//    NSArray *schooldata = dic[@"schooldata"];
+//    if (schooldata && [schooldata isKindOfClass:[NSArray class]] &&
+//        [schooldata count] > 0) {
+//        
+//        NSMutableArray *arr = [NSMutableArray array];
+//        for (NSDictionary *dic in schooldata) {
+//            SchoolModel *model = [SchoolModel new];
+//            model.schoolid = dic[@"uid"];
+//            model.schoolname = dic[@"realname"];
+//            [arr addObject:model];
+//        }
+//        return arr;
+//    }
+//    return nil;
+//}
+//
+//+ (NSArray *)getDynaTag:(NSDictionary *)dic {
+//    NSArray *arr = dic[@"dynamic_label"];
+//    if (arr && [arr isKindOfClass:[NSArray class]] && arr.count > 0) {
+//        return arr;
+//    }
+//    
+//    return nil;
+//}
+//
+//@end

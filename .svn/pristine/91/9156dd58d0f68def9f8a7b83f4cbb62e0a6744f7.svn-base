@@ -1,0 +1,84 @@
+//
+//  NoteModel.h
+//  JYEX
+//
+//  Created by slovelys on 15/7/20.
+//  Copyright © 2015年 广州洋基. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface NoteModel : NSObject
+
+/// 用户编号
+@property (copy, nonatomic) NSNumber *user_id;
+/// 当前版本号
+@property (copy, nonatomic) NSNumber *curr_ver;
+/// 创建版本号
+@property (copy, nonatomic) NSNumber *create_ver;
+/// 创建时间
+@property (copy, nonatomic) NSString *create_time;
+/// 修改时间
+@property (copy, nonatomic) NSString *modify_time;
+/// 删除状态
+@property (copy, nonatomic) NSNumber *delete_state;
+/// 编辑状态
+@property (copy, nonatomic) NSNumber *edit_state;
+/// 冲突状态
+@property (copy, nonatomic) NSNumber *conflict_state;
+/// 同步状态，1表示正在同步
+@property (copy, nonatomic) NSNumber *sync_state;
+/// 是否上传
+@property (copy, nonatomic) NSNumber *need_upload;
+/// 目录编号
+@property (copy, nonatomic) NSString *catalog_id;
+/// 笔记编号
+@property (copy, nonatomic) NSString *note_id;
+/// NOTE的名称
+@property (copy, nonatomic) NSString *note_title;
+/// NOTE的类型
+@property (copy, nonatomic) NSNumber *note_type;
+/// NOTE包含的所有ITEM总长度，不包含自身
+@property (copy, nonatomic) NSNumber *note_size;
+/// 文件保存路径
+@property (copy, nonatomic) NSString *file_path;
+/// 文件扩展名
+@property (copy, nonatomic) NSString *file_ext;
+/// 编辑环境
+@property (copy, nonatomic) NSString *edit_location;
+/// 文件来源
+@property (copy, nonatomic) NSString *note_src;
+/// 第一条item(当NOTE自身含有文件时，此GUID对应存储实际文件内容的ITEM)
+@property (copy, nonatomic) NSString *first_item;
+/// 共享模式，0不共享，1共享给好友，2共享给所有人（备用）
+@property (copy, nonatomic) NSNumber *share_mode;
+/// 加密标识(是否加密)
+@property (copy, nonatomic) NSNumber *encrypt_flag;
+/// 是否下载
+@property (copy, nonatomic) NSNumber *need_downlord;
+///
+@property (copy, nonatomic) NSNumber *owner_id;
+
+@property (copy, nonatomic) NSNumber *from_id;
+/// 星星级别
+@property (copy, nonatomic) NSNumber *star_level;
+/// 到期日期
+@property (copy, nonatomic) NSString *expire_date;
+/// 完成日期
+@property (copy, nonatomic) NSString *finish_date;
+/// 完成状态 0： 表示未完成 1：表示已完成
+@property (copy, nonatomic) NSNumber *finish_state;
+/// HTML内容
+@property (copy, nonatomic) NSString *content;
+
+@property (copy, nonatomic) NSNumber *fail_times;
+
+@property (copy, nonatomic) NSString *note_class_id;
+
+@property (copy, nonatomic) NSNumber *note_friend;
+
+@property (copy, nonatomic) NSNumber *send_sms;
+
+@property (copy, nonatomic) NSString *note_tag;
+
+@end

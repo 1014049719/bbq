@@ -1,0 +1,13 @@
+//
+//  HeadUploadTools.m
+//  BBQ
+//
+//  Created by wth on 15/8/3.
+//  Copyright (c) 2015年 bbq. All rights reserved.
+//
+
+#import "HeadUploadTools.h"
+
+@implementation HeadUploadTools
+
+@end

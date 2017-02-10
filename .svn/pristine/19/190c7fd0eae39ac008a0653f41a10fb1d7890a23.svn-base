@@ -1,0 +1,64 @@
+//
+//  AttachModel.h
+//  JYEX
+//
+//  Created by slovelys on 15/7/20.
+//  Copyright © 2015年 广州洋基. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import "Attachment.h"
+
+@interface AttachModel : NSObject
+
+@property (copy, nonatomic) NSString *guid;
+
+@property (copy, nonatomic) NSString *localid;
+
+@property (copy, nonatomic) NSString *attachid;
+
+@property (strong, nonatomic) NSNumber *itype;
+
+@property (strong, nonatomic) NSNumber *graphtime;
+
+@property (strong, nonatomic) NSNumber *remote;
+
+@property (copy, nonatomic) NSString *orgpath;
+
+@property (copy, nonatomic) NSString *filepath;
+
+@property (copy, nonatomic) NSString *serverip;
+
+@property (strong, nonatomic) NSNumber *size;
+
+@property (strong, nonatomic) NSNumber *width;
+
+@property (strong, nonatomic) NSNumber *height;
+
+@property (copy, nonatomic) NSDictionary *data;
+
+@property (strong, nonatomic) NSNumber *dateline;
+
+@property (strong, nonatomic) NSNumber *upflag;
+
+@property (strong, nonatomic) NSNumber *flag;
+
+@property (strong, nonatomic) NSNumber *mImageId;
+
+@property (strong, nonatomic) NSNumber *videotime;
+
+@property (assign, nonatomic) BBQAttachUploadState uploadState;
+
+
+@property (strong, nonatomic) NSURL *assetURL;
+@property (strong, nonatomic) UIImage *image, *thumbnailImage;
+
+- (id)init;
+- (id)initWithDic:(NSDictionary *)dic;
+
++ (instancetype)attachWithAssetURL:(NSURL *)assetURL;
+
+-(NSDictionary *)toDictionary;
+
+
+@end

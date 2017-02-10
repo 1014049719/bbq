@@ -1,0 +1,16 @@
+//
+//  HeadUploadTools.h
+//  BBQ
+//
+//  Created by wth on 15/8/3.
+//  Copyright (c) 2015年 bbq. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface HeadUploadTools : NSObject
+
++(void)PrintSomething:(NSString *)str;
+
+
+@end

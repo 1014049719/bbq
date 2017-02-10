@@ -1,0 +1,108 @@
+////
+////  GlobalVar.h
+////  Astro
+////
+////  Created by root on 11-11-28.
+////  Copyright 2011 洋基科技. All rights reserved.
+////
+//
+//#import <Foundation/Foundation.h>
+////#import "DBMng.h"
+//#import <AssetsLibrary/AssetsLibrary.h>
+//#import "BBQBabyModel.h"
+//
+//@interface GlobalVar : NSObject
+//
+//
+////
+////@property(nonatomic, strong) NSMutableArray *m_arrBaobaoData;     //宝宝数据数组
+////@property(nonatomic, strong) BBQBabyModel *curBaobao;
+////@property(nonatomic, copy) NSString *qiniuToken;
+//@property(nonatomic, copy) NSString *qiniuDNS;
+//
+//@property(nonatomic, strong) BBQBabyModel *curClass;
+//@property(nonatomic, strong) NSArray *arrClassData;
+//
+//@property(nonatomic, strong) SchoolModel *curSchool;
+//@property(nonatomic, strong) NSArray *schooldata;
+//
+//@property(nonatomic, strong) NSArray *arrDynaTag;
+//
+//
+//@property(nonatomic, strong) NSFileHandle*	hLogFile;
+//@property(nonatomic, copy) NSString *sUpdataSoftUrl;
+//@property(nonatomic, copy) NSString *sUpdateDate;
+//@property(nonatomic, assign)  BOOL bNeedUpdataSoft;
+//
+//@property (nonatomic, strong) TLimitUserInfo *tLimitUser;
+//
+//@property(nonatomic,strong) ALAssetsLibrary *assetsLibrary;
+//
+//@property (nonatomic, strong) NSArray *arrAnnouncementType;
+//
+//@property (nonatomic, assign) NSTimeInterval lastTime;
+//
+//
+//+ (GlobalVar *) getInstance;
+//
+//-(void) initGlobalVar;
+//-(void) initCurAccount;
+//- (void)initCurAccountWithDic:(NSDictionary *)dicData;
+//
+//-(void)setBaobaoData:(NSArray *)baobaodata qntoken:(NSString *)qntoken qndns:(NSString *)qndns;
+//-(void)setClassData:(NSArray *)arrdata;
+//-(void)setSchooldata:(NSArray *)data;
+//////添加一个宝宝数据
+////-(void)addOneBaoBao:(TJYEXBaoBaoData *)baobao;
+//////修改一个宝宝数据
+////-(void)updateOneBaoBao:(TJYEXBaoBaoData *)baobao;
+//////获得一个宝宝数据
+////-(TJYEXBaoBaoData *)getOneBaoBao:(NSString *)baobaouid;
+//////根据班级id 匹配宝宝
+////-(TJYEXBaoBaoData *)getOneBaoBaoByClassUid:(NSString *)classuid;
+//////根据学校id 匹配宝宝
+////-(TJYEXBaoBaoData *)getOneBaoBaoBySchoolUid:(NSString *)schooluid;
+//
+//
+////显示一个图片(可能是网络，可能是本地)
+//-(void)DispNetorLocalImg:(NSString *)avatarUrl imgview:(UIImageView *)imgView;
+//
+//- (void)DispNetorLocalImg:(NSString *)avatarUrl imgview:(UIImageView *)imgView placeholderImage:(NSString*)imageName;
+////显示按钮的图片(可能是网络，可能是本地)
+//-(void)buttonDispNetorLocalImg:(NSString *)avatarUrl imgview:(UIButton *)headbtn;
+//
+//-(NSString *)getQnToken;
+//
+//
+//-(void) setUpdataSoftFlag;
+//-(void) resetUpdataSoftFlag;
+//-(BOOL) getUpdataSoftFlag;
+//-(NSString *)getUpdateDate;
+//
+//
+////+(TJYEXLoginUserInfo *)getLoginUserInfoFromDic:(NSDictionary *)dicData username:(NSString *)username password:(NSString *)password;
+//+(NSArray *)getBaobaoDataFromDic:(NSDictionary *)dicData;
+//+(NSString *)getQnTokenFromDic:(NSDictionary *)dicData;
+//+(NSString *)getQnDnsFromDic:(NSDictionary *)dicData;
+//+(NSArray *)getClassDataFromDic:(NSDictionary *)dicData;
+//+(NSArray *)getSchoolDataFromDic:(NSDictionary *)dic;
+//+(NSArray *)getDynaTag:(NSDictionary *)dic;
+//
+//
+/////更新本地数据库中当前用户的头像url
+//+ (void)updateTheCurUserWithURLStr:(NSString *)avatarUrlStr;
+//
+//+ (void)updateTheCurBaoBaoWithURLStr:(NSString *)avatarUrlStr;
+//@end
+//
+//
+////#define TheGlobal		[GlobalVar getInstance]
+////#define TheDbMng		TheGlobal.dbMngSet
+//////#define TheCurUser		TheGlobal.curUser
+//////#define TheCurBaoBao	TheGlobal.curBaobao
+////#define TheLimitUser    TheGlobal.tLimitUser
+////
+////#define TheDbMngDict	TheDbMng.dctDbItem
+////#define TheLogFile		TheGlobal.hLogFile
+//
+//

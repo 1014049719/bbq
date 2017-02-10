@@ -1,0 +1,46 @@
+//
+//  DBController.h
+//  SparkEnglish
+//  对cppsqlite3的简单封装，适当时提供多个不同的单例来对不同数据库的访问
+//  Created by huanghb on 11-1-27.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+#import "DbConstDefine.h"
+#import "DbMngDataDef.h"
+#import "CommonDef.h"
+#import "BussInterImpl.h"
+#import <FMDB.h>
+
+#pragma mark -
+#pragma mark 数据库对象封装
+
+
+#define GUID_ZERO @"00000000-0000-0000-0000-000000000000"
+
+
+@interface AstroDBMng : NSObject
+{
+	
+}
+
++(NSString *)getDb91NoteFileName;
++(NSString *)getDbCommonFileName;
+
+/// 初始化数据库
++ (FMDatabase *)getDb91DataBase;
++ (FMDatabase *)getDbCommonDataBase;
+
+@end
+
+
+#define gDbAstroCommon	[AstroDBMng getDbAstroCommon]
+#define gDb91Note       [AstroDBMng getDb91Note]
+
+
+
+
+
+

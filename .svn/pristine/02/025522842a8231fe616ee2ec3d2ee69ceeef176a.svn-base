@@ -1,0 +1,333 @@
+///*
+// *  Business.mm
+// *  NoteBook
+// *
+// *  Created by wangsc on 10-9-17.
+// *  Copyright 2010 ND. All rights reserved.
+// *
+// */
+//
+//#import "BizLogic_Note.h"
+//#import "DataSync.h"
+//
+//#import "DynaMgr.h"
+//#import "AttachMgr.h"
+//#import "PhotoMgr.h"
+//
+//#import "CommonDateTime.h"
+//#import "CommonNoteOpr.h"
+//#import "CommonDirectory.h"
+//
+//#import "Global.h"
+//#import "logging.h"
+//#import "GlobalVar.h"
+//
+//#import "UIProgress.h"
+//
+//#import "AppMacro.h"
+//
+//#import "DynaModel.h"
+//#import "AttachModel.h"
+//
+//@implementation BizLogic (ForDyna)
+//
+//+ (long)getLocalID {
+//  static long localid = 0;
+//
+//  if (0 == localid) {
+//    NSTimeInterval timeinterval = [[NSDate date] timeIntervalSince1970];
+//    localid = (long)timeinterval;
+//  }
+//  localid++;
+//  return localid;
+//}
+//
+////增加1条动态
+//+ (BOOL)addDyna:(DynaModel *)dyna attachinfo:(NSArray *)arrAttach {
+//  NSTimeInterval timeinterval = [[NSDate date] timeIntervalSince1970];
+//  long dateline1 = (long)timeinterval;
+//  NSNumber *dateline = [NSNumber numberWithLong:dateline1];
+//
+//  int piccount = 0;
+//  int videocount = 0;
+//
+//  dyna.guid = [NSString stringWithUUID];
+//  dyna.localid = [NSString stringWithUUID];
+//
+//  if (arrAttach && [arrAttach isKindOfClass:[NSArray class]]) {
+//    for (AttachModel *attach in arrAttach) {
+//
+//      attach.guid = dyna.guid;
+//      attach.localid = dyna.localid;
+//      attach.attachid = [NSString stringWithUUID];
+//      attach.remote = @ATTACH_POS_LOCAL;
+//      attach.dateline = dateline;
+//      attach.upflag = @DYNA_NEED_UPLOAD;
+//      attach.flag = @DYNA_FLAG_NORMAL;
+//
+//      [AstroDBMng addAttach:attach];
+//
+//      if ([attach.itype intValue] == ATTACH_TYPE_PIC)
+//        piccount++;
+//      else
+//        videocount++;
+//    }
+//  }
+//
+//  dyna.dateline = dateline;
+//  dyna.creuid = [NSNumber numberWithInt:[TheCurUser.member.uid intValue]];
+//  dyna.crenickname = TheCurUser.member.nickname;
+//  dyna.attachinfo = arrAttach;
+//
+//  dyna.piccount = [NSNumber numberWithInt:piccount];
+//  dyna.videocount = [NSNumber numberWithInt:videocount];
+//  dyna.flag = @DYNA_FLAG_NORMAL;
+//
+//  dyna.updatetime = dateline;
+//  dyna.tradetable = @"";
+//
+//  dyna.shareflag = @DYNA_SHARE_NOSHARE;
+//  dyna.ispajs = @DYNA_SRC_NORMAL;
+//  dyna.upflag = @DYNA_NEED_UPLOAD;
+//
+//  dyna.localattachinfo = arrAttach;
+//  dyna.fbztx = TheCurUser.member.avartar;
+//
+//#ifdef TARGET_PARENT
+//  dyna.schoolname = TheCurBaoBao.curSchool.schoolname;
+//  dyna.classname = TheCurBaoBao.curClass.className;
+//  dyna.groupkey = [NSNumber numberWithInt:TheCurUser.member.groupkey.intValue];
+//  dyna.gxid = [NSNumber numberWithInt:TheCurBaoBao.gxid.intValue];
+//  dyna.gxname = TheCurBaoBao.gxname;
+//  dyna.baobaoname = TheCurBaoBao.realname;
+//
+//#elif TARGET_TEACHER
+//  dyna.schoolname = TheCurUser.curSchool.schoolname;
+//  dyna.classname = TheCurUser.curClass.classname;
+//  dyna.groupkey = [NSNumber numberWithInt:TheCurUser.member.groupkey];
+//  dyna.gxid = [NSNumber numberWithInt:0];
+//  dyna.gxname = @"";
+//  dyna.baobaoname = @"";
+//#else
+//  dyna.schoolname = TheCurUser.curSchool.schoolname;
+//  dyna.classname = @"";
+//  dyna.groupkey = [NSNumber numberWithInt:TheCurUser.member.groupkey];
+//  dyna.gxid = [NSNumber numberWithInt:0];
+//  dyna.gxname = @"";
+//  dyna.baobaoname = @"";
+//#endif
+//  [AstroDBMng addDyna:dyna];
+//  [[NSNotificationCenter defaultCenter]
+//      postNotificationName:kAddedDynamicNotification
+//                    object:nil
+//                  userInfo:@{
+//                    @"model" : dyna
+//                  }];
+//  //发同步上传消息
+//  [[DataSync instance] syncRequest:BIZ_SYNC_UPLOAD_DYNA:nil:nil:nil];
+//
+//  //显示进展信息
+//  //    [UIProgress dispProgress];
+//
+//  return YES;
+//}
+//
+////修改动态
+//+ (BOOL)updateDyna:(DynaModel *)dicDyna
+//         addAttach:(NSArray *)arrAddAttach
+//         delAttach:(NSArray *)arrDelAttach
+//      remainAttach:(NSArray *)arrRemainAttach {
+//  /*
+//  long localid = [self getLocalID];
+//  NSString *strLocalID = [NSString stringWithFormat:@"%ld",localid];
+//
+//  NSTimeInterval timeinterval = [[NSDate date] timeIntervalSince1970];
+//  long dateline1 = (long)timeinterval;
+//  NSNumber *dateline = [NSNumber numberWithLong:dateline1];
+//
+//  int piccount = 0;
+//  int videocount = 0;
+//
+//  NSMutableArray *arrAttachNew = [NSMutableArray array];
+//
+//  //剩下的
+//  if ( arrRemainAttach && [arrRemainAttach isKindOfClass:[NSArray class]] ) {
+//      for (NSDictionary *dic in arrRemainAttach) {
+//
+//          NSNumber *attachtype = [dic objectForKey:@"attachtype"];
+//          if ( attachtype == 0 ) piccount++;
+//          else videocount++;
+//
+//          [arrAttachNew addObject:dic];
+//      }
+//  }
+//
+//  //新增的
+//  if ( arrAddAttach && [arrAddAttach isKindOfClass:[NSArray class]] ) {
+//      for (NSDictionary *dic in arrAddAttach) {
+//          NSMutableDictionary *dicAttach = [NSMutableDictionary
+//  dictionaryWithDictionary:dic];
+//          [dicAttach setObject:@"0" forKey:@"guid"];
+//          [dicAttach setObject:strLocalID forKey:@"localid"];
+//          long attachid = [self getLocalID];
+//          NSString *strAttachID = [NSString stringWithFormat:@"%ld",attachid];
+//          [dicAttach setObject:strAttachID forKey:@"attachguid"];
+//          //[dicAttach setObject:@0 forKey:@"attachtype"];
+//          //[dicAttach setObject:@"" forKey:@"filename"];
+//          //[dicAttach setObject:dateline forKey:@"shoottime"];
+//          [dicAttach setObject:@0 forKey:@"attachpos"];
+//          //[dicAttach setObject:@"" forKey:@"filepath"];
+//          //[dicAttach setObject:@0 forKey:@"filesize"];
+//          //[dicAttach setObject:@{} forKey:@"info"];
+//          [dicAttach setObject:dateline forKey:@"dateline"];
+//          [dicAttach setObject:dateline forKey:@"shoottime"];
+//          [dicAttach setObject:@1 forKey:@"upflag"];
+//          [dicAttach setObject:@0 forKey:@"flag"];
+//
+//          [arrAttachNew addObject:dicAttach];
+//
+//          [AstroDBMng addAttach:dicAttach];
+//
+//          NSNumber *attachtype = [dicAttach objectForKey:@"attachtype"];
+//          if ( attachtype == 0 ) piccount++;
+//          else videocount++;
+//      }
+//  }
+//
+//  //删除的
+//  if ( arrDelAttach && [arrDelAttach isKindOfClass:[NSArray class]] ) {
+//      for (NSDictionary *dic in arrDelAttach) {
+//          NSMutableDictionary *dicAttach = [NSMutableDictionary
+//  dictionaryWithDictionary:dic];
+//
+//          [dicAttach setObject:dateline forKey:@"dateline"];
+//          [dicAttach setObject:@1 forKey:@"upflag"];
+//          [dicAttach setObject:@1 forKey:@"flag"];
+//
+//          [AstroDBMng deleteAttach:dicAttach]; //置为删除
+//          //删除相应文件（后面添加上）
+//      }
+//  }
+//
+//  //修改其他数据
+//
+//  [dicDyna setObject:dateline forKey:@"dateline"];
+//  [dicDyna setObject:arrAttachNew forKey:@"attachinfo"];
+//  [dicDyna setObject:@1 forKey:@"piccount"];
+//  [dicDyna setObject:@0 forKey:@"videocount"];
+//  [dicDyna setObject:dateline forKey:@"contentupdate"];
+//  [dicDyna setObject:dateline forKey:@"updatetime"];
+//  [dicDyna setObject:@1 forKey:@"upflag"];
+//  [dicDyna setObject:@1 forKey:@"editflag"];
+//  [dicDyna setObject:arrAttachNew forKey:@"localattachinfo"];
+//
+//  [AstroDBMng updateDyna:dicDyna];
+//  */
+//
+//  return YES;
+//}
+//
+////删除动态
+//+ (BOOL)deleteDyna:(DynaModel *)dicDyna {
+//  NSArray *arrDelAttach = dicDyna.attachinfo;
+//
+//  //删除
+//  if (arrDelAttach) {
+//    for (AttachModel *attach in arrDelAttach) {
+//      attach.flag = @DYNA_FLAG_DELETE;
+//
+//      [AstroDBMng deleteAttach:attach];
+//      //删除相应文件（后面添加上）
+//    }
+//  }
+//
+//  dicDyna.flag = @DYNA_FLAG_DELETE;
+//  [AstroDBMng deleteDyna:dicDyna];
+//
+//  return YES;
+//}
+//
+////查询动态
+///*
+//+(NSArray *)getDyna:(NSString *)baobaoid lastDyna:(DynaModel *)dicDyna
+//limit:(int)nLimitCount
+//{
+//    return [AstroDBMng quereyDyna:baobaoid lastdync:dicDyna limit:nLimitCount];
+//
+//}
+//*/
+//
+//+ (NSArray *)getDyna:(NSString *)baobaouid
+//            classuid:(NSString *)classuid
+//            schoolid:(NSString *)schoolid
+//               dtype:(int)dtype
+//            dateline:(int)updatetime {
+//  //查询本地数据库记录
+//  return [AstroDBMng getDyna:baobaouid
+//                    classuid:classuid
+//                    schoolid:schoolid
+//                       dtype:dtype
+//                    dateline:updatetime];
+//}
+//
+////删除所有的旧纪录
+//+ (BOOL)delDyna:(NSString *)baobaouid
+//       classuid:(NSString *)classuid
+//       schoolid:(NSString *)schoolid
+//          dtype:(int)dtype {
+//  //删除所有的旧纪录
+//  return [AstroDBMng delDyna:baobaouid
+//                    classuid:classuid
+//                    schoolid:schoolid
+//                       dtype:dtype];
+//}
+//
+////通过guid查询动态
+//+ (DynaModel *)getDynaByGuid:(NSString *)guid {
+//  DynaModel *dyna = [AstroDBMng getDynaByGuid:guid];
+//
+//  return dyna;
+//}
+//
+////查询本地上传记录(首次查询，dicDYna为nil)
+//+ (NSArray *)getLocalUploadDyna:(DynaModel *)dicDyna limit:(int)nLimitCount {
+//  return [AstroDBMng getLocalUploadDyna:dicDyna limit:nLimitCount];
+//}
+//
+////插入一批记录
+//+ (BOOL)InsertDyna:(NSArray *)arrDyna {
+//  for (DynaModel *model in arrDyna) {
+//    [AstroDBMng addDyna:model];
+//  }
+//
+//  return YES;
+//}
+//
+////插入1个记录
+//+ (BOOL)InsertSingleDyna:(DynaModel *)dyna {
+//  [AstroDBMng addDyna:dyna];
+//
+//  return YES;
+//}
+//
+////删除记录
+//+ (BOOL)deleteDynaByGuid:(NSString *)guid {
+//  DynaModel *dyna = [AstroDBMng getDynaByGuid:guid];
+//
+//  if (dyna)
+//    [self deleteDyna:dyna];
+//
+//  return YES;
+//}
+//
+////增加1条照片访问
+//+ (BOOL)addPhotoRecord:(NSString *)photoid {
+//  return [AstroDBMng addPhotoRecord:photoid];
+//}
+//
+////查询照片访问记录列表
+//+ (NSArray *)getPhotoRecord {
+//  return [AstroDBMng getPhotoRecordList];
+//}
+//
+//@end

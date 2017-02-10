@@ -1,0 +1,37 @@
+//
+//  BBQDynamicManager.h
+//  BBQ
+//
+//  Created by 朱琨 on 15/12/10.
+//  Copyright © 2015年 bbq. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@class Dynamic;
+
+typedef void (^SearchCompletion)(NSArray *dynamics);
+
+@interface BBQDynamicManager : NSObject
+
++ (instancetype)sharedManager;
+
+- (void)saveDynamic:(Dynamic *)dynamic;
+- (void)saveDynamicSync:(Dynamic *)dynamic;
+- (void)saveDynamics:(NSArray *)dynamics;
+- (void)saveDynamicsSync:(NSArray *)dynamics;
+- (void)deleteDynamic:(Dynamic *)dynamic;
+- (void)deleteDynamicSync:(Dynamic *)dynamic;
+- (void)deleteDynamics:(NSArray *)dynamics;
+- (void)deleteDynamicsSync:(NSArray *)dynamics;
+- (void)dynamicWithGuid:(NSString *)guid completion:(SearchCompletion)block;
+- (void)dynamicWithLocalid:(NSString *)localid completion:(SearchCompletion)block;
+- (void)dynamicsWithUploadState:(NSInteger)state completion:(SearchCompletion)block;
+- (void)dynamicsAtBeginningWithCompletion:(SearchCompletion)block;
+- (void)dynamicsAfterDynamic:(Dynamic *)dynamic completion:(SearchCompletion)block;
+- (void)dynamicsWhere:(NSString *)where count:(NSInteger)count completion:(SearchCompletion)block;
+- (void)dynamicsWithParams:(NSDictionary *)dic completion:(SearchCompletion)block;
+
+- (void)publishDynamic:(Dynamic *)dynamic;
+
+@end

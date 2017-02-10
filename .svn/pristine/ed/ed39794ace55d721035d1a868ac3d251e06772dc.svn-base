@@ -1,0 +1,790 @@
+////
+////  BussData.m
+////  Astro
+////
+////  Created by root on 11-11-18.
+////  Copyright 2011 ND SOFT. All rights reserved.
+////
+//
+//#import "BussDataDef.h"
+//#import "SBJSON.h"
+//#import "NetConstDefine.h"
+////#import "logging.h"
+//#import "PubFunction.h"
+//#import "CommonDefine.h"
+//
+//
+//#pragma mark -
+//#pragma mark 宏定义
+////
+//#define InstantiateMutableArray(aryObj, initNum)                               \
+//  {                                                                            \
+//    if (!aryObj) {                                                             \
+//      aryObj = [[NSMutableArray alloc] initWithCapacity:(initNum)];            \
+//    }                                                                          \
+//    [aryObj removeAllObjects];                                                 \
+//  }
+//
+//#define ReleaseMutableArray(aryObj)                                            \
+//  {                                                                            \
+//    if (aryObj) {                                                              \
+//      [aryObj removeAllObjects];                                               \
+//      [aryObj release];                                                        \
+//      aryObj = nil;                                                            \
+//    }                                                                          \
+//  }
+//
+//#pragma mark -
+//#pragma mark 结构定义
+//
+//@implementation TBussStatus
+//@synthesize iCode;
+//@synthesize sInfo;
+//@synthesize rtnData;
+//@synthesize srcParam;
+//
+//- (void)dealloc {
+//  self.sInfo = nil;
+//  self.rtnData = nil;
+//  self.srcParam = nil;
+//  [super dealloc];
+//}
+//
+//@end
+//
+////登录用户
+//@implementation TLoginUserInfo
+//
+//@synthesize sUserName, sPassword, sUserID, sNickName, sRealName, sUAPID, sSID,
+//    sSessionID, sLoginTime, sBlowfish, sMsg;
+//@synthesize sSrvTbName;
+//@synthesize iLoginType, iGroupID, iAppID, iSavePasswd, iAutoLogin;
+//@synthesize sNoteUserId;
+//@synthesize sNoteMasterKey;
+//@synthesize sNoteIpLocation;
+//
+//- (id)init {
+//  self = [super init];
+//  if (self) {
+//    self.iAppID = [CS_SOFT_ID intValue];
+//    self.iAutoLogin = 1;
+//
+//    self.sUserName = @"";
+//    self.sPassword = @"";
+//    self.sUserID = @"";
+//    self.sNickName = @"";
+//    self.sRealName = @"";
+//    self.sUAPID = @"";
+//    self.sSID = @"";
+//    self.sSessionID = @"";
+//    self.sLoginTime = @"";
+//    self.sBlowfish = @"";
+//    self.sSrvTbName = @"";
+//    self.sMsg = @"";
+//
+//    self.sNoteUserId = @"";
+//    self.sNoteMasterKey = @"";
+//    self.sNoteIpLocation = @"";
+//  }
+//
+//  return self;
+//}
+//
+//- (id)copyWithZone:(NSZone *)zone {
+//  TLoginUserInfo *newObj = [[[self class] allocWithZone:zone] init];
+//
+//  newObj.sUserName = [NSMutableString stringWithString:self.sUserName];
+//  newObj.sPassword = [NSMutableString stringWithString:self.sPassword];
+//  newObj.sUserID = [NSMutableString stringWithString:self.sUserID];
+//  newObj.sNickName = [NSMutableString stringWithString:self.sNickName];
+//  newObj.sRealName = [NSMutableString stringWithString:self.sRealName];
+//  newObj.sUAPID = [NSMutableString stringWithString:self.sUAPID];
+//  newObj.sSID = [NSMutableString stringWithString:self.sSID];
+//  newObj.sSessionID = [NSMutableString stringWithString:self.sSessionID];
+//  newObj.sLoginTime = [NSMutableString stringWithString:self.sLoginTime];
+//  newObj.iLoginType = self.iLoginType;
+//  newObj.iGroupID = self.iGroupID;
+//  newObj.iAppID = self.iAppID;
+//  newObj.sBlowfish = [NSMutableString stringWithString:self.sBlowfish];
+//  newObj.iSavePasswd = self.iSavePasswd;
+//  newObj.iAutoLogin = self.iAutoLogin;
+//  newObj.sSrvTbName = [NSMutableString stringWithString:self.sSrvTbName];
+//  newObj.sMsg = [NSMutableString stringWithString:self.sMsg];
+//
+//  newObj.sNoteUserId = [NSMutableString stringWithString:self.sNoteUserId];
+//  newObj.sNoteMasterKey =
+//      [NSMutableString stringWithString:self.sNoteMasterKey];
+//  newObj.sNoteIpLocation =
+//      [NSMutableString stringWithString:self.sNoteIpLocation];
+//
+//  return newObj;
+//}
+//
+//- (BOOL)isDefaultUser {
+//  return ([sUserName isEqualToString:CS_DEFAULTACCOUNT_USERNAME] &&
+//          [sPassword isEqualToString:CS_DEFAULTACCOUNT_PASSWORD]);
+//}
+//
+//- (BOOL)isLogined {
+//  return (iLoginType == ELoginType_OnLine && sSID != nil && [sSID length] > 0);
+//}
+//
+//- (void)dealloc {
+//  self.sUserName = nil;
+//  self.sPassword = nil;
+//  self.sUserID = nil;
+//  self.sNickName = nil;
+//  self.sRealName = nil;
+//  self.sUAPID = nil;
+//  self.sSID = nil;
+//  self.sSessionID = nil;
+//  self.sLoginTime = nil;
+//  self.sBlowfish = nil;
+//  self.sSrvTbName = nil;
+//  self.sMsg = nil;
+//
+//  self.sNoteUserId = nil;
+//  self.sNoteMasterKey = nil;
+//  self.sNoteIpLocation = nil;
+//
+//  [super dealloc];
+//}
+//
+//@end
+//
+////家园E线
+//@implementation TJYEXLoginUserInfo
+//@synthesize sEmail;
+//@synthesize sMobilephone;
+//@synthesize sTelephone;
+//@synthesize sAddress;
+//@synthesize iLoginFlag, iSchoolType;
+//@synthesize sAlbumIdPerson; // 2014.9.26
+//@synthesize sAlbumNamePerson;
+//@synthesize sAlbumUidPerson;
+//@synthesize sAlbumUsernamePerson;
+//@synthesize sAlbumIdClass; // 2014.9.26
+//@synthesize sAlbumNameClass;
+//@synthesize sAlbumUidClass;
+//@synthesize sAlbumUsernameClass;
+//@synthesize sAlbumIdSchool; // 2014.9.26
+//@synthesize sAlbumNameSchool;
+//@synthesize sAlbumUidSchool;
+//@synthesize sAlbumUsernameSchool;
+//@synthesize sAvatarUrl; // 2015.7.8
+//@synthesize nAvatarStatus;
+//@synthesize groupkey;
+//@synthesize gender;
+//
+//- (id)init {
+//  self = [super init];
+//  if (self) {
+//    self.sEmail = @"";
+//    self.sMobilephone = @"";
+//    self.sTelephone = @"";
+//    self.sAddress = @"";
+//    self.iLoginFlag = 0;
+//    self.iSchoolType = 0;
+//
+//    self.sAlbumIdPerson = @""; // 2014.9.26
+//    self.sAlbumNamePerson = @"";
+//    self.sAlbumUidPerson = @"";
+//    self.sAlbumUsernamePerson = @"";
+//    self.sAlbumIdClass = @""; // 2014.9.26
+//    self.sAlbumNameClass = @"";
+//    self.sAlbumUidClass = @"";
+//    self.sAlbumUsernameClass = @"";
+//    self.sAlbumIdSchool = @""; // 2014.9.26
+//    self.sAlbumNameSchool = @"";
+//    self.sAlbumUidSchool = @"";
+//    self.sAlbumUsernameSchool = @"";
+//
+//    self.sAvatarUrl = @""; // 2015.7.8
+//  }
+//
+//  return self;
+//}
+//
+//- (BOOL)isLogined {
+//  return (iLoginType == ELoginType_OnLine); //用户是否已经登录了
+//}
+//
+//- (BOOL)isLoginedSuccUser {
+//  return (iLoginFlag == 1); //成功登录过的用户
+//}
+//
+//- (id)copyWithZone:(NSZone *)zone {
+//  TJYEXLoginUserInfo *newObj = [super copyWithZone:zone];
+//
+//  newObj.sEmail = [NSMutableString stringWithString:self.sEmail];
+//  newObj.sMobilephone = [NSMutableString stringWithString:self.sMobilephone];
+//  newObj.sTelephone = [NSMutableString stringWithString:self.sTelephone];
+//  newObj.sAddress = [NSMutableString stringWithString:self.sAddress];
+//  newObj.iLoginFlag = self.iLoginFlag;
+//  newObj.iSchoolType = self.iSchoolType;
+//
+//  newObj.sAlbumIdPerson =
+//      [NSMutableString stringWithString:self.sAlbumIdPerson]; // 2014.9.26
+//  newObj.sAlbumNamePerson =
+//      [NSMutableString stringWithString:self.sAlbumNamePerson];
+//  newObj.sAlbumUidPerson =
+//      [NSMutableString stringWithString:self.sAlbumUidPerson];
+//  newObj.sAlbumUsernamePerson =
+//      [NSMutableString stringWithString:self.sAlbumUsernamePerson];
+//  newObj.sAlbumIdClass =
+//      [NSMutableString stringWithString:self.sAlbumIdClass]; // 2014.9.26
+//  newObj.sAlbumNameClass =
+//      [NSMutableString stringWithString:self.sAlbumNameClass];
+//  newObj.sAlbumUidClass =
+//      [NSMutableString stringWithString:self.sAlbumUidClass];
+//  newObj.sAlbumUsernameClass =
+//      [NSMutableString stringWithString:self.sAlbumUsernameClass];
+//  newObj.sAlbumIdSchool =
+//      [NSMutableString stringWithString:self.sAlbumIdSchool]; // 2014.9.26
+//  newObj.sAlbumNameSchool =
+//      [NSMutableString stringWithString:self.sAlbumNameSchool];
+//  newObj.sAlbumUidSchool =
+//      [NSMutableString stringWithString:self.sAlbumUidSchool];
+//  newObj.sAlbumUsernameSchool =
+//      [NSMutableString stringWithString:self.sAlbumUsernameSchool];
+//
+//  newObj.sAvatarUrl = [NSMutableString stringWithString:self.sAvatarUrl];
+//
+//  newObj.nAvatarStatus = self.nAvatarStatus;
+//  newObj.groupkey = self.groupkey;
+//  newObj.gender = self.gender;
+//
+//  return newObj;
+//}
+//
+//- (void)dealloc {
+//  self.sEmail = nil;
+//  self.sMobilephone = nil;
+//  self.sTelephone = nil;
+//  self.sAddress = nil;
+//
+//  self.sAlbumIdPerson = nil; // 2014.9.26
+//  self.sAlbumNamePerson = nil;
+//  self.sAlbumUidPerson = nil;
+//  self.sAlbumUsernamePerson = nil;
+//  self.sAlbumIdClass = nil; // 2014.9.26
+//  self.sAlbumNameClass = nil;
+//  self.sAlbumUidClass = nil;
+//  self.sAlbumUsernameClass = nil;
+//  self.sAlbumIdSchool = nil; // 2014.9.26
+//  self.sAlbumNameSchool = nil;
+//  self.sAlbumUidSchool = nil;
+//  self.sAlbumUsernameSchool = nil;
+//
+//  self.sAvatarUrl = nil;
+//
+//  [super dealloc];
+//}
+//
+//- (BOOL)isMiddleSchoolTeacher {
+//  return ((1 == self.iSchoolType) && (self.iGroupID == 22));
+//}
+//- (BOOL)isMiddleSchoolParent {
+//  return ((1 == self.iSchoolType) && (self.iGroupID == 31));
+//}
+//- (BOOL)isMiddleSchoolMaster {
+//  return ((1 == self.iSchoolType) &&
+//          (self.iGroupID == 21 || self.iGroupID == 34 || self.iGroupID == 35));
+//}
+//
+//- (BOOL)isInfantsSchoolParent {
+//  return ((0 == self.iSchoolType) && (self.iGroupID == 31));
+//}
+//- (BOOL)isInfantsSchoolTeacher {
+//  return ((0 == self.iSchoolType) && (self.iGroupID == 22));
+//}
+//- (BOOL)isInfantsSchoolMaster {
+//  return ((0 == self.iSchoolType) &&
+//          (self.iGroupID == 21 || self.iGroupID == 34 || self.iGroupID == 35));
+//}
+//
+//- (BOOL)isCommonMember {
+//  return (self.iGroupID == 33 || self.iGroupID == 30);
+//}
+//
+///// 处理关系
+//+ (NSString *)relationshipLabelText:(int)gx gxname:(NSString *)gxname {
+//  NSString *relationship = @"";
+//  switch (gx) {
+//  case 1: {
+//    relationship = @"爸爸";
+//  } break;
+//  case 2: {
+//    relationship = @"妈妈";
+//  } break;
+//  case 3: {
+//    relationship = @"爷爷";
+//  } break;
+//  case 4: {
+//    relationship = @"奶奶";
+//  } break;
+//  case 5: {
+//    relationship = @"外公";
+//  } break;
+//  case 6: {
+//    relationship = @"外婆";
+//  } break;
+//  case 7: {
+//    relationship = @"舅舅";
+//  } break;
+//  case 8: {
+//    relationship = @"姑妈";
+//  } break;
+//  case 9: {
+//    relationship = @"姐姐";
+//  } break;
+//  case 10: {
+//    relationship = @"哥哥";
+//  } break;
+//  case 11: {
+//    relationship = @"叔叔";
+//  } break;
+//
+//  case 12: {
+//    relationship = @"姥姥";
+//  } break;
+//
+//  case 13: {
+//    relationship = @"姥爷";
+//  } break;
+//
+//  case 14: {
+//    relationship = @"干妈";
+//  } break;
+//
+//  case 15: {
+//    relationship = @"小姨";
+//  } break;
+//
+//  case 16: {
+//    relationship = @"阿姨";
+//  } break;
+//
+//  case 17: {
+//    relationship = @"舅妈";
+//  } break;
+//
+//  case 18: {
+//    relationship = @"婶婶";
+//  } break;
+//
+//  case 19: {
+//    relationship = @"姨妈";
+//  } break;
+//
+//  case 20: {
+//    relationship = @"姨父";
+//  } break;
+//
+//  case 21: {
+//    relationship = @"干爸爸";
+//  } break;
+//
+//  case 22: {
+//    relationship = @"姑父";
+//  } break;
+//
+//  case 23: {
+//    relationship = @"伯母";
+//  } break;
+//
+//  case 24: {
+//    relationship = @"姑姑";
+//  } break;
+//
+//  case 25: {
+//    relationship = @"伯父";
+//  } break;
+//
+//  case 100: {
+//    relationship = gxname;
+//  } break;
+//  default:
+//    break;
+//  }
+//  return relationship;
+//}
+//
+//+ (NSString *)vipLabelText:(int)qx {
+//  NSString *string = @"";
+//  switch (qx) {
+//  case 1: {
+//    string = @"圈主";
+//  } break;
+//  case 2: {
+//    string = @"管理员";
+//  } break;
+//  case 3: {
+//    string = @"非管理员";
+//  } break;
+//  default:
+//    break;
+//  }
+//  return string;
+//}
+//
+//@end
+//
+////宝宝数据列表
+//@implementation TJYEXBaoBaoData
+//@synthesize sBaobaouid;
+//@synthesize sUsername;
+//@synthesize sNickname;
+//@synthesize sRealname;
+//
+//@synthesize birthyear;
+//@synthesize birthmonth;
+//@synthesize birthday;
+//@synthesize gender;
+//
+//@synthesize sSchooluid;
+//@synthesize sClassuid;
+//
+//@synthesize strSchoolName;
+//@synthesize strClassName;
+//
+//@synthesize gxid;
+//@synthesize gxname;
+//@synthesize avatar;
+//@synthesize qx;
+//
+//- (id)init {
+//  self = [super init];
+//
+//  self.sBaobaouid = @"";
+//  self.sUsername = @"";
+//  self.sNickname = @"";
+//  self.sRealname = @"";
+//
+//  self.sSchooluid = @"";
+//  self.sClassuid = @"";
+//
+//  self.strSchoolName = @"";
+//  self.strClassName = @"";
+//
+//  self.gxname = @"";
+//  self.avatar = @"";
+//
+//  return self;
+//}
+//
+//- (id)initWithDic:(NSDictionary *)dicBaobao {
+//  self = [super init];
+//   // NSLog(@"%@",dicBaobao);
+//  self.sBaobaouid = pickJsonStrValue(dicBaobao, @"uid");
+//  self.sUsername = pickJsonStrValue(dicBaobao, @"username");
+//  self.sNickname = pickJsonStrValue(dicBaobao, @"nickname");
+//  self.sRealname = pickJsonStrValue(dicBaobao, @"realname");
+//
+//  self.birthyear = pickJsonIntValue(dicBaobao, @"birthyear");
+//  self.birthmonth = pickJsonIntValue(dicBaobao, @"birthmonth");
+//  self.birthday = pickJsonIntValue(dicBaobao, @"birthday");
+//  self.gender = pickJsonIntValue(dicBaobao, @"gender");
+//
+////  self.sSchooluid = pickJsonStrValue(dicBaobao, @"schooluid");
+////  self.sClassuid = pickJsonStrValue(dicBaobao, @"classuid");
+////  self.strSchoolName = pickJsonStrValue(dicBaobao, @"schoolname");
+////  self.strClassName = pickJsonStrValue(dicBaobao, @"classname");
+//  self.coverurl = pickJsonStrValue(dicBaobao, @"coverurl");
+//  self.gxid = pickJsonIntValue(dicBaobao, @"gxid");
+//  self.gxname = pickJsonStrValue(dicBaobao, @"gxname");
+//  self.avatar = pickJsonStrValue(dicBaobao, @"avartar");
+//  self.qx = pickJsonIntValue(dicBaobao, @"qx");
+//    
+//    if (dicBaobao[@"baobaoschooldata"] && [[dicBaobao objectForKey:@"baobaoschooldata"] isKindOfClass:[NSArray class]]) {
+//        self.baobaoschooldata = [BBQSchoolDataModel mj_objectArrayWithKeyValuesArray:dicBaobao[@"baobaoschooldata"]];//dicBaobao[@"baobaoschooldata"];
+//        BBQSchoolDataModel *schoolModel = [self.baobaoschooldata firstObject];
+//        BBQClassDataModel *classModel = [schoolModel.classdata firstObject];
+//        self.sSchooluid = schoolModel.schoolid;
+//        self.sClassuid = classModel.classid;
+//        self.strSchoolName = schoolModel.schoolname;
+//        self.strClassName = classModel.classname;
+//    }
+//    if (dicBaobao[@"dynamictags"] && [[dicBaobao objectForKey:@"dynamictags"] isKindOfClass:[NSArray class]]) {
+//        self.dynamictags = dicBaobao[@"dynamictags"];
+//    }
+//
+//  return self;
+//}
+//
+//- (id)copyWithZone:(NSZone *)zone {
+//  TJYEXBaoBaoData *newObj = [[[self class] allocWithZone:zone] init];
+//
+//  newObj.sBaobaouid = self.sBaobaouid;
+//  newObj.sUsername = [NSMutableString stringWithString:self.sUsername];
+//  newObj.sNickname = [NSMutableString stringWithString:self.sNickname];
+//  newObj.sRealname = [NSMutableString stringWithString:self.sRealname];
+//  newObj.birthyear = self.birthyear;
+//  newObj.birthmonth = self.birthmonth;
+//  newObj.birthday = self.birthday;
+//  newObj.gender = self.gender;
+//
+//  newObj.sSchooluid = [NSMutableString stringWithString:self.sSchooluid];
+//  newObj.sClassuid = [NSMutableString stringWithString:self.sClassuid];
+//
+//  newObj.strSchoolName = [NSMutableString stringWithString:self.strSchoolName];
+//  newObj.strClassName = [NSMutableString stringWithString:self.strClassName];
+//
+//  newObj.gxid = self.gxid;
+//  newObj.gxname = [NSMutableString stringWithString:self.gxname];
+//  newObj.avatar = [NSMutableString stringWithString:self.avatar];
+//  newObj.coverurl = [NSMutableString stringWithString:self.coverurl];
+//  newObj.qx = self.qx;
+//  newObj.baobaoschooldata = [NSMutableArray arrayWithArray:self.baobaoschooldata];
+//
+//  return newObj;
+//}
+//
+//- (void)dealloc {
+//  self.sBaobaouid = nil;
+//  self.sUsername = nil;
+//  self.sNickname = nil;
+//  self.sRealname = nil;
+//
+//  self.sSchooluid = nil;
+//  self.sClassuid = nil;
+//
+//  self.strSchoolName = nil;
+//  self.strClassName = nil;
+//
+//  self.gxname = nil;
+//  self.avatar = nil;
+//
+//  [super dealloc];
+//}
+//
+//@end
+//
+//#pragma mark TJYEXLanmu
+//@implementation TJYEXLanmu
+//@synthesize sLanmuName;
+//
+//- (id)init {
+//  self.sLanmuName = @"";
+//  return self;
+//}
+//
+//- (id)copyWithZone:(NSZone *)zone {
+//  TJYEXLanmu *newObj = [[[self class] allocWithZone:zone] init];
+//
+//  newObj.sLanmuName = [NSMutableString stringWithString:self.sLanmuName];
+//  return newObj;
+//}
+//
+//- (void)dealloc {
+//  self.sLanmuName = nil;
+//
+//  [super dealloc];
+//}
+//@end
+//
+//#pragma mark TJYEXClass
+//@implementation TJYEXClass
+//@synthesize sClassId;
+//@synthesize sClassName;
+//
+//- (id)init {
+//  self.sClassId = @"";
+//  self.sClassName = @"";
+//  return self;
+//}
+//
+//- (id)copyWithZone:(NSZone *)zone {
+//  TJYEXClass *newObj = [[[self class] allocWithZone:zone] init];
+//
+//  newObj.sClassId = [NSMutableString stringWithString:self.sClassId];
+//  newObj.sClassName = [NSMutableString stringWithString:self.sClassName];
+//  return newObj;
+//}
+//
+//- (void)dealloc {
+//  self.sClassId = nil;
+//  self.sClassName = nil;
+//
+//  [super dealloc];
+//}
+//@end
+//
+//// 定义日期数据结构
+//@implementation TDateInfo
+//@synthesize year;
+//@synthesize month;
+//@synthesize day;
+//@synthesize hour;
+//@synthesize minute;
+//@synthesize isRunYue;
+//
+//- (void)dealloc {
+//  [super dealloc];
+//}
+//
+////今日
+//+ (TDateInfo *)getTodayDateInfo {
+//  NSDate *date = [NSDate date];
+//  NSCalendar *calendar = [NSCalendar currentCalendar];
+//  NSDateComponents *comps = [calendar
+//      components:(NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit)
+//        fromDate:date];
+//
+//  TDateInfo *todayInfo = [[TDateInfo new] autorelease];
+//  todayInfo.year = [comps year];
+//  todayInfo.month = [comps month];
+//  todayInfo.day = [comps day];
+//  return todayInfo;
+//}
+//
+//+ (TDateInfo *)dateinfoFromDate:(NSDate *)dt {
+//  NSCalendar *calendar = [NSCalendar currentCalendar];
+//  NSDateComponents *comps = [calendar
+//      components:(NSYearCalendarUnit | NSMonthCalendarUnit | NSDayCalendarUnit)
+//        fromDate:dt];
+//
+//  TDateInfo *todayInfo = [[TDateInfo new] autorelease];
+//  todayInfo.year = [comps year];
+//  todayInfo.month = [comps month];
+//  todayInfo.day = [comps day];
+//  return todayInfo;
+//}
+//
+//+ (TDateInfo *)dateinfoDayToNow:(int)d {
+//  NSDate *dt =
+//      [NSDate dateWithTimeIntervalSinceNow:(NSTimeInterval)(d * 24 * 3600)];
+//  return [TDateInfo dateinfoFromDate:dt];
+//}
+//
+//+ (TDateInfo *)dateinfoMonthToNow:(int)m {
+//  TDateInfo *dateInfo = [TDateInfo getTodayDateInfo];
+//
+//  int yy = dateInfo.year;
+//  int mm = dateInfo.month;
+//
+//  yy += m / 12;
+//  mm += m % 12;
+//
+//  if (mm > 12) {
+//    yy += 1;
+//    mm -= 12;
+//  } else if (mm < 1) {
+//    yy -= 1;
+//    mm += 12;
+//  }
+//
+//  dateInfo.year = yy;
+//
+//  if (mm != dateInfo.month) {
+//    dateInfo.month = mm;
+//    int maxDay = [PubFunction maxMonthDay:yy:mm];
+//    if (dateInfo.day > maxDay)
+//      dateInfo.day = maxDay;
+//  }
+//
+//  return dateInfo;
+//}
+//
+//+ (TDateInfo *)dateinfoMonthToSpecificMonth:(int)m date:(NSDate *)dt {
+//  TDateInfo *dateInfo = [TDateInfo dateinfoFromDate:dt];
+//
+//  int yy = dateInfo.year;
+//  int mm = dateInfo.month;
+//
+//  yy += m / 12;
+//  mm += m % 12;
+//
+//  if (mm > 12) {
+//    yy += 1;
+//    mm -= 12;
+//  } else if (mm < 1) {
+//    yy -= 1;
+//    mm += 12;
+//  }
+//
+//  dateInfo.year = yy;
+//
+//  if (mm != dateInfo.month) {
+//    dateInfo.month = mm;
+//    int maxDay = [PubFunction maxMonthDay:yy:mm];
+//    if (dateInfo.day > maxDay)
+//      dateInfo.day = maxDay;
+//  }
+//
+//  return dateInfo;
+//}
+//
+//+ (TDateInfo *)dateinfoYearToNow:(int)y {
+//  TDateInfo *dateInfo = [TDateInfo getTodayDateInfo];
+//  dateInfo.year += y;
+//
+//  if (y > 1) {
+//    int maxDay = [PubFunction maxMonthDay:dateInfo.year:dateInfo.month];
+//    if (dateInfo.day > maxDay)
+//      dateInfo.day = maxDay;
+//  }
+//
+//  return dateInfo;
+//}
+//
+//+ (TDateInfo *)dateinfoYearToSpecificYear:(int)y date:(NSDate *)dt {
+//  TDateInfo *dateInfo = [TDateInfo dateinfoFromDate:dt];
+//
+//  dateInfo.year += y;
+//
+//  if (y != 0) {
+//    int maxDay = [PubFunction maxMonthDay:dateInfo.year:dateInfo.month];
+//    if (dateInfo.day > maxDay)
+//      dateInfo.day = maxDay;
+//  }
+//
+//  return dateInfo;
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 检查新版本
+//@implementation TCheckVersionResult
+//
+//@synthesize sVerCode;
+//@synthesize sDownURL;
+//
+//- (void)dealloc {
+//  self.sVerCode = nil;
+//  self.sDownURL = nil;
+//
+//  [super dealloc];
+//}
+//
+//@end
+//
+//@implementation JYEXUserAppInfo
+//
+//@synthesize sUserName;
+//@synthesize sAppCode;
+//@synthesize sAppName;
+//@synthesize iAppID;
+//@synthesize iAppType;
+//
+//- (id)init {
+//  self = [super init];
+//  if (self) {
+//    self.sUserName = @"";
+//    self.sAppCode = @"";
+//    self.sAppName = @"";
+//    self.iAppID = 0;
+//    self.iAppType = 0;
+//  }
+//  return self;
+//}
+//
+//- (void)dealloc {
+//  self.sUserName = nil;
+//  self.sAppCode = nil;
+//  self.sAppName = nil;
+//
+//  [super dealloc];
+//}
+//@end

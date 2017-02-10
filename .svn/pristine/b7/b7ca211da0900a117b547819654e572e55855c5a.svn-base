@@ -1,0 +1,69 @@
+//
+//  CateModel.h
+//  JYEX
+//
+//  Created by slovelys on 15/7/21.
+//  Copyright © 2015年 广州洋基. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface CateModel : NSObject
+
+/// 用户编号
+@property (copy, nonatomic) NSNumber *user_id;
+/// 当前版本号
+@property (copy, nonatomic) NSNumber *curr_ver;
+/// 创建版本号
+@property (copy, nonatomic) NSNumber *create_ver;
+/// 创建时间
+@property (copy, nonatomic) NSString *create_time;
+/// 修改时间
+@property (copy, nonatomic) NSString *modify_time;
+/// 删除状态
+@property (copy, nonatomic) NSNumber *delete_state;
+/// 编辑状态
+@property (copy, nonatomic) NSNumber *edit_state;
+/// 冲突状态
+@property (copy, nonatomic) NSNumber *conflict_state;
+/// 同步状态，1表示正在同步
+@property (copy, nonatomic) NSNumber *sync_state;
+/// 是否上传
+@property (copy, nonatomic) NSNumber *need_upload;
+/// 目录编号
+@property (copy, nonatomic) NSString *catalog_id;
+/// 当前目录上一级目录
+@property (copy, nonatomic) NSString *catalog_belong_to;
+/// 第一级目录位置
+@property (copy, nonatomic) NSString *catalog_path1;
+/// 第二级目录位置
+@property (copy, nonatomic) NSString *catalog_path2;
+/// 第三级目录位置
+@property (copy, nonatomic) NSString *catalog_path3;
+/// 第四级目录位置
+@property (copy, nonatomic) NSString *catalog_path4;
+/// 第五级目录位置
+@property (copy, nonatomic) NSString *catalog_path5;
+/// 第六级目录位置
+@property (copy, nonatomic) NSString *catalog_path6;
+/// 排列位置
+@property (copy, nonatomic) NSNumber *catalog_order;
+/// 目录名称
+@property (copy, nonatomic) NSString *catalog_name;
+/// 加密标识(是否加密)
+@property (copy, nonatomic) NSNumber *encrypt_flag;
+/// 验证密码
+@property (copy, nonatomic) NSString *verify_data;
+/// 目录类型
+@property (copy, nonatomic) NSNumber *server_type;
+/// 目录颜色
+@property (copy, nonatomic) NSNumber *catalog_color;
+/// 目录图标
+@property (copy, nonatomic) NSNumber *catalog_icon;
+/// 手机目录标志
+@property (copy, nonatomic) NSNumber *mobile_flag;
+/// 笔记数量
+@property (copy, nonatomic) NSNumber *note_count;
+
+
+@end

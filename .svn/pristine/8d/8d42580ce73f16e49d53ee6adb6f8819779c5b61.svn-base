@@ -1,0 +1,624 @@
+////
+////  BussInterImpl.h
+////  Astro
+////
+////  Created by root on 11-11-22.
+////  Copyright 2011 ND SOFT. All rights reserved.
+////
+//
+//#import <Foundation/Foundation.h>
+//#import "NetConstDefine.h"
+//#import "ASIHTTPRequest.h"
+//#import "ASIFormDataRequest.h"
+//#import "DbMngDataDef.h"
+//
+//
+//#pragma mark 全局函数
+////不支持NSDictionary和NSArray
+//id pickJsonValue(NSDictionary* jObj, NSString* jsKey, id defVal);
+//BOOL pickJsonBOOLValue(NSDictionary* jObj, NSString* jsKey, BOOL defVal);
+////int pickJsonIntValue(NSDictionary* jObj, NSString* jsKey, int defVal);
+//int pickJsonIntValue(NSDictionary* jObj, NSString* jsKey);
+//float pickJsonFloatValue(NSDictionary* jObj, NSString* jsKey, float defVal);
+//double pickJsonDoubleValue(NSDictionary* jObj, NSString* jsKey, double defVal);
+////NSString* pickJsonStrValue(NSDictionary* jObj, NSString* jsKey, NSString* defVal);
+//NSString* pickJsonStrValue(NSDictionary* jObj, NSString* jsKey);
+//
+//#pragma mark -
+//#pragma mark 数据JSON转换处理协议
+//@protocol BussSendDataPack
+////构造发送JSON串数据
+//@required
+//-(NSString*) PackSendOutJsonString;
+//@optional
+//-(NSData*) PackSendOutByteData;
+//
+//@end
+//
+//
+//#pragma mark -
+//#pragma mark 业务结束处理协议
+//@protocol BussRecvDataProc
+//@required
+////接收数据处理
+//-(BOOL) ProcRecvData:(id) rcvData Error:(NSError**) err;
+//@end
+//
+//#pragma mark -
+//#pragma mark 业务请求基础
+//@interface BussInterImplBase : NSObject 
+//{
+//@public
+//	ASIHTTPRequest* objASIHttpReqt;
+//	NSString* strURL;	//连接地址
+//	enum EHttpMethod eHttpMethod;	//连接方式
+//	int iHttpCode;	//HTTP状态码
+//	
+//	//构造发送数据
+//	id<NSObject, BussSendDataPack>	delgtPackData;
+//	
+//	//请求回调函数
+//	//数据处理前回调
+//	BOOL bContinueProc;		//处理前回调后是否继续处理：
+//	NSObject* callbackObj_preProc;
+//	SEL callbackFunc_preProc;	
+//	
+//	//数据处理结束回调
+//	NSObject* callbackObj;
+//	SEL callbackFunc;
+//}
+//
+//@property(retain) ASIHTTPRequest* objASIHttpReqt;
+//@property(nonatomic, retain) NSString* strURL;
+//@property(nonatomic) enum EHttpMethod eHttpMethod;
+//@property(nonatomic, readonly) int iHttpCode;
+//@property(retain) id<NSObject, BussSendDataPack>	delgtPackData;
+//@property(retain) NSObject* callbackObj;
+//@property(nonatomic, assign) SEL callbackFunc;
+//@property(retain) NSObject* callbackObj_preProc;
+//@property(nonatomic, assign) SEL callbackFunc_preProc;	
+//@property(nonatomic) BOOL bContinueProc;
+//
+//#pragma mark -
+//+ (id) InstantiateBussInter:(NSString*)url Method:(enum EHttpMethod)method;
+//+ (id) InstantiateBussInter:(NSString*)url Method:(enum EHttpMethod)method ResponseTarget:(id) target ResponseSelector:(SEL) selector;
+//- (id) init;
+//- (NSString*) WrapJsonStringWithBussID:(int) bussID DictData:(NSDictionary*)innerData;
+//- (NSString*) WrapJsonStringWithBussID:(int) bussID AryData:(NSArray*)innerData;
+//-(NSString*) WrapJsonStringWithOption:(NSString*)option DictData:(NSDictionary*)innerData;
+//-(NSString*) WrapJsonStringWithOption:(NSString*)option AryData:(NSArray*)innerData;
+//
+//#pragma mark -
+//+(BOOL) prepareUnpackRecvData:(id) rcvData ToJsonObj:(id*)retJsObj HttpStatus:(int)statusCode Error:(NSError**)err;
+//+(NSString*) getHttpStatusDescByCode:(int)httpCode;
+//+(NSString*) pickResponBufFromRecvJsObj:(NSDictionary*)jsObj;
+//+ (BOOL) IsErrMsgJson:(id) objJson HttpStatus:(int)statusCode Error:(NSError**) err;
+//+ (NSString*) getQueryBaseURL;
+//+(NSString*) makeQueryURLWithCgi:(NSString*) cgiName;
+//+(NSString*) makeQueryURLWithCgiSID:(NSString*)cgiName UserSID:(NSString*)sSID;
+//+(NSString*) makeQueryURLWithCgiSIDWithParam:(NSString*)cgiName UserSID:(NSString*)sSID param:(NSString *)strParam; //add 2012.11.28
+//+(NSString*) makeQueryURLWithSID:(NSString*)sSID;
+//
+////通用的处理接收数据
+//-(BOOL) ProcRecvData:(id) rcvData Error:(NSError**) err;
+////通用的解包函数（解为dictionary)
+//-(BOOL)unpackJsonForResult:(NSString*)jsRep Result:(TBussStatus *)sts;
+//
+//
+//#pragma mark -
+////对象释放
+//-(void) cancelHttpRequest;
+//-(void) destroyBussReqObj;
+//
+//@end
+//
+//
+//#pragma mark -
+////私有方法
+//@interface BussInterImplBase (Private)
+//-(ASIHTTPRequest*) InitRequestWhithHeader;
+//-(ASIHTTPRequest*) InitRequestWhithHeader:(NSString *)strContentTypeValue;
+//-(ASIFormDataRequest*) InitJYEXRequestWhithHeader:(NSString *)strContentTypeValue;
+//-(ASIFormDataRequest*) InitFormRequestWithHeader;
+//
+////请求
+//- (void) HttpRequest;
+//- (void) HttpRequest:(NSString*)url Method:(enum EHttpMethod)method ResponseTarget:(id) target ResponseSelector:(SEL) selector;
+//-(void)HttpRequest_DownloadFile:(NSString*)url Method:(enum EHttpMethod)method filename:(NSString *)strFilename contenttype:(NSString *)strContentTypeValue ResponseTarget:(id) target ResponseSelector:(SEL) selector;
+//-(void)HttpRequest_uploadFile:(NSString*)url Method:(enum EHttpMethod)method contenttype:(NSString *)strContentTypeValue ResponseTarget:(id) target ResponseSelector:(SEL) selector;
+//
+////HTTP方法
+//-(NSString*) HttpMethodString;
+////异步请求
+//-(void) DoASyncRequest;
+//-(void) DoASyncRequest_DownloadFile:(NSString *)strFilename contenttype:(NSString *)strContentTypeValue;
+//-(void) DoASyncRequest_uploadFile:(NSString *)strContentTypeValue;
+//-(void) DoASyncRequest_uploadJYEXFile:(NSString *)strContentTypeValue FileName:(NSString*)strFileName FileExt:(NSString*)strExt;
+//-(void) DoASyncRequest_uploadFormData:(NSArray *)arrFormData;
+//
+//
+////同步请求
+//-(void) DoSyncRequest;
+////构造发送数据
+//-(NSMutableData*) MakeSendParam;
+////构建发送数据
+//-(NSMutableData*) MakeSendBytesParam;
+//
+////处理接收数据
+//-(void) doProcRecvData:(id)rcvData HttpCode:(int) httpCode;
+//
+//
+//-(void)notifyPreCallBack:(id)arg;
+//-(void)notifyCallBack:(id)arg;
+//
+//@end
+//
+//
+///*
+//#pragma mark -
+//#pragma mark 登录
+//@interface BussLogin : BussInterImplBase <BussSendDataPack>
+//{
+//	TLoginUserInfo* lgnUser;
+//	id	retObj;
+//	SEL	retFunc;
+//	int	iLoginStatus;	//登录状态：0-初始; 1－登录; 2－inituser
+//	NSString* sSrvDate;	
+//}
+//@property(nonatomic, retain)TLoginUserInfo* lgnUser;
+//@property(nonatomic, assign)id	retObj;
+//@property(nonatomic, assign)SEL	retFunc;
+//@property(nonatomic, retain)NSString* sSrvDate;	
+//
+//-(void) Login:(NSString*) username Password:(NSString*) passwd RemPswd:(int)remPswd AutoLogin:(int)autoLogin ResponseTarget:(id) target ResponseSelector:(SEL) selector;
+//-(NSString*) AutoLogin:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//-(BOOL) ProcRecvData:(id) rcvData Error:(NSError**) err;
+//-(void) UnPackLoginJsonStr:(NSDictionary*) jsObj;
+//-(void)UnPackLogin91NoteJsonStr:(NSDictionary*) jsObj;
+//-(void)UnPackLoginGetNickNameJsonStr:(NSDictionary*) jsObj;
+//-(void) login91Note;
+//-(void) onLogined:(id)err;
+//@end
+//*/ 
+//
+////家园E线
+//#pragma mark -
+//#pragma mark 家园E线登陆
+//@interface BussJYEXLogin : BussInterImplBase <BussSendDataPack>
+//{
+////    TJYEXLoginUserInfo* lgnUser;
+//    
+//	id	retObj;
+//	SEL	retFunc;
+//	int	iLoginStatus;	//登录状态：0-初始; 1－登录; 2－inituser
+//	NSString* sSrvDate;
+//    
+//    NSMutableArray *appList;
+//    
+//    NSArray *m_arrBaobaoData;
+//    
+//    NSString *qiniutoken;
+//    NSString *qiniudns;
+//    NSArray *m_arrClassData;
+//    
+//}
+////@property(nonatomic, retain)TJYEXLoginUserInfo* lgnUser;
+//@property(nonatomic, retain) id	retObj;
+//@property(nonatomic, assign) SEL retFunc;
+//@property(nonatomic, retain)NSString* sSrvDate;
+//@property(nonatomic, retain)NSMutableArray* appList;
+//@property(nonatomic, retain)NSString *qiniutoken;
+//@property(nonatomic, retain)NSString *qiniudns;
+//@property(nonatomic, retain)NSArray* m_arrClassData;
+//@property(nonatomic, retain)NSArray *m_arrSchoolData;
+//@property(nonatomic, retain) NSArray *m_arrDynaTag;
+//
+//-(void) Login:(NSString*) username Password:(NSString*) passwd RemPswd:(int)remPswd AutoLogin:(int)autoLogin ResponseTarget:(id) target ResponseSelector:(SEL) selector;
+////-(NSString*) AutoLogin:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//-(BOOL) ProcRecvData:(id) rcvData Error:(NSError**) err;
+//-(void) UnPackLoginJsonStr:(NSDictionary*) jsObj;
+////-(void)UnPackLogin91NoteJsonStr:(NSDictionary*) jsObj;
+////-(void)UnPackLoginGetNickNameJsonStr:(NSDictionary*) jsObj;
+//-(void) onLogined:(id)err;
+//
+////-(void)getJYEXUserInfor;
+////-(void)getJYEXUserInforEnd:(id)err;
+////-(void)UnPackLoginJYEXUserinforJsonStr:(NSDictionary*) jsObj;
+//
+////-(void)getJYEXUserAppList;
+////-(void)getJYEXUserAppListEnd:(id)err;
+////-(void)UnPackLoginJYEXUserAppListJsonStr:(NSDictionary*) jsObj;
+//
+//-(void)getJYEXLanmuList;
+//-(void)getJYEXLanmuListEnd:(id)err;
+//-(void)UnPackLoginJYEXLanmuListJsonStr:(NSDictionary*) jsObj;
+//
+//-(void)getJYEXClassList;
+//-(void)getJYEXClassListEnd:(id)err;
+//-(void)UnPackLoginJYEXClassListJsonStr:(NSDictionary*) jsObj;
+//
+//@end
+//
+//
+//
+//#pragma mark -
+//#pragma mark 家园E线 在线更新
+//@interface BussJYEXSoftUpdata : BussInterImplBase <BussSendDataPack>
+//{
+//    id	retObj;
+//	SEL	retFunc;
+//}
+//@property(nonatomic, assign)id	retObj;
+//@property(nonatomic, assign)SEL	retFunc;
+//
+//-(void) getSoftInfoFromVersion:(NSString*)sSoftID ResponseTarget:(id) target ResponseSelector:(SEL) selector;
+////-(void)getSoftInfoFromVersion;
+//-(void)getSoftInfoFromVersionEnd:(id)err;
+//-(void)UnPackLoginJYEXSoftUpdataJsonStr:(NSDictionary*) jsObj;
+//@end
+//
+//#pragma mark -
+//#pragma mark 家园E线 查询更新文章数
+//@interface BussJYEXGetUpdateNumber : BussInterImplBase <BussSendDataPack>
+//{
+// 
+//}
+//
+//-(void) getUpdateNumber:(int)dateline ResponseTarget:(id) target ResponseSelector:(SEL) selector;
+//-(NSString*) PackSendOutJsonString;
+//
+//@end
+//
+//
+//#pragma mark -
+//#pragma mark 登出
+//@interface BussLogout: BussInterImplBase <BussSendDataPack>
+//{
+//	NSString* sSID;		//sid
+//}
+//@property(nonatomic, retain) NSString* sSID;
+//
+//-(void) Logout:(NSString*)sessID ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//-(BOOL) ProcRecvData:(id) rcvData Error:(NSError**) err;
+//
+//@end
+//
+//
+///*
+//#pragma mark -
+//#pragma mark 验证session
+//@interface BussCheckSession : BussInterImplBase
+//{
+//	NSString* sSID;		//sid
+//}
+//@property(nonatomic, retain) NSString* sSID;
+//
+//-(void) checkSession:(NSString*)sessID ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(BOOL) ProcRecvData:(id) rcvData Error:(NSError**) err;
+//
+//@end
+//*/
+//
+//
+//#pragma mark -
+//#pragma mark 注册新用户
+//@interface BussRegisterUser : BussInterImplBase <BussSendDataPack>
+//{
+//	NSString* UserName;
+//	NSString* Password;
+//	NSString* NickName;
+//}
+//@property(nonatomic, retain)NSString* UserName;
+//@property(nonatomic, retain)NSString* Password;
+//@property(nonatomic, retain)NSString* NickName;
+//
+//-(void) registerUser:(NSString*)userName Password:(NSString*)password Nickname:(NSString*)nickname RespTarget:(id)target RespSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//-(BOOL) ProcRecvData:(id) rcvData Error:(NSError**) err;
+//
+//@end
+//
+//
+//
+//
+//#pragma mark -
+//#pragma mark 检查新版本
+//@interface BussCheckVersion : BussInterImplBase <BussSendDataPack>
+//{
+//	NSString*	sCheckDate;	//日期
+//}
+//@property(nonatomic, retain) NSString*	sCheckDate;
+//
+////
+//-(void)checkNewVersion:(id)target :(SEL)selector;
+//
+////
+//-(NSString*) PackSendOutJsonString;
+//-(BOOL) ProcRecvData:(id) rcvData Error:(NSError**)err;
+//+(BOOL) unpackJsonCheckVersion:(NSString*)sJson :(TCheckVersionResult*)dout;
+//+(NSComparisonResult) compareVersion:(NSString *)value1 :(NSString *)value2;
+//
+//
+//@end
+//
+//
+//
+//#pragma mark -
+//#pragma mark 签到换取积分
+//
+//@interface BussQianDao : BussInterImplBase <BussSendDataPack>
+//{
+//	NSString*	sReqDate;	//请求日期
+//}
+//
+//@property (nonatomic,retain) NSString* sReqDate;
+//
+//-(void) RequestQiandao:(NSString *)strDate ResponseTarget :(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//-(BOOL) ProcRecvData:(id) rcvData Error:(NSError**)err;
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 获取服务器时间
+//
+//@interface BussServerDateTime : BussInterImplBase <BussSendDataPack>
+//{
+//}
+//
+//-(void) RequestServerDateTimeWithResponseTarget :(id)target ResponseSelector:(SEL)selector;
+//
+//-(NSString*) PackSendOutJsonString;
+//-(BOOL) ProcRecvData:(id) rcvData Error:(NSError**)err;
+//
+//@end
+//
+//
+//
+//
+////---------------------------------用户部分---------------------------------
+//
+//
+//
+//#pragma mark -
+//#pragma mark 家园E线,上传日志
+//@interface BussUploadJYEXNote : BussInterImplBase <BussSendDataPack>
+//{
+//    TNoteInfo *noteinfo;
+//}
+//@property (nonatomic,retain) TNoteInfo *noteinfo;
+//
+//
+//-(void) UploadNote:(id)param ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//@end
+//
+//
+////--------------------------------笔记项部分------------------------------
+//
+//
+//#pragma mark -
+//#pragma mark 下载笔记项文件
+//
+//@interface BussDownItemFile : BussInterImplBase <BussSendDataPack>
+//{
+//}
+//
+//-(void)DownItemFile:(NSString *)strID filename:(NSString *)strFilename contenttype:(NSString *)strContentType ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 上传笔记项数据包
+//
+//
+//@interface BussJYEXUploadItemFile : BussInterImplBase <BussSendDataPack>
+//{
+//    NSString *strItemGuid;
+//    NSString *strExt;
+//    int rs;
+//    int re;
+//}
+//@property (nonatomic,retain) NSString *strItemGuid;
+//@property (nonatomic,retain) NSString *strExt;
+//@property (nonatomic,assign) int rs;
+//@property (nonatomic,assign) int re;
+//
+//-(void)UploadItemFile:(id)param_ ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(NSData*) PackSendOutByteData;
+//
+//@end
+//
+//
+//
+//
+//#pragma mark -
+//#pragma mark 查询相册列表
+//
+//@interface BussJYEXQueryAlbumList : BussInterImplBase <BussSendDataPack>
+//{
+//}
+//
+//-(void) QueryAlbumList:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//
+//@end
+//
+//
+//#pragma mark -
+//#pragma mark 上传图片到相册
+//
+//@interface BussJYEXUploadPhoto : BussInterImplBase <BussSendDataPack>
+//{
+//}
+//
+//-(void) uploadPhoto:(NSString *)strAlbumId title:(NSString *)strTitle albumname:(NSString *)strAlbumName itemguid:(NSString *)strItemGuid uid:(NSString *)strUid username:(NSString *)strUsername ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 创建相册
+//
+//@interface BussJYEXCreateAlbum : BussInterImplBase <BussSendDataPack>
+//{
+//    NSString *m_strAlbum;
+//    NSNumber *m_spaceid;
+//}
+//@property(nonatomic,retain) NSString *m_strAlbum;
+//@property(nonatomic,retain) NSNumber *m_spaceid;
+//
+//-(void) CreateAlbum:(NSString *)strAlbumName space:(NSNumber *)spaceid ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//
+//@end
+//
+//
+//#pragma mark -
+//#pragma mark 注册
+//
+//@interface BussJYEXRegister : BussInterImplBase <BussSendDataPack>
+//{
+//    NSString *m_strUser;
+//    NSString *m_strPassword;
+//    NSString *m_strNickname;
+//    NSString *m_strRealname;
+//    NSString *m_strEmail;
+//}
+//
+//@property(nonatomic,retain) NSString *m_strUser;
+//@property(nonatomic,retain) NSString *m_strPassword;
+//@property(nonatomic,retain) NSString *m_strNickname;
+//@property(nonatomic,retain) NSString *m_strRealname;
+//@property(nonatomic,retain) NSString *m_strEmail;
+//
+//-(void)RegisterUser:(NSString *)strUser password:(NSString *)strPassword nickname:(NSString *)strNickname readlname:(NSString *)strRealname email:(NSString *)strEmail ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//
+//@end
+//
+//
+//#pragma mark -
+//#pragma mark 修改用户资料，包括密码
+//
+//@interface BussJYEXUpdateUserInfo : BussInterImplBase <BussSendDataPack>
+//{
+//    NSString *m_strUid;
+//    NSString *m_strUserName;
+//    NSString *m_strOldPassword;
+//    NSString *m_strNewPassword;
+//    NSString *m_strNickname;
+//    NSString *m_strRealname;
+//    NSString *m_strEmail;
+//    NSString *m_strMobile;
+//}
+//
+//@property(nonatomic,retain) NSString *m_strUid;
+//@property(nonatomic,retain) NSString *m_strUserName;
+//@property(nonatomic,retain) NSString *m_strOldPassword;
+//@property(nonatomic,retain) NSString *m_strNewPassword;
+//@property(nonatomic,retain) NSString *m_strNickname;
+//@property(nonatomic,retain) NSString *m_strRealname;
+//@property(nonatomic,retain) NSString *m_strEmail;
+//@property(nonatomic,retain) NSString *m_strMobile;
+//
+//-(void)UpdateUserInfo:(NSString *)strUid username:(NSString *)strUserName oldpassword:(NSString *)strOldPassword newpassword:(NSString *)strNewPassword nickname:(NSString *)strNickname readlname:(NSString *)strRealname email:(NSString *)strEmail mobile:(NSString *)strMobile ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//
+//
+//@end
+//
+//
+//#pragma mark -
+//#pragma mark 获取图片列表
+//
+//@interface BussJYEXGetAlbumPics : BussInterImplBase <BussSendDataPack>
+//{
+//  
+//}
+//
+//
+//-(void) GetAlbumPics:(NSString *)strAlbumID ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//
+//@end
+//
+//
+//#pragma mark -
+//#pragma mark 下载文件
+//
+//@interface BussDownloadFile : BussInterImplBase <BussSendDataPack>
+//{
+//}
+//
+//-(void)DownloadFile:(NSString *)strUrl filename:(NSString *)strFilename contenttype:(NSString *)strContentType ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//
+//@end
+//
+//
+////--------------------------------下载头像部分------------------------------
+//
+//#pragma mark -
+//#pragma mark 查询用户头像更新时间
+//
+//@interface BussQueryAvatar : BussInterImplBase <BussSendDataPack>
+//{
+//}
+//
+//-(void) QueryAvatar:(NSString *)strUserid ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 获取用户头像
+//
+//@interface BussGetAvatar : BussInterImplBase <BussSendDataPack>
+//{
+//}
+//
+//
+//-(void)GetAvatar:(NSString *)strUserid filename:(NSString *)strFilename contenttype:(NSString *)strContentType ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//
+//@end
+//
+//
+//
+//#pragma mark -
+//#pragma mark 上传动态图片到服务器
+//
+//@interface BussBbqUploadPic : BussInterImplBase <BussSendDataPack>
+//{
+//}
+//
+//-(void) bbqUploadPic:(NSString *)strLocalId filename:(NSString *)strFileName ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//
+//@end
+//
+//
+//#pragma mark -
+//#pragma mark 提交信息到服务端
+//
+//@interface BussBbqPostMsg : BussInterImplBase <BussSendDataPack>
+//{
+//    NSString *m_strUrl;
+//    NSDictionary *m_dicData;
+//}
+//
+//@property(nonatomic,retain) NSString *m_strUrl;
+//@property(nonatomic,retain) NSDictionary *m_dicData;
+//
+//
+//-(void) bbqPostMsg:(NSString *)strUrl data:(NSDictionary *)dicData ResponseTarget:(id)target ResponseSelector:(SEL)selector;
+//-(NSString*) PackSendOutJsonString;
+//
+//@end
+//
+//

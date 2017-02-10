@@ -1,0 +1,61 @@
+///*
+// *  Business.h
+// *  NoteBook
+// *
+// *  Created by wangsc on 10-9-17.
+// *  Copyright 2010 ND. All rights reserved.
+// *
+// */
+//#import "BizLogic.h"
+//
+//#import "CateMgr.h"
+//#import "NoteMgr.h"
+//#import "ItemMgr.h"
+//#import "Note2ItemMgr.h"
+//
+//
+//
+//@interface BizLogic (ForDyna)
+//{
+//
+//}
+//
+////
+//////增加1条动态
+////+(BOOL)addDyna:(DynaModel *)dicDyna attachinfo:(NSArray *)arrAttach;
+//////修改动态
+////+(BOOL)updateDyna:(DynaModel *)dicDyna addAttach:(NSArray *)arrAddAttach delAttach:(NSArray *)arrDelAttach;
+//////删除动态
+////+(BOOL)deleteDyna:(DynaModel *)dicDyna;
+//
+//
+////查询本地数据库记录
+//+(NSArray *)getDyna:(NSString *)baobaouid classuid:(NSString *)classuid schoolid:(NSString *)schoolid dtype:(int)dtype dateline:(int)updatetime;
+////删除所有的旧纪录
+//+(BOOL)delDyna:(NSString *)baobaouid classuid:(NSString *)classuid schoolid:(NSString *)schoolid dtype:(int)dtype;
+//
+//
+//
+////通过guid查询动态
+//+(DynaModel *)getDynaByGuid:(NSString *)guid;
+//
+//
+////查询本地上传记录(首次查询，dicDYna为nil)
+//+(NSArray *)getLocalUploadDyna:(DynaModel *)dicDyna limit:(int)nLimitCount;
+//
+////插入一批记录
+//+(BOOL)InsertDyna:(NSArray *)arrDyna;
+////插入1个记录
+//+(BOOL)InsertSingleDyna:(DynaModel *)dyna;
+////删除记录
+//+(BOOL)deleteDynaByGuid:(NSString *)guid;
+//
+////
+////增加1条照片访问
+//+(BOOL)addPhotoRecord:(NSString *)photoid;
+////查询照片访问记录列表
+//+(NSArray *)getPhotoRecord;
+//
+//
+//
+//@end

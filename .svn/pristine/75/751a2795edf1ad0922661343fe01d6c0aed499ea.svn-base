@@ -1,0 +1,61 @@
+//
+//  DBController.h
+//  SparkEnglish
+//  对cppsqlite3的简单封装，适当时提供多个不同的单例来对不同数据库的访问
+//  Created by huanghb on 11-1-27.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import "DBMng.h"
+
+
+#pragma mark -
+#pragma mark 数据库管理
+@interface AstroDBMng(ForCommonMgr)
+{
+    
+}
+
+//确认数据库是否存在
++(BOOL) loadDbAstroCommon;
+//
+////最后登录的帐号
+//+(NSString *) getLastLoginUser:(TJYEXLoginUserInfo*) user;
+////帐号列表
+//+(NSMutableArray* ) getLoginUserList;
+////本地登录过的帐号数
+//+(int) getLoginedUserCount;
+////删除账户
+//+(BOOL) deleteLoginUserByUserName:(NSString*)sUserName;
+////最后登录的帐号
+//+(TJYEXLoginUserInfo*) getJYEXLoginUserByUID:(NSString*)sUserID;
+////
+//+(TJYEXLoginUserInfo*) getJYEXLoginUserByUserName:(NSString*)sUserName;
+////更新账号
+//+(BOOL) replaceJYEXLoginUser:(TJYEXLoginUserInfo*) user data:(NSDictionary *)dicData;
+//
+//
+
+//自定义数据
++(NSString*) getSystemCfg:(NSString*)sKey Cond:(NSString*)sCondition Default:(NSString*)sDefValue;
++(BOOL) setSystemCfg:(NSString*)sKey Cond:(NSString*)sCondition Value:(NSString*)sValue;
+
+
++(BOOL) deleteJYEXAppListByUserName:(NSString *)sUserName;
++(NSArray*) getAppListByUserName:(NSString *)sUserName AppType:(UserAppType)appType;
++(JYEXUserAppInfo*)getAppListByUserName:(NSString *)sUserName AppCode:(NSString *)appCode;
+
++(BOOL)insertAppListByUserName:(NSString *)sUserName AppList:(NSArray*)appList;
++(NSArray*) getLanmuList;
++(BOOL)cleanLanmuList;
++(BOOL)insertLanmuListByUserName:(NSArray*)lanmuList;
+
+//+(BOOL) pickClassInfoFromQuery:(TJYEXClass*) classInfo Query:(CppSQLite3Query*)query;
++(NSArray*) getClassList;
++(BOOL) cleanClassList;
++(BOOL) insertClassListByUserName:(NSArray*)classList;
+
+
+
+@end
+

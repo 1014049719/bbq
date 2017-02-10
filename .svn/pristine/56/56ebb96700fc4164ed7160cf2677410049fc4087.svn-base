@@ -1,0 +1,3353 @@
+////
+////  BussInterImpl.mm
+////  Astro
+////
+////  Created by root on 11-11-22.
+////  Copyright 2011 ND SOFT. All rights reserved.
+////
+//
+//#import "BussInterImpl.h"
+//#import "CommonDef.h"
+//#import "SBJson.h"
+////#import "BussComdIDDef.h"
+//#import "NetConstDefine.h"
+//#import "GlobalVar.h"
+//#import "PubFunction.h"
+////#import "BussIntfWeather.h"
+////#import "UIImage+WebCache.h"
+////#import "UIDevice+TAAddition.h"
+//
+//#import "BizLogicAll.h"
+//#import "CommonAll.h"
+//#import "DBMngAll.h"
+//
+//#import <mach/mach.h>
+//#import <CommonCrypto/CommonDigest.h>
+//
+//#import "UIProgress.h"
+//#import "Reachability.h"
+//#import "Global.h"
+//#import "logging.h"
+//
+//#include "JsonManager.h"
+//#include "AppMacro.h"
+//
+////#define LOG_NETINFO //调试使用
+//
+/////////////////////////////////
+/////////全局函数////////////
+//id pickJsonValue(NSDictionary *jObj, NSString *jsKey, id defVal) {
+//  id val = [jObj objectForKey:jsKey];
+//  if (!val || [val isKindOfClass:[NSNull class]]) {
+//    return defVal;
+//  } else {
+//    return val;
+//  }
+//}
+//
+//BOOL pickJsonBOOLValue(NSDictionary *jObj, NSString *jsKey, BOOL defVal) {
+//  return [(NSNumber *)pickJsonValue(
+//      jObj, jsKey, [NSNumber numberWithBool:defVal]) boolValue];
+//}
+//
+//// int pickJsonIntValue(NSDictionary* jObj, NSString* jsKey, int defVal)
+////{
+////	return [(NSNumber*)pickJsonValue(jObj, jsKey, [NSNumber
+////numberWithInt:defVal]) intValue];
+////}
+//
+//int pickJsonIntValue(NSDictionary *jObj, NSString *jsKey) {
+//  return [(NSNumber *)pickJsonValue(jObj, jsKey, [NSNumber numberWithInt:0])
+//          intValue];
+//}
+//
+//float pickJsonFloatValue(NSDictionary *jObj, NSString *jsKey, float defVal) {
+//  return [(NSNumber *)pickJsonValue(
+//      jObj, jsKey, [NSNumber numberWithFloat:defVal]) floatValue];
+//}
+//
+//double pickJsonDoubleValue(NSDictionary *jObj, NSString *jsKey, double defVal) {
+//  return [(NSNumber *)pickJsonValue(
+//      jObj, jsKey, [NSNumber numberWithDouble:defVal]) doubleValue];
+//}
+//
+//// NSString* pickJsonStrValue(NSDictionary* jObj, NSString* jsKey, NSString*
+//// defVal)
+////{
+////	return (NSString*)pickJsonValue(jObj, jsKey, defVal);
+////}
+//
+//NSString *pickJsonStrValue(NSDictionary *jObj, NSString *jsKey) {
+//  return (NSString *)pickJsonValue(jObj, jsKey, @"");
+//}
+//
+/////////////////////////////////
+//
+//#pragma mark -
+//#pragma mark BussInterImplBase公有方法
+//
+//@implementation BussInterImplBase
+//
+//@synthesize objASIHttpReqt;
+//@synthesize delgtPackData, strURL, eHttpMethod;
+//@synthesize iHttpCode;
+//@synthesize callbackObj, callbackFunc;
+//@synthesize bContinueProc, callbackObj_preProc, callbackFunc_preProc;
+//
+//+ (id)InstantiateBussInter:(NSString *)url Method:(EHttpMethod)method {
+//  id buss = [[self class] new]; //可适合子类对象
+//  BussInterImplBase *base = (BussInterImplBase *)buss;
+//  base.strURL = url;
+//  base.eHttpMethod = method;
+//
+//  return [buss autorelease];
+//}
+//
+//+ (id)InstantiateBussInter:(NSString *)url
+//                    Method:(EHttpMethod)method
+//            ResponseTarget:(id)target
+//          ResponseSelector:(SEL)selector {
+//  id buss = [[self class] new]; //可适合子类对象
+//  BussInterImplBase *base = (BussInterImplBase *)buss;
+//  base.strURL = url;
+//  base.eHttpMethod = method;
+//  base.callbackObj = target;
+//  base.callbackFunc = selector;
+//
+//  return [buss autorelease];
+//}
+//
+//- (id)init {
+//  self = [super init];
+//  if (self) {
+//    self.strURL = @"";                  //连接地址
+//    self.eHttpMethod = HTTP_METHOD_POST; //连接方式
+//    self.callbackFunc = nil;
+//    self.callbackObj = nil;
+//    self.delgtPackData = nil;
+//    self.bContinueProc = YES;
+//    self.callbackObj_preProc = nil;
+//    self.callbackFunc_preProc = nil;
+//  }
+//
+//  return self;
+//}
+//
+//- (void)dealloc {
+//  [self destroyBussReqObj];
+//
+//  self.strURL = nil;
+//  self.callbackFunc = nil;
+//  self.callbackObj = nil;
+//  self.delgtPackData = nil;
+//  self.callbackObj_preProc = nil;
+//  self.callbackFunc_preProc = nil;
+//
+//  [super dealloc];
+//}
+//
+//- (NSString *)WrapJsonStringWithBussID:(int)bussID
+//                              DictData:(NSDictionary *)innerData {
+//  NSMutableDictionary *jObjRoot = [NSMutableDictionary dictionary];
+//  if (!jObjRoot)
+//    return @"";
+//
+//  //加上业务命令ID
+//  [jObjRoot setObject:[NSNumber numberWithInt:bussID] forKey:@"comdcode"];
+//  [jObjRoot setObject:[innerData JSONRepresentation] forKey:@"paramcontent"];
+//
+//  //转成字符串
+//  //[jObjRoot setObject:LANGCODE forKey:@"langcode"];
+//  NSString *strJson = [jObjRoot JSONRepresentation];
+//  return strJson;
+//}
+//
+//- (NSString *)WrapJsonStringWithBussID:(int)bussID
+//                               AryData:(NSArray *)innerData {
+//  NSMutableDictionary *jObjRoot = [NSMutableDictionary dictionary];
+//  if (!jObjRoot)
+//    return @"";
+//
+//  //加上业务命令ID
+//  [jObjRoot setObject:[innerData JSONRepresentation] forKey:@"paramcontent"];
+//
+//  //转成字符串
+//  NSString *strJson = [jObjRoot JSONRepresentation];
+//  return strJson;
+//}
+//
+//- (NSString *)WrapJsonStringWithOption:(NSString *)option
+//                              DictData:(NSDictionary *)innerData {
+//  NSMutableDictionary *jObjRoot = [NSMutableDictionary dictionary];
+//  if (!jObjRoot)
+//    return @"";
+//
+//  //加上业务命令ID
+//  [jObjRoot setObject:option forKey:@"option"];
+//  [jObjRoot setObject:innerData forKey:@"param"];
+//
+//  //转成字符串
+//  NSString *strJson = [jObjRoot JSONRepresentation];
+//  return strJson;
+//}
+//
+//- (NSString *)WrapJsonStringWithOption:(NSString *)option
+//                               AryData:(NSArray *)innerData {
+//  NSMutableDictionary *jObjRoot = [NSMutableDictionary dictionary];
+//  if (!jObjRoot)
+//    return @"";
+//
+//  //加上业务命令ID
+//  [jObjRoot setObject:option forKey:@"option"];
+//  [jObjRoot setObject:innerData forKey:@"param"];
+//
+//  //转成字符串
+//  NSString *strJson = [jObjRoot JSONRepresentation];
+//  return strJson;
+//}
+//
+//+ (BOOL)prepareUnpackRecvData:(id)rcvData
+//                    ToJsonObj:(id *)retJsObj
+//                   HttpStatus:(int)statusCode
+//                        Error:(NSError **)err {
+//  // LOG_DEBUG(@"返回数据：%@", rcvData);
+//
+//  NSLog(@"rcvData:%@", rcvData);
+//
+//  do {
+//    if (statusCode == 0) //网络出错
+//    {
+//      *err = [NSError errorWithDomain:@"网络出错" code:statusCode userInfo:nil];
+//      break;
+//    }
+//
+//    if ([rcvData isKindOfClass:[NSError class]]) {
+//      *err = rcvData;
+//      break;
+//    }
+//
+//    if (nil == rcvData) {
+//      NSString *errHttp =
+//          [BussInterImplBase getHttpStatusDescByCode:statusCode];
+//      *err = [NSError errorWithDomain:errHttp code:statusCode userInfo:nil];
+//      break;
+//    }
+//
+//    //收到的非字符串（json字符串）
+//    if (![rcvData isKindOfClass:[NSString class]]) {
+//      NSString *errHttp =
+//          [BussInterImplBase getHttpStatusDescByCode:statusCode];
+//      *err = [NSError errorWithDomain:errHttp code:statusCode userInfo:nil];
+//      break;
+//    }
+//    NSString *sJSON = (NSString *)rcvData;
+//    if (statusCode == 200 && [rcvData isKindOfClass:[NSString class]]) {
+//      // NSLog(@"%@", (NSString*)rcvData );
+//      //剔除第一个 { 或者 ] 之前的空格或换行符
+//      if ((![(NSString *)rcvData hasPrefix:@"{"]) &&
+//          (![(NSString *)rcvData hasPrefix:@"["])) {
+//        NSRange r1 = [sJSON rangeOfString:@"{"];
+//        NSRange r2 = [sJSON rangeOfString:@"["];
+//        if (r1.location == NSNotFound && r2.location == NSNotFound) {
+//          break;
+//        } else {
+//          r1.location =
+//              ((r1.location <= r2.location) ? r1.location : r2.location);
+//          sJSON = [(NSString *)rcvData substringFromIndex:r1.location];
+//        }
+//      }
+//    }
+//
+//    if ([rcvData isKindOfClass:[NSString class]]) {
+//      //*retJsObj = [(NSString*)rcvData JSONValue];
+//      *retJsObj = [(NSString *)sJSON JSONValue];
+//      //是空json串
+//      if ([PubFunction isObjNull:*retJsObj]) {
+//        NSString *errHttp =
+//            [BussInterImplBase getHttpStatusDescByCode:statusCode];
+//        *err = [NSError errorWithDomain:errHttp code:statusCode userInfo:nil];
+//        break;
+//      }
+//
+//      if ([BussInterImplBase IsErrMsgJson:*retJsObj
+//                               HttpStatus:statusCode
+//                                    Error:err]) {
+//        break;
+//      }
+//    }
+//
+//    return YES;
+//
+//  } while (NO);
+//
+//  if (statusCode == 200) {
+//    *err = nil;
+//    return YES;
+//  }
+//  return NO;
+//}
+//
+//+ (NSString *)getHttpStatusDescByCode:(int)httpCode {
+//  NSMutableDictionary *allStatusDesc = nil;
+//  @try {
+//    allStatusDesc = [[NSMutableDictionary alloc]
+//        initWithObjectsAndKeys:
+//            @"Continue", @"100", @"Switching Protocols", @"101", @"Processing",
+//            @"102", @"OK", @"200", @"Created", @"201", @"Accepted", @"202",
+//            @"Non-Authoritative Information", @"203", @"No Content", @"204",
+//            @"Reset Content", @"205", @"Partial Content", @"206",
+//            @"Multi-Status", @"207", @"IM Used", @"226", @"Multiple Choices",
+//            @"300", @"Moved Permanently", @"301", @"Found", @"302",
+//            @"See Other", @"303", @"Not Modified", @"304", @"Use Proxy", @"305",
+//            @"(Unused)", @"306", @"Temporary Redirect", @"307", @"Bad Request",
+//            @"400", @"Unauthorized", @"401", @"Payment Required", @"402",
+//            @"Forbidden", @"403", @"Not Found", @"404", @"Method Not Allowed",
+//            @"405", @"Not Acceptable", @"406", @"Proxy Authentication Required",
+//            @"407", @"Request Time out", @"408", @"Conflict", @"409", @"Gone",
+//            @"410", @"Length Required", @"411", @"Precondition Failed", @"412",
+//            @"Request Entity Too Large", @"413", @"Request-URI Too Long",
+//            @"414", @"Unsupported Media Type", @"415",
+//            @"Requested Range Not Satisfiable", @"416", @"Expectation Failed",
+//            @"417", @"I'm a teapot", @"418", @"Unprocessable Entity", @"422",
+//            @"Locked", @"423", @"Failed Dependency", @"424",
+//            @"(Unordered Collection)", @"425", @"Upgrade Required", @"426",
+//            @"Internal Server Error", @"500", @"Not Implemented", @"501",
+//            @"Bad Gateway", @"502", @"Service Unavailable", @"503",
+//            @"Gateway Timeout", @"504", @"HTTP Version Not Supported", @"505",
+//            @"Variant Also Negotiates", @"506", @"Insufficient Storage", @"507",
+//            @"Not Extended", @"510", nil];
+//
+//    NSString *sKey = [NSString stringWithFormat:@"%d", httpCode];
+//    return [allStatusDesc objectForKey:sKey];
+//  } @catch (NSException *e) {
+//    LOG_ERROR(@"未找到http状态码. code=%d", httpCode);
+//  } @finally {
+//    if (allStatusDesc) {
+//      [allStatusDesc release];
+//    }
+//  }
+//  return @"";
+//}
+//
+//+ (NSString *)pickResponBufFromRecvJsObj:(NSDictionary *)jsObj {
+//  if ([PubFunction isObjNull:jsObj]) {
+//    return nil;
+//  }
+//
+//  NSString *strBuf = pickJsonStrValue(jsObj, @"sresponbuf");
+//  // LOG_DEBUG(@"返回数据内容：%@", strBuf);
+//  return strBuf;
+//}
+//
+//+ (BOOL)IsErrMsgJson:(id)objJson
+//          HttpStatus:(int)statusCode
+//               Error:(NSError **)err {
+//  if ([objJson isKindOfClass:[NSArray class]]) {
+//    return NO;
+//  } else if ([objJson isKindOfClass:[NSDictionary class]]) {
+//
+//    if ([objJson count] == 1) {
+//      NSString *msgKey = [[objJson allKeys] objectAtIndex:0];
+//      if ([msgKey compare:@"msg"] == 0) {
+//        *err = [NSError errorWithDomain:pickJsonStrValue(objJson, @"msg")
+//                                   code:statusCode
+//                               userInfo:nil];
+//        return YES;
+//      }
+//    }
+//  }
+//
+//  return NO;
+//}
+//
+//+ (NSString *)getQueryBaseURL {
+//#ifdef TARGET_IPHONE_SIMULATOR
+//#if ACCESS_OUTER_SERVICE
+//  return CS_OUTER_URL_BASE;
+//#else
+//  return CS_INNER_URL_BASE;
+//#endif
+//#else
+//  return CS_OUTER_URL_BASE;
+//#endif
+//}
+//
+//+ (NSString *)makeQueryURLWithCgi:(NSString *)cgiName {
+//  NSString *url = [NSString
+//      stringWithFormat:@"%@%@", [BussInterImplBase getQueryBaseURL], cgiName];
+//
+////调试---------
+//#ifdef LOG_NETINFO
+//  LOG_ERROR(@"URL=%@", url);
+//#else
+//  LOG_DEBUG(@"URL=%@", url);
+//#endif
+//  return url;
+//}
+//
+//+ (NSString *)makeQueryURLWithCgiSID:(NSString *)cgiName
+//                             UserSID:(NSString *)sSID {
+//  NSString *url = [NSString
+//      stringWithFormat:@"%@%@?sid=%@", [BussInterImplBase getQueryBaseURL],
+//                       cgiName, sSID];
+//
+////调试---------
+//#ifdef LOG_NETINFO
+//  LOG_ERROR(@"URL=%@", url);
+//#else
+//  LOG_DEBUG(@"URL=%@", url);
+//#endif
+//  return url;
+//}
+//
+//+ (NSString *)makeQueryURLWithCgiSIDWithParam:(NSString *)cgiName
+//                                      UserSID:(NSString *)sSID
+//                                        param:(NSString *)strParam {
+//  NSString *url;
+//
+//  if (!strParam)
+//    url = [NSString
+//        stringWithFormat:@"http://api1.note.91.com/%@?sid=%@", cgiName, sSID];
+//  else
+//    url = [NSString stringWithFormat:@"http://api1.note.91.com/%@?sid=%@%@",
+//                                     cgiName, sSID, strParam];
+//
+////调试---------
+//#ifdef LOG_NETINFO
+//  LOG_ERROR(@"URL=%@", url);
+//#else
+//  LOG_DEBUG(@"URL=%@", url);
+//#endif
+//  return url;
+//}
+//
+//+ (NSString *)makeQueryURLWithSID:(NSString *)sSID {
+//  NSString *url =
+//      [BussInterImplBase makeQueryURLWithCgiSID:@"astrocommand" UserSID:sSID];
+//
+////调试---------
+//#ifdef LOG_NETINFO
+//  LOG_ERROR(@"URL=%@", url);
+//#else
+//  LOG_DEBUG(@"URL=%@", url);
+//#endif
+//  return url;
+//}
+//
+//#pragma mark -
+////对象释放
+//- (void)cancelHttpRequest {
+//  if (objASIHttpReqt) {
+//    LOG_DEBUG(@"ASIHttpRequest对象释放：%@", objASIHttpReqt);
+//    [self.objASIHttpReqt clearDelegatesAndCancel];
+//    //[self.objASIHttpReqt release];
+//    self.objASIHttpReqt = nil;
+//  }
+//}
+//
+//- (void)destroyBussReqObj {
+//  [self cancelHttpRequest];
+//  self.strURL = nil;
+//  self.delgtPackData = nil;
+//  self.callbackObj = nil;
+//  self.callbackFunc = nil;
+//  self.callbackObj_preProc = nil;
+//  self.callbackFunc_preProc = nil;
+//  self.bContinueProc = NO;
+//}
+//
+//- (BOOL)ProcRecvData:(id)rcvData Error:(NSError **)err {
+//  NSDictionary *jsobj = nil;
+//  if (![BussInterImplBase prepareUnpackRecvData:rcvData
+//                                      ToJsonObj:&jsobj
+//                                     HttpStatus:self.iHttpCode
+//                                          Error:err]) {
+//    LOG_ERROR(@"收到数据预处理错误");
+//    return NO;
+//  }
+//
+//  return YES;
+//}
+//
+//- (BOOL)unpackJsonForResult:(NSString *)jsRep Result:(TBussStatus *)sts {
+//  if (![jsRep isKindOfClass:[NSString class]])
+//    return YES;
+//
+//  if (![jsRep hasPrefix:@"{"])
+//    return YES;
+//
+//  NSDictionary *nodes = [jsRep JSONValue];
+//  if (nodes == nil)
+//    return YES;
+//
+//  sts.rtnData = nodes;
+//  NSString *strMsg = [nodes objectForKey:@"msg"];
+//  if (strMsg)
+//    sts.sInfo = strMsg;
+//
+//  return YES;
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark BussInterImplBase私有方法
+//
+////私有方法
+//@implementation BussInterImplBase (Private)
+//
+//- (void)HttpRequest {
+//  [self DoASyncRequest];
+//}
+//
+//- (void)HttpRequest:(NSString *)url
+//             Method:(EHttpMethod)method
+//     ResponseTarget:(id)target
+//   ResponseSelector:(SEL)selector {
+//  self.strURL = url;
+//  self.eHttpMethod = method;
+//  self.callbackObj = target;
+//  self.callbackFunc = selector;
+//
+//  [self HttpRequest];
+//}
+//
+//- (void)HttpRequest_DownloadFile:(NSString *)url
+//                          Method:(EHttpMethod)method
+//                        filename:(NSString *)strFilename
+//                     contenttype:(NSString *)strContentTypeValue
+//                  ResponseTarget:(id)target
+//                ResponseSelector:(SEL)selector {
+//  self.strURL = url;
+//  self.eHttpMethod = method;
+//  self.callbackObj = target;
+//  self.callbackFunc = selector;
+//
+//  [self DoASyncRequest_DownloadFile:strFilename
+//                        contenttype:strContentTypeValue];
+//}
+//
+//- (void)HttpRequest_uploadFile:(NSString *)url
+//                        Method:(EHttpMethod)method
+//                   contenttype:(NSString *)strContentTypeValue
+//                ResponseTarget:(id)target
+//              ResponseSelector:(SEL)selector {
+//  self.strURL = url;
+//  self.eHttpMethod = method;
+//  self.callbackObj = target;
+//  self.callbackFunc = selector;
+//
+//  [self DoASyncRequest_uploadFile:strContentTypeValue];
+//}
+//
+//- (void)HttpRequest_uploadJYEXFile:(NSString *)url
+//                            Method:(EHttpMethod)method
+//                       contenttype:(NSString *)strContentTypeValue
+//                          FileName:(NSString *)strFileName
+//                           FileExt:(NSString *)strFileExt
+//                    ResponseTarget:(id)target
+//                  ResponseSelector:(SEL)selector {
+//  self.strURL = url;
+//  self.eHttpMethod = method;
+//  self.callbackObj = target;
+//  self.callbackFunc = selector;
+//
+//  [self DoASyncRequest_uploadJYEXFile:strContentTypeValue
+//                             FileName:strFileName
+//                              FileExt:strFileExt];
+//}
+//
+//- (void)HttpRequest_uploadFormData:(NSString *)url
+//                            Method:(EHttpMethod)method
+//                              data:(NSArray *)arrFormData
+//                    ResponseTarget:(id)target
+//                  ResponseSelector:(SEL)selector {
+//  self.strURL = url;
+//  self.eHttpMethod = method;
+//  self.callbackObj = target;
+//  self.callbackFunc = selector;
+//
+//  [self DoASyncRequest_uploadFormData:arrFormData];
+//}
+//
+//- (NSString *)HttpMethodString {
+//  switch (eHttpMethod) {
+//  case HTTP_METHOD_GET:
+//    return @"GET";
+//
+//  case HTTP_METHOD_POST:
+//    return @"POST";
+//
+//  case HTTP_METHOD_PUT:
+//    return @"PUT";
+//
+//  default:
+//    break;
+//  }
+//  return @"";
+//}
+//
+//- (ASIHTTPRequest *)InitRequestWhithHeader {
+//  // URL
+//  NSURL *url = [NSURL URLWithString:self.strURL];
+//  // HTTP请求Header设置
+//  [self cancelHttpRequest];
+//  ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+//  NSLog(@"%f", [ASIHTTPRequest defaultTimeOutSeconds]);
+//  self.objASIHttpReqt = request;
+//  LOG_DEBUG(@"ASIHttpRequest对象创建：%@", objASIHttpReqt);
+//
+//  //[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+//  [request addRequestHeader:@"User-Agent"
+//                      value:@" Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) "
+//                            @"AppleWebKit/420+ (KHTML, like Gecko) "
+//                            @"Version/3.0 Mobile/1A543a Safari/419.3"];
+//  [request addRequestHeader:@"Content-Type" value:@"application/json"];
+//  [request addRequestHeader:@"Content-Type"
+//                      value:@"application/x-www-form-urlencoded"];
+//  [request addRequestHeader:@"Accept" value:@"*/*"];
+//  [request addRequestHeader:@"Accept-Encoding"
+//                      value:@""]; // Accept-Encoding: gzip, deflate
+//  //请求方法
+//  NSString *method = [self HttpMethodString];
+//  if (![PubFunction stringIsNullOrEmpty:method]) {
+//    [request setRequestMethod:method];
+//  }
+//
+//  return request;
+//}
+//
+//- (ASIHTTPRequest *)InitRequestWhithHeader:(NSString *)strContentTypeValue {
+//  // URL
+//  NSURL *url = [NSURL URLWithString:self.strURL];
+//  // HTTP请求Header设置
+//  [self cancelHttpRequest];
+//  ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:url];
+//  self.objASIHttpReqt = request;
+//  LOG_DEBUG(@"ASIHttpRequest对象创建：%@", objASIHttpReqt);
+//
+//  //[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+//  [request addRequestHeader:@"User-Agent"
+//                      value:@" Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) "
+//                            @"AppleWebKit/420+ (KHTML, like Gecko) "
+//                            @"Version/3.0 Mobile/1A543a Safari/419.3"];
+//  [request addRequestHeader:@"Content-Type" value:strContentTypeValue];
+//  [request addRequestHeader:@"Accept" value:@"*/*"];
+//  [request addRequestHeader:@"Accept-Encoding"
+//                      value:@""]; // Accept-Encoding: gzip, deflate
+//  //请求方法
+//  NSString *method = [self HttpMethodString];
+//  if (![PubFunction stringIsNullOrEmpty:method]) {
+//    [request setRequestMethod:method];
+//  }
+//
+//  return request;
+//}
+//
+//- (ASIFormDataRequest *)InitJYEXRequestWhithHeader:
+//    (NSString *)strContentTypeValue {
+//  // URL
+//  NSURL *url = [NSURL URLWithString:self.strURL];
+//  // HTTP请求Header设置
+//  [self cancelHttpRequest];
+//  ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:url];
+//  self.objASIHttpReqt = request;
+//  LOG_DEBUG(@"ASIFormDataRequest对象创建：%@", objASIHttpReqt);
+//
+//  //[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+//  [request addRequestHeader:@"User-Agent"
+//                      value:@" Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) "
+//                            @"AppleWebKit/420+ (KHTML, like Gecko) "
+//                            @"Version/3.0 Mobile/1A543a Safari/419.3"];
+//  [request addRequestHeader:@"Content-Type" value:strContentTypeValue];
+//  [request addRequestHeader:@"Accept" value:@"*/*"];
+//  [request addRequestHeader:@"Accept-Encoding"
+//                      value:@""]; // Accept-Encoding: gzip, deflate
+//  //请求方法
+//  NSString *method = [self HttpMethodString];
+//  if (![PubFunction stringIsNullOrEmpty:method]) {
+//    [request setRequestMethod:method];
+//  }
+//
+//  return request;
+//}
+//
+//- (ASIFormDataRequest *)InitFormRequestWithHeader {
+//  // URL
+//  NSURL *url = [NSURL URLWithString:self.strURL];
+//  // HTTP请求Header设置
+//  [self cancelHttpRequest];
+//  ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:url];
+//  self.objASIHttpReqt = request;
+//  LOG_DEBUG(@"ASIFormDataRequest对象创建：%@", objASIHttpReqt);
+//
+//  //[request addRequestHeader:@"User-Agent" value:@"ASIHTTPRequest"];
+//  [request addRequestHeader:@"User-Agent"
+//                      value:@" Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) "
+//                            @"AppleWebKit/420+ (KHTML, like Gecko) "
+//                            @"Version/3.0 Mobile/1A543a Safari/419.3"];
+//  [request addRequestHeader:@"Content-Type"
+//                      value:@"application/x-www-form-urlencoded"];
+//  [request addRequestHeader:@"Accept" value:@"*/*"];
+//  [request addRequestHeader:@"Accept-Encoding"
+//                      value:@""]; // Accept-Encoding: gzip, deflate
+//  //请求方法
+//  NSString *method = [self HttpMethodString];
+//  if (![PubFunction stringIsNullOrEmpty:method]) {
+//    [request setRequestMethod:method];
+//  }
+//
+//  return request;
+//}
+//
+//- (void)DoSyncRequest {
+//  LOG_DEBUG(@"HTTP同步请求...");
+//  ASIHTTPRequest *request = [self InitRequestWhithHeader];
+//  //发出数据
+//  if (self.eHttpMethod == HTTP_METHOD_POST)
+//    [request appendPostData:[self MakeSendParam]];
+//  [request startSynchronous];
+//  NSError *err = [request error];
+//  if (!err) {
+//    NSString *response = [request responseString];
+//    int code = [request responseStatusCode];
+//    LOG_ERROR(@"%@", response);
+//
+//    //处理数据
+//    [self doProcRecvData:response HttpCode:code];
+//  } else {
+//    //处理后通知
+//    [self notifyCallBack:err];
+//  }
+//}
+//
+//- (void)DoASyncRequest {
+//  LOG_DEBUG(@"HTTP异步请求...");
+//  // ASIHTTPRequest* request = [self InitRequestWhithHeader];
+//  ASIHTTPRequest *request =
+//      [self InitRequestWhithHeader:@"application/x-www-form-urlencoded"];
+//  //
+//
+//  request.useCookiePersistence = YES;
+//  //发出数据
+//  if (self.eHttpMethod == HTTP_METHOD_POST)
+//    [request appendPostData:[self MakeSendParam]];
+//
+//  [request setDelegate:self];
+//  [request startAsynchronous];
+//}
+//
+//- (void)DoASyncRequest_DownloadFile:(NSString *)strFilename
+//                        contenttype:(NSString *)strContentTypeValue {
+//  LOG_DEBUG(@"HTTP异步请求下载文件...");
+//  ASIHTTPRequest *request = [self InitRequestWhithHeader:strContentTypeValue];
+//
+//  //发出数据
+//  if (self.eHttpMethod == HTTP_METHOD_POST)
+//    [request appendPostData:[self MakeSendParam]];
+//
+//  // add
+//  [request setDownloadDestinationPath:strFilename];
+//
+//  [request setDelegate:self];
+//  [request startAsynchronous];
+//}
+//
+//- (void)DoASyncRequest_uploadFile:(NSString *)strContentTypeValue {
+//  LOG_DEBUG(@"HTTP异步请求上传文件数据...");
+//  ASIHTTPRequest *request = [self InitRequestWhithHeader:strContentTypeValue];
+//
+//  //发出数据
+//  if (self.eHttpMethod == HTTP_METHOD_POST)
+//    [request appendPostData:[self MakeSendBytesParam]];
+//
+//  [request setDelegate:self];
+//  [request startAsynchronous];
+//}
+//
+//- (void)DoASyncRequest_uploadJYEXFile:(NSString *)strContentTypeValue
+//                             FileName:(NSString *)strFileName
+//                              FileExt:(NSString *)strExt {
+//  LOG_DEBUG(@"HTTP异步请求上传文件数据...");
+//  ASIFormDataRequest *request =
+//      [self InitJYEXRequestWhithHeader:strContentTypeValue];
+//
+//  //发出数据
+//  if (self.eHttpMethod == HTTP_METHOD_POST) {
+//    [request setData:[self MakeSendBytesParam]
+//          withFileName:[NSString stringWithFormat:@"%@.%@", strFileName, strExt]
+//        andContentType:strContentTypeValue
+//                forKey:@"attachment"];
+//
+//    //设置显示代理
+//    [request setUploadProgressDelegate:[UIProgress instance]];
+//    request.showAccurateProgress = YES;
+//
+//    [request setDelegate:self];
+//    [request startAsynchronous];
+//  }
+//}
+//
+//- (void)DoASyncRequest_uploadFormData:(NSArray *)arrFormData {
+//  LOG_DEBUG(@"HTTP异步请求上传Form格式文件数据...");
+//  ASIFormDataRequest *request = [self InitFormRequestWithHeader];
+//
+//  for (NSDictionary *obj in arrFormData) {
+//
+//    NSString *key = [obj objectForKey:@"key"];
+//    NSString *value = [obj objectForKey:@"value"];
+//    NSString *type = [obj objectForKey:@"type"];
+//
+//    if ([type isEqualToString:@"data"])
+//      [request addPostValue:value forKey:key];
+//    else
+//      [request addFile:value forKey:key]; //文件
+//  }
+//
+//  //设置显示代理
+//  [request setUploadProgressDelegate:[UIProgress instance]];
+//  request.showAccurateProgress = YES;
+//
+//  [request setDelegate:self];
+//  [request startAsynchronous];
+//}
+//
+//// HTTP响应:成功
+//- (void)requestFinished:(ASIHTTPRequest *)request {
+//  // Use when fetching text data
+//  NSString *responseString = [request responseString];
+//  iHttpCode = [request responseStatusCode];
+//  LOG_DEBUG(@"HTTP异步请求成功. code=%d", iHttpCode);
+//
+//  //	// Use when fetching binary data
+//  //	NSData *responseData = [request responseData];
+//
+//  LOG_DEBUG(@"HTTP异步请求响应->回调函数...");
+//  [self doProcRecvData:responseString HttpCode:iHttpCode];
+//
+//  /*
+//  //网络状态是否发生变化  add 2012.8.20
+//  if ( TheNetStatus == 1 ) { //网络不正常
+//      TheNetStatus = 0;  //正常
+//      //发通知
+//      NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+//      if (nc) {
+//          [nc postNotificationName:NOTIFICATION_NETSTATUS_CHANGE object:nil
+//  userInfo:nil];
+//      }
+//  }
+//  */
+//}
+//
+//// HTTP响应:失败
+//- (void)requestFailed:(ASIHTTPRequest *)request {
+//  NSError *err = [request error];
+//  iHttpCode = [request responseStatusCode];
+//  LOG_DEBUG(@"HTTP异步请求失败(%d)...", iHttpCode);
+//
+//  if (iHttpCode == 200)
+//    iHttpCode = 1; //特殊处理
+//
+//  if (err) {
+//    // If an error occurs, error will contain an NSError
+//    // If error code is = ASIConnectionFailureErrorType (1, Connection failure
+//    // occurred) - inspect [[error userInfo] objectForKey:NSUnderlyingErrorKey]
+//    // for more information
+//    if ([err code] == ASIConnectionFailureErrorType) {
+//      // TheNetStatus = 1;  //网络不正常  //add 2012.8.20
+//      LOG_ERROR(@"网络请求出错: errcode=%ld, errinfo=%@",
+//                (long)[err code],
+//                [[err userInfo] objectForKey:NSUnderlyingErrorKey]);
+//    } else {
+//      LOG_ERROR(@"网络请求出错: errcode=%ld, errinfo=%@",
+//                (long)[err code], @"");
+//    }
+//  }
+//
+//  else {
+//    NSString *sErrHttp = [BussInterImplBase getHttpStatusDescByCode:iHttpCode];
+//    if ([PubFunction stringIsNullOrEmpty:sErrHttp]) {
+//      sErrHttp = @"网络错误";
+//    }
+//    err = [NSError errorWithDomain:sErrHttp code:iHttpCode userInfo:nil];
+//  }
+//
+//  [self notifyCallBack:err];
+//}
+//
+////构建发送数据
+//- (NSMutableData *)MakeSendParam {
+//  LOG_DEBUG(@"构造发送数据...");
+//  NSMutableData *requestData = [NSMutableData data];
+//
+//  NSString *strJson = @"";
+//  if (delgtPackData &&
+//      [delgtPackData respondsToSelector:@selector(PackSendOutJsonString)]) {
+//    strJson = [delgtPackData PackSendOutJsonString];
+//  }
+//
+////调试---------
+//#ifdef LOG_NETINFO
+//  LOG_ERROR(@"发出请求数据：%@", strJson);
+//#else
+//  LOG_DEBUG(@"发出请求数据：%@", strJson);
+//#endif
+//
+//  //	if (strJson && [strJson length] > 0)
+//  { [requestData appendData:[strJson dataUsingEncoding:NSUTF8StringEncoding]]; }
+//  return requestData;
+//}
+//
+////构建发送数据
+//- (NSMutableData *)MakeSendBytesParam {
+//  LOG_DEBUG(@"构造发送数据...");
+//  NSMutableData *requestData = [NSMutableData data];
+//
+//  NSData *data = [NSData dataWithBytes:"1" length:1];
+//  if (delgtPackData &&
+//      [delgtPackData respondsToSelector:@selector(PackSendOutByteData)]) {
+//    data = [delgtPackData PackSendOutByteData];
+//  }
+//
+////调试---------
+//#ifdef LOG_NETINFO
+//  LOG_DEBUG(@"发出字节数据：%d 字节", [data length]);
+//#else
+//  LOG_DEBUG(@"发出字节数据：%lu 字节", (unsigned long)[data length]);
+//#endif
+//
+//  //	if (strJson && [strJson length] > 0)
+//  { [requestData appendData:data]; }
+//  return requestData;
+//}
+//
+////处理接收数据
+//- (void)doProcRecvData:(id)rcvData HttpCode:(int)httpCode {
+////调试--------
+//#ifdef LOG_NETINFO
+//  LOG_ERROR(@"返回HttpCode：%d", httpCode);
+//  LOG_ERROR(@"返回数据：%@", rcvData);
+//#else
+//  LOG_DEBUG(@"返回HttpCode：%d", httpCode);
+//  LOG_DEBUG(@"返回数据：%@", rcvData);
+//#endif
+//
+//  //处理前通知
+//  [self notifyPreCallBack:rcvData];
+//
+//  //是否继续处理
+//  if (!bContinueProc) {
+//    return;
+//  } else {
+//    //数据处理
+//    NSError *err = nil;
+//    //		if ( [ self respondsToSelector:@selector(ProcRecvData::)] )
+//    {
+//      id imp = self;
+//
+//      if (![imp ProcRecvData:rcvData Error:&err]) {
+//        //				err = [NSError errorWithDomain:@"数据处理错误"
+//        //code:NSFormattingError userInfo:nil];
+//      }
+//    }
+//
+//    //处理后通知
+//    if (err) {
+//      [self notifyCallBack:err];
+//    } else {
+//      [self notifyCallBack:rcvData];
+//    }
+//  }
+//}
+//
+///*
+//-(BOOL) ProcRecvData:(id) rcvData Error:(NSError**) err
+//{
+//    *err = nil;
+//    return YES;
+//}
+//*/
+//
+//- (void)notifyPreCallBack:(id)arg {
+//  if (!callbackObj_preProc) {
+//    return;
+//  } else if ([callbackObj_preProc respondsToSelector:callbackFunc_preProc]) {
+//    [callbackObj_preProc performSelectorOnMainThread:callbackFunc_preProc
+//                                          withObject:arg
+//                                       waitUntilDone:NO];
+//    LOG_DEBUG(@"＝＝＝＝回调结束＝＝＝＝");
+//  }
+//}
+//
+//- (void)notifyCallBack:(id)arg {
+//  if (!callbackObj) {
+//    return;
+//  } else if ([callbackObj respondsToSelector:callbackFunc]) {
+//    [callbackObj performSelectorOnMainThread:callbackFunc
+//                                  withObject:arg
+//                               waitUntilDone:NO];
+//
+//    LOG_DEBUG(@"＝＝＝＝回调结束＝＝＝＝");
+//  }
+//}
+//
+//@end
+//
+///*
+//#pragma mark -
+//#pragma mark 登录
+//@implementation BussLogin
+//
+//@synthesize lgnUser;
+//@synthesize	retObj;
+//@synthesize	retFunc;
+//@synthesize sSrvDate;
+//
+//-(void) Login:(NSString*) username Password:(NSString*) passwd
+//RemPswd:(int)remPswd AutoLogin:(int)autoLogin ResponseTarget:(id) target
+//ResponseSelector:(SEL) selector
+//{
+//        NSLog(@"登录用户：name=%@, pswd=%@", username, passwd);
+//        if (!self.lgnUser)
+//        {
+//                self.lgnUser = [[TLoginUserInfo new] autorelease];
+//        }
+//
+//        self.lgnUser.sUserName = username;
+//        self.lgnUser.sPassword = passwd;
+//    self.lgnUser.iSavePasswd = remPswd;
+//
+//        self.delgtPackData = self;
+//        self.retObj = target;
+//        self.retFunc = selector;
+//        iLoginStatus = 1;	//登录...
+//
+//        NSString* url = [BussInterImplBase makeQueryURLWithCgi:@"loginByPhone"];
+//        [self HttpRequest:url Method:HTTP_METHOD_POST ResponseTarget:self
+//ResponseSelector:@selector(onLogined:)];
+//}
+//
+//-(void) login91Note
+//{
+//    iLoginStatus = 2;	//登录..
+//
+//    NSString *url = [BussInterImplBase
+//makeQueryURLWithCgiSIDWithParam:@"common/log/login" UserSID:self.lgnUser.sSID
+//param:nil];
+//        [self HttpRequest:url Method:HTTP_METHOD_GET ResponseTarget:self
+//ResponseSelector:@selector(onNoteLogined:)];
+//
+//}
+//
+//-(void) loginGetNickName
+//{
+//    iLoginStatus = 3;	//取nickname
+//
+//    NSString *url = [NSString
+//stringWithFormat:@"http://uap.91.com/user/%@?sid=%@",self.lgnUser.sUserID,self.lgnUser.sSID];
+//
+//    //调试---------
+//#ifdef LOG_NETINFO
+//    LOG_ERROR(@"URL=%@", url);
+//#else
+//    LOG_DEBUG(@"URL=%@", url);
+//#endif
+//
+//        [self HttpRequest:url Method:HTTP_METHOD_GET ResponseTarget:retObj
+//ResponseSelector:retFunc];
+//
+//}
+//
+//
+//-(NSString*) AutoLogin:(id)target ResponseSelector:(SEL)selector
+//{
+//        TLoginUserInfo* user = [TLoginUserInfo new];
+//        @try
+//        {
+//                if ([AstroDBMng getLoginedUserCount] <= 0)
+//                {
+//#ifdef TARGET_IPHONE_SIMULATOR
+//        #if ACCESS_OUTER_SERVICE
+//                        user.sUserName = CS_DEFAULTACCOUNT_USERNAME;
+//                        user.sPassword = CS_DEFAULTACCOUNT_PASSWORD;
+//        #else
+//                        user.sUserName = @"test200";
+//                        user.sPassword = @"1";
+//        #endif
+//#else
+//                        user.sUserName = CS_DEFAULTACCOUNT_USERNAME;
+//                        user.sPassword = CS_DEFAULTACCOUNT_PASSWORD;
+//#endif
+//                }
+//                else
+//                {
+//                        if (![AstroDBMng getLastLoginUser:user])
+//                        {
+//                                return LOC_STR("hqdrxxsb");
+//                        }
+//                }
+//
+//                [self Login:user.sUserName Password:user.sPassword RemPswd:1
+//AutoLogin:1 ResponseTarget:target ResponseSelector:selector];
+//
+//                return nil;
+//        }
+//        @catch (NSException * e)
+//        {
+//                return nil;
+//        }
+//        @finally
+//        {
+//                [user release];
+//        }
+//
+//        return nil;
+//}
+//
+//-(void) dealloc
+//{
+//        self.lgnUser = nil;
+//        self.sSrvDate = nil;
+//        [super dealloc];
+//}
+//
+//-(BOOL) ProcRecvData:(id) rcvData Error:(NSError**) err
+//{
+//        //LOG_DEBUG(@"返回数据：%@", rcvData);
+//    NSDictionary* objJson = nil;
+//        if ( ![BussInterImplBase prepareUnpackRecvData:rcvData
+//ToJsonObj:&objJson HttpStatus:self.iHttpCode Error:err] )
+//        {
+//                LOG_ERROR(@"登录：收到数据预处理错误");
+//                return NO;
+//        }
+//
+//        if (!objJson || *err)
+//        {
+//                LOG_ERROR(@"登录：收到数据预处理错误");
+//                return NO;
+//        }
+//
+//        if(!self.lgnUser)
+//        {
+//                LOG_ERROR(@"登录：登录帐号信息异常");
+//                return NO;
+//        }
+//
+//    //登录
+//        if (iLoginStatus == 1)
+//        {
+//                [self UnPackLoginJsonStr:objJson];
+//        }
+//        //用户初始化数据(请求服务端用户对应数据表)
+//        else if(iLoginStatus == 2)
+//        {
+//                //[self UnPackInitUserJsonStr:objJson];
+//        [self UnPackLogin91NoteJsonStr:objJson];
+//
+//                //正确
+//                self.lgnUser.sLoginTime = [PubFunction getTimeStr1];
+//                self.lgnUser.iLoginType = ELoginType_OnLine;
+//    }
+//    else if ( iLoginStatus == 3 )
+//    {
+//        [self UnPackLoginGetNickNameJsonStr:objJson];
+//
+//        //登录成功后的共通业务逻辑
+//        //[BizLogic procLoginSuccess:self.lgnUser];
+//        }
+//        return YES;
+//}
+//
+//
+//-(NSString*) PackSendOutJsonString
+//{
+//        NSMutableDictionary* jobjUser = [NSMutableDictionary dictionary];
+//        if ( !jobjUser )
+//        {
+//                return @"";
+//        }
+//
+//        //登录
+//        if (iLoginStatus == 1)
+//        {
+//                [jobjUser setObject:lgnUser.sUserName forKey:@"username"];
+//                [jobjUser setObject:lgnUser.sPassword forKey:@"password"];
+//                [jobjUser setObject:[NSNumber numberWithInt:lgnUser.iAppID]
+//forKey:@"appid"];
+//                [jobjUser setObject:lgnUser.sBlowfish forKey:@"blowfish"];
+//
+//                NSString* strJson = [jobjUser JSONRepresentation];
+//                return strJson;
+//        }
+//        //登录91Note
+//        else //if(iLoginStatus == 2)
+//        {
+//                [jobjUser setObject:lgnUser.sUserName forKey:@"username"];
+//                [jobjUser setObject:CS_SOFT_ID forKey:@"vercode"];
+//        }
+//
+//        NSString* strJson = [jobjUser JSONRepresentation];
+//        return strJson;
+//}
+//
+//-(void) UnPackLoginJsonStr:(NSDictionary*) jsObj
+//{
+//        if ( !jsObj )
+//        {
+//                return;
+//        }
+//
+//        int code = pickJsonIntValue(jsObj, @"code");
+//        if (code != 200)
+//        {
+//                LOG_ERROR(@"登录请求有错误. code=%d", code);
+//        }
+//        self.lgnUser.sUserID = pickJsonStrValue(jsObj, @"uid");
+//        self.lgnUser.sSID = pickJsonStrValue(jsObj, @"sid");
+//        self.lgnUser.sUAPID = pickJsonStrValue(jsObj, @"uapSid");
+//        self.lgnUser.sMsg = pickJsonStrValue(jsObj, @"msg");
+//        self.lgnUser.sSessionID = pickJsonStrValue(jsObj, @"sessionid");
+//}
+//
+//
+//
+//
+//-(void)UnPackLogin91NoteJsonStr:(NSDictionary*) jsObj
+//{
+//        if ( !jsObj )
+//        {
+//                return;
+//        }
+//
+//    //保存参数
+//    NSNumber *user_id = [jsObj objectForKey:@"user_id"];
+//    self.lgnUser.sNoteUserId = [user_id stringValue];
+//    self.lgnUser.sNoteMasterKey = [jsObj objectForKey:@"master_key"];
+//    self.lgnUser.sNoteIpLocation = [jsObj objectForKey:@"ip_location"];
+//}
+//
+//-(void)UnPackLoginGetNickNameJsonStr:(NSDictionary*) jsObj
+//{
+//        if ( !jsObj )
+//        {
+//                return;
+//        }
+//
+//    //保存参数
+//    self.lgnUser.sNickName = [jsObj objectForKey:@"nickname"];
+//
+//}
+//
+//
+//-(void) onLogined:(id)err
+//{
+//        if (err && [err isKindOfClass:[NSError class]])
+//        {
+//                LOG_ERROR(@"登录：请求sid失败");
+//                if ( retObj && [retObj respondsToSelector:retFunc])
+//                {
+//                        [retObj  performSelector:retFunc withObject:err];
+//                }
+//                return;
+//        }
+//
+//        //获取用户对应数据表
+//    TLoginUserInfo *userinfo = [AstroDBMng
+//getLoginUserByUID:self.lgnUser.sUserID];
+//    if ( userinfo)
+//    {
+//        if ([userinfo.sNoteUserId intValue] > 1 && [userinfo.sNoteMasterKey
+//length] == 16 )
+//        {
+//            //不再登录91note
+//            self.lgnUser.sNoteUserId = userinfo.sNoteUserId;
+//            self.lgnUser.sNoteMasterKey = userinfo.sNoteMasterKey;
+//            self.lgnUser.sNoteIpLocation = userinfo.sNoteIpLocation;
+//
+//            //正确
+//            self.lgnUser.sLoginTime = [PubFunction getTimeStr1];
+//            self.lgnUser.iLoginType = ELoginType_OnLine;
+//
+//            if ( userinfo.sNickName && [userinfo.sNickName length]> 0 )
+//            {
+//                self.lgnUser.sNickName = userinfo.sNickName;
+//
+//                //登录成功后的共通业务逻辑
+//                [BizLogic procLoginSuccess:self.lgnUser];
+//
+//                if ( retObj && [retObj respondsToSelector:retFunc])
+//                {
+//                    [retObj  performSelector:retFunc withObject:err];
+//                }
+//                return;
+//            }
+//            else {
+//                [self loginGetNickName];
+//                return;
+//            }
+//        }
+//    }
+//
+//    [self login91Note];
+//}
+//
+//-(void) onNoteLogined:(id)err
+//{
+//        if (err && [err isKindOfClass:[NSError class]])
+//        {
+//                LOG_ERROR(@"登录：请求sid失败");
+//                if ( retObj && [retObj respondsToSelector:retFunc])
+//                {
+//                        [retObj  performSelector:retFunc withObject:err];
+//                }
+//                return;
+//        }
+//
+//    if ( self.lgnUser.sNickName && [self.lgnUser.sNickName length]> 0 )
+//    {
+//        //登录成功后的共通业务逻辑
+//        [BizLogic procLoginSuccess:self.lgnUser];
+//
+//        if ( retObj && [retObj respondsToSelector:retFunc])
+//        {
+//            [retObj  performSelector:retFunc withObject:err];
+//        }
+//        return;
+//    }
+//
+//    [self loginGetNickName];
+//}
+//
+//@end
+//
+//*/
+//
+//#pragma mark -
+//#pragma mark 家园E线登录
+//@implementation BussJYEXLogin
+//@synthesize lgnUser;
+//@synthesize retObj;
+//@synthesize retFunc;
+//@synthesize sSrvDate;
+//@synthesize appList;
+//@synthesize qiniutoken;
+//@synthesize qiniudns;
+//@synthesize m_arrClassData;
+//@synthesize m_arrSchoolData;
+//@synthesize m_arrDynaTag;
+//
+//- (void)dealloc {
+//  self.lgnUser = nil;
+//  self.sSrvDate = nil;
+//
+//  self.qiniutoken = nil;
+//  self.qiniudns = nil;
+//  self.m_arrClassData = nil;
+//  self.m_arrSchoolData = nil;
+//
+//  //    [retObj release];
+//  retObj = nil;
+//  SAFEFREE_OBJECT(m_arrBaobaoData);
+//  SAFEFREE_OBJECT(self.appList);
+//
+//  [super dealloc];
+//}
+//
+//- (void)Login:(NSString *)username
+//            Password:(NSString *)passwd
+//             RemPswd:(int)remPswd
+//           AutoLogin:(int)autoLogin
+//      ResponseTarget:(id)target
+//    ResponseSelector:(SEL)selector {
+//  NSLog(@"登录用户：name=%@, pswd=%@", username, passwd);
+//  SAFEFREE_OBJECT(self.appList);
+//
+//  self.lgnUser = [[TJYEXLoginUserInfo new] autorelease];
+//
+//  self.lgnUser.sUserName = username;
+//  self.lgnUser.sPassword = passwd;
+//  self.lgnUser.iSavePasswd = remPswd;
+//  self.lgnUser.iAutoLogin = autoLogin;
+//
+//  self.lgnUser.iLoginFlag = 0; //是否成功登录过标志
+//
+//  self.delgtPackData = self;
+//  self.retObj = target;
+//  self.retFunc = selector;
+//
+//  iLoginStatus = 1; //登录...
+//
+//  // NSString* url = [BussInterImplBase
+//  // makeQueryURLWithCgi:@"mobile.php?mod=member&ac=login"];
+////  NSString *url = [BussInterImplBase
+////      makeQueryURLWithCgi:@"bbq.php?mod=member&ac=login&cmdcode=5"];
+////      NSString* url = [BussInterImplBase
+////      makeQueryURLWithCgi:@"bbq.php?mod=member&ac=login11&cmdcode=71"];
+//    NSString* url = [BussInterImplBase
+//                     makeQueryURLWithCgi:URL_LOGIN_3_0];
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:self
+//      ResponseSelector:@selector(onLogined:)];
+//}
+//
+///*
+// -(NSString*) AutoLogin:(id)target ResponseSelector:(SEL)selector
+// {
+//        TJYEXLoginUserInfo* user = [TJYEXLoginUserInfo new];
+//        @try
+//        {
+// if ( [AstroDBMng getLoginedUserCount] <= 0 || ![AstroDBMng
+// getLastLoginUser:user])
+// {
+// NSString *s = @"{\"result\":true,\"msg\":\"login_false\"}";
+// if ( target && [target respondsToSelector:selector] )
+// {
+// [target performSelector:selector withObject:s];
+// }
+// return nil;
+// }
+//
+// if ( [user.sUserName length]>0 && [user.sPassword length]>0 ) {
+// //if ( user.iAutoLogin ) {
+// [self Login:user.sUserName Password:user.sPassword RemPswd:user.iSavePasswd
+// AutoLogin:user.iAutoLogin ResponseTarget:target ResponseSelector:selector];
+// }
+// else
+// {
+// NSString *s = @"{\"result\":true,\"msg\":\"login_false\"}";
+// if ( target && [target respondsToSelector:selector] )
+// {
+// [target performSelector:selector withObject:s];
+// }
+// }
+// return nil;
+//        }
+//        @catch (NSException * e)
+//        {
+// return nil;
+//        }
+//        @finally
+//        {
+// [user release];
+//        }
+//
+//        return nil;
+// }
+// */
+//
+//- (BOOL)ProcRecvData:(id)rcvData Error:(NSError **)err {
+//  NSDictionary *objJson = nil;
+//  if (![BussInterImplBase prepareUnpackRecvData:rcvData
+//                                      ToJsonObj:&objJson
+//                                     HttpStatus:self.iHttpCode
+//                                          Error:err]) {
+//    LOG_ERROR(@"登录：收到数据预处理错误");
+//    return NO;
+//  }
+//
+//  if (!objJson || *err) {
+//    LOG_ERROR(@"登录：收到数据预处理错误");
+//    return NO;
+//  }
+//
+//  //登录
+//  if (iLoginStatus == 1) {
+//    [self UnPackLoginJsonStr:objJson];
+//  }
+//  //用户初始化数据(请求服务端用户对应数据表)
+//  // else if(iLoginStatus == 2)
+//  //{
+//  //    [self UnPackLoginJYEXUserinforJsonStr:objJson];
+//  //}
+//  // else if ( iLoginStatus == 3 )
+//  //{
+//  //    [self UnPackLoginJYEXUserAppListJsonStr:objJson];
+//  //}
+//  else if (iLoginStatus == 4) {
+//    [self UnPackLoginJYEXLanmuListJsonStr:objJson];
+//  } else if (iLoginStatus == 5) {
+//    [self UnPackLoginJYEXClassListJsonStr:objJson];
+//  }
+//  return YES;
+//}
+//
+////-------------------------
+//
+////***登录第1步解析(登录结果)
+//- (void)UnPackLoginJsonStr:(NSDictionary *)jsObjOrg {
+//  if (!jsObjOrg) {
+//    return;
+//  }
+//  NSString *result = nil;
+//  NSLog(@"%@\r\n", [jsObjOrg description]);
+//
+//  int iResult = pickJsonIntValue(jsObjOrg, @"res");
+//  if (iResult != 1) {
+//    LOG_ERROR(@"登录失败\r\n");
+//
+//    result = pickJsonStrValue(jsObjOrg, @"msg");
+//    if (result && [result length] > 0)
+//      LOG_ERROR(@"%@\r\n", @"登录失败");
+//    return;
+//  }
+//
+//  NSDictionary *dicData = [jsObjOrg objectForKey:@"data"];
+//  if (!dicData) {
+//    LOG_ERROR(@"无data数据返回\r\n");
+//    return;
+//  }
+//
+//  //保存
+//  //[[NSUserDefaults standardUserDefaults] setObject:dicData
+//  //forKey:KEY_LATEST_USER];
+//
+//  NSString *sUsername = self.lgnUser.sUserName;
+//  NSString *sPassword = self.lgnUser.sPassword;
+//
+//  self.lgnUser = [GlobalVar getLoginUserInfoFromDic:dicData
+//                                           username:sUsername
+//                                           password:sPassword];
+//  self.lgnUser.iLoginFlag = 1;                 //登录成功过标志
+//  self.lgnUser.iLoginType = ELoginType_OnLine; //登录在线标志
+//
+//  SAFEFREE_OBJECT(m_arrBaobaoData);
+//  NSArray *arrBaobao = [GlobalVar getBaobaoDataFromDic:dicData];
+//  if (arrBaobao && [arrBaobao isKindOfClass:[NSArray class]]) {
+//    m_arrBaobaoData = [[NSArray alloc] initWithArray:arrBaobao];
+//  } else {
+//    m_arrBaobaoData = [[NSArray alloc] init];
+//  }
+//
+//  NSString *token = [GlobalVar getQnTokenFromDic:dicData];
+//  NSString *qndns = [GlobalVar getQnDnsFromDic:dicData];
+//
+//  self.qiniudns = qndns;
+//  self.qiniutoken = token;
+//
+//  self.m_arrClassData = [GlobalVar getClassDataFromDic:dicData];
+//  self.m_arrSchoolData = [GlobalVar getSchoolDataFromDic:dicData];
+//  self.m_arrDynaTag = [GlobalVar getDynaTag:dicData];
+//
+//  //更新到数据库
+//  [AstroDBMng replaceJYEXLoginUser:lgnUser data:dicData];
+//}
+//
+////---------------------------
+//
+///*
+////---登录第2步解析(获取用户属性信息)
+//
+//-(void)UnPackLoginJYEXUserinforJsonStr:(NSDictionary*) jsObj
+//{
+//    if ( !jsObj )
+//    {
+//        return;
+//    }
+//    NSLog(@"%@\r\n", [jsObj description]);
+//
+//    self.lgnUser.sNickName = pickJsonStrValue(jsObj, @"nickname");
+//    self.lgnUser.sRealName = pickJsonStrValue(jsObj, @"realname");
+//
+//    //家园e线新增的属性
+//    TJYEXLoginUserInfo *user = (TJYEXLoginUserInfo *)self.lgnUser;
+//    user.iSchoolType = pickJsonIntValue(jsObj, @"school_type");
+//    user.sEmail = pickJsonStrValue(jsObj, @"email");
+//    user.sMobilephone = pickJsonStrValue(jsObj, @"mobile");
+//    user.sTelephone = pickJsonStrValue(jsObj, @"telephone");
+//    user.sAddress = pickJsonStrValue(jsObj, @"address");
+//
+//    [AstroDBMng replaceJYEXLoginUser:((TJYEXLoginUserInfo*)self.lgnUser)];
+//}
+//
+////--------------------
+//
+////---登录第3步解析(获取开通应用列表和未开通应用列表)
+//-(void)UnPackLoginJYEXUserAppListJsonStr:(NSDictionary*) jsObj
+//{
+//    if ( !jsObj )
+//    {
+//        return;
+//    }
+//    NSLog(@"%@\r\n", [jsObj description]);
+//    if ( !self.appList ) {
+//        self.appList = [[NSMutableArray alloc] init];
+//    }
+//    assert( self.appList );
+//
+//    id ob = pickJsonValue(jsObj, @"userapp", nil);
+//    if ( ob && [ob isKindOfClass:[NSArray class]] ) {
+//        NSArray *arr = (NSArray*)ob;
+//        NSDictionary * dic = nil;
+//        for ( int i = 0; i < [arr count]; ++i ) {
+//            dic = [arr objectAtIndex:i];
+//            if ( dic ) {
+//                JYEXUserAppInfo* appInfo = [[JYEXUserAppInfo alloc] init];
+//                appInfo.sUserName = self.lgnUser.sUserName;
+//                appInfo.sAppName = (NSString*)[dic objectForKey:@"ywname"];
+//                appInfo.iAppID = [(NSNumber*)[dic objectForKey:@"id"]
+//integerValue];
+//                appInfo.sAppCode = (NSString*)[dic objectForKey:@"ywcode"];
+//                appInfo.iAppType = USER_APP_TYPE_BOUGHT;
+//                [self.appList addObject:appInfo];
+//                SAFEFREE_OBJECT(appInfo);
+//            }
+//        }
+//    }
+//
+//    ob = pickJsonValue(jsObj, @"otherapp", nil);
+//    if ( ob && [ob isKindOfClass:[NSArray class]] ) {
+//        NSArray *arr = (NSArray*)ob;
+//        NSDictionary * dic = nil;
+//        for ( int i = 0; i < [arr count]; ++i ) {
+//            dic = [arr objectAtIndex:i];
+//            if ( dic ) {
+//                JYEXUserAppInfo* appInfo = [[JYEXUserAppInfo alloc] init];
+//                appInfo.sUserName = self.lgnUser.sUserName;
+//                appInfo.sAppName = (NSString*)[dic objectForKey:@"ywname"];
+//                appInfo.iAppID = [(NSNumber*)[dic objectForKey:@"id"]
+//integerValue];
+//                appInfo.sAppCode = (NSString*)[dic objectForKey:@"ywcode"];
+//                appInfo.iAppType = USER_APP_TYPE_NOMINATE;
+//                [self.appList addObject:appInfo];
+//                SAFEFREE_OBJECT(appInfo);
+//            }
+//        }
+//    }
+//
+//    //更新到数据库
+//    if ( self.appList ) {
+//        [BizLogic updateUserAppList:self.appList
+//WithUserName:self.lgnUser.sUserName];
+//    }
+//
+//}
+//*/
+//
+////-----------------------
+////***登录第4步解析(获取栏目信息列表)
+//- (void)UnPackLoginJYEXLanmuListJsonStr:(NSDictionary *)jsObj {
+//  if (!jsObj) {
+//    return;
+//  }
+//  NSLog(@"%@\r\n", [jsObj description]);
+//  NSEnumerator *enumerator = [jsObj objectEnumerator];
+//
+//  NSDictionary *dic = nil;
+//  TJYEXLanmu *lanmu = nil;
+//  NSMutableArray *arr = [NSMutableArray array];
+//  while (id obj = [enumerator nextObject]) {
+//    if ([obj isKindOfClass:[NSDictionary class]]) {
+//      dic = obj;
+//      lanmu = [[TJYEXLanmu alloc] init];
+//      lanmu.sLanmuName = pickJsonStrValue(dic, @"classname");
+//      if (lanmu.sLanmuName) {
+//        [arr addObject:lanmu];
+//      }
+//      [lanmu release];
+//    }
+//  }
+//  int i;
+//  if ([arr count]) {
+//    //更新到数据库
+//    [BizLogic cleanLanmuList];
+//    i = [BizLogic insertLanmuListByUserName:arr];
+//  }
+//}
+//
+////-------------------------
+//
+////*** 登录第5步解析(获取班级信息列表)
+//- (void)UnPackLoginJYEXClassListJsonStr:(NSDictionary *)jsObj {
+//  if (!jsObj) {
+//    return;
+//  }
+//  NSLog(@"%@\r\n", [jsObj description]);
+//  NSEnumerator *enumerator = [jsObj objectEnumerator];
+//
+//  NSDictionary *dic = nil;
+//  TJYEXClass *classInfo = nil;
+//  NSMutableArray *arr = [NSMutableArray array];
+//  while (dic = (NSDictionary *)[enumerator nextObject]) {
+//    classInfo = [[TJYEXClass alloc] init];
+//    classInfo.sClassId = pickJsonStrValue(dic, @"uid");
+//    classInfo.sClassName = pickJsonStrValue(dic, @"username");
+//    [arr addObject:classInfo];
+//    [classInfo release];
+//  }
+//  int i;
+//  if ([arr count]) {
+//    //更新到数据库
+//    [BizLogic cleanClassList];
+//    i = [BizLogic insertClassListByUserName:arr];
+//  }
+//}
+//
+////－－－－－－－－－－－－－
+//
+//- (NSString *)PackSendOutJsonString {
+//  NSMutableDictionary *jobjUser = [NSMutableDictionary dictionary];
+//
+//  //登录
+//  if (1 == iLoginStatus) {
+//    [jobjUser setObject:lgnUser.sPassword forKey:@"password"];
+//    [jobjUser setObject:lgnUser.sUserName forKey:@"username"];
+//
+//    // add 2014.6.30
+//
+//    NetworkStatus netType = [[Global instance] getNetworkStatus];
+//    NSString *strNetwork = @"";
+//    if (netType == NotReachable)
+//      strNetwork = @"NotReachable";
+//    else if (netType == ReachableViaWWAN)
+//      strNetwork = @"2G/3G";
+//    else if (netType == ReachableViaWiFi)
+//      strNetwork = @"WIFI";
+//
+//    [jobjUser setObject:BBQ_APPID forKey:@"appid"];
+//    [jobjUser setObject:[CommonFunc getAppName] forKey:@"appname"];
+//    [jobjUser setObject:[CommonFunc getAppVersion] forKey:@"appver"];
+//    [jobjUser setObject:JYEX_APPSROUCE forKey:@"appsource"];
+//    [jobjUser setObject:[[UIDevice currentDevice] systemName] forKey:@"ostype"];
+//    [jobjUser setObject:[[UIDevice currentDevice] systemVersion]
+//                 forKey:@"osver"];
+//    [jobjUser setObject:[[UIDevice currentDevice] model] forKey:@"phonetype"];
+//    [jobjUser setObject:[_GLOBAL getTokenString] forKey:@"token"];
+//    [jobjUser setObject:strNetwork forKey:@"network"];
+//    [jobjUser setObject:[CommonFunc getDevelopVersion] forKey:@"appbuildcode"];
+//
+//  } else //其他步骤
+//  {
+//    return @"";
+//  }
+//
+//  NSString *strJson = [jobjUser JSONRepresentation];
+//
+//  NSString *para = [NSString stringWithFormat:@"para=%@", strJson];
+//  NSLog(@"para=%@", para);
+//
+//  return para;
+//}
+//
+////第一步后的回调
+//- (void)onLogined:(id)err {
+//  if (err && [err isKindOfClass:[NSError class]]) {
+//    LOG_ERROR(@"网络出现问题，登录失败");
+//    if (retObj && [retObj respondsToSelector:retFunc]) {
+//      [retObj performSelector:retFunc withObject:err];
+//    }
+//    return;
+//  }
+//
+//  if (self.lgnUser.iLoginFlag == 1) { //登录成功
+//
+//    //成功后的处理（切换库等）
+//    // 2015.7.20
+//    [BizLogic procJYEXLoginSuccess:self.lgnUser
+//                        baobaodata:m_arrBaobaoData
+//                           qntoken:self.qiniutoken
+//                             qndns:self.qiniudns
+//                         classdata:self.m_arrClassData
+//                        schooldata:self.m_arrSchoolData
+//                           tagdata:self.m_arrDynaTag];
+//
+//    //所有步骤结束
+//    if (retObj && [retObj respondsToSelector:retFunc]) {
+//      [retObj performSelector:retFunc withObject:err];
+//    }
+//    return;
+//
+//    //开始第4步
+//    [self getJYEXLanmuList];
+//  } else {
+//    LOG_ERROR(@"登录失败");
+//
+//    if (retObj && [retObj respondsToSelector:retFunc]) {
+//      [retObj performSelector:retFunc withObject:err];
+//    }
+//    return;
+//  }
+//}
+//
+////---------------------------------------------
+////第二步
+///*--
+//-(void)getJYEXUserInfor
+//{
+//    iLoginStatus = 2;	//获取用户信息
+//
+//        NSString* url = [BussInterImplBase
+//makeQueryURLWithCgi:@"mobile.php?mod=member&ac=view"];
+//
+//        [self HttpRequest:url Method:HTTP_METHOD_POST ResponseTarget:self
+//ResponseSelector:@selector(getJYEXUserInforEnd:)];
+//}
+//
+////第二步后的回调
+//-(void)getJYEXUserInforEnd:(id)err
+//{
+//    if (err && [err isKindOfClass:[NSError class]])
+//    {
+//        if ( retObj && [retObj respondsToSelector:retFunc])
+//        {
+//            [retObj  performSelector:retFunc withObject:err];
+//        }
+//        return;
+//    }
+//
+//    //开始第三步
+//    [self getJYEXUserAppList];
+//    return;
+//}
+//
+//
+////---------------------------------------------
+////第三步
+//
+//
+////--- 登录第3步(获取用户的应用列表)
+//-(void)getJYEXUserAppList
+//{
+//    iLoginStatus = 3; //获取用户的应用列表
+//
+//    SAFEFREE_OBJECT(self.appList);
+//    NSString* url = [BussInterImplBase
+//makeQueryURLWithCgi:@"mobile.php?mod=app&ac=userapp"];
+//        [self HttpRequest:url Method:HTTP_METHOD_POST ResponseTarget:self
+//ResponseSelector:@selector(getJYEXUserAppListEnd:)];
+//}
+//
+////第三步后的回调
+//-(void)getJYEXUserAppListEnd:(id)err
+//{
+//    if ( !err || ![err isKindOfClass:[NSError class]])
+//    {
+//        //开始第四步
+//        [self getJYEXLanmuList];
+//    }
+//    else
+//    {
+//        if ( retObj && [retObj respondsToSelector:retFunc])
+//        {
+//            [retObj  performSelector:retFunc withObject:err];
+//        }
+//    }
+//    return;
+//}
+//*/
+//
+////--------------------------------------
+////第四步
+//
+////*** 登录第4步(获取用户的栏目列表)
+//- (void)getJYEXLanmuList {
+//  NSLog(@"获取用户栏目信息\r\n");
+//
+//  iLoginStatus = 4; //获取用户的栏目列表
+//
+//  NSString *s =
+//      [NSString stringWithFormat:@"mobile.php?mod=blog&ac=classlist&uid=%@",
+//                                 TheCurUser.member.uid];
+//  NSString *url = [BussInterImplBase makeQueryURLWithCgi:s];
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:self
+//      ResponseSelector:@selector(getJYEXLanmuListEnd:)];
+//}
+//
+////第4步后的回调
+//- (void)getJYEXLanmuListEnd:(id)err {
+//  if (err && [err isKindOfClass:[NSError class]]) {
+//    if (retObj && [retObj respondsToSelector:retFunc]) {
+//      [retObj performSelector:retFunc withObject:err];
+//    }
+//    return;
+//  }
+//
+//  //调用第五步
+//  [self getJYEXClassList];
+//}
+//
+////－－－－－－－－－－－－－－－－－－
+//
+////*** 登录第5步(获取班级信息列表)
+//- (void)getJYEXClassList {
+//  NSLog(@"获取用户班级列表\r\n");
+//
+//  iLoginStatus = 5; //获取用户的班级列表
+//
+//  NSString *url = [BussInterImplBase
+//      makeQueryURLWithCgi:@"mobile.php?mod=friend&ac=classList"];
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:self
+//      ResponseSelector:@selector(getJYEXClassListEnd:)];
+//}
+//
+////第5步后的回调
+//- (void)getJYEXClassListEnd:(id)err {
+//  //所有步骤结束
+//  if (retObj && [retObj respondsToSelector:retFunc]) {
+//    [retObj performSelector:retFunc withObject:err];
+//  }
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 家园E线在线更新
+//@implementation BussJYEXSoftUpdata
+//@synthesize retObj;
+//@synthesize retFunc;
+//- (void)getSoftInfoFromVersion:(NSString *)sSoftID
+//                ResponseTarget:(id)target
+//              ResponseSelector:(SEL)selector {
+//  self.delgtPackData = self;
+//  self.retObj = target;
+//  self.retFunc = selector;
+//  NSString *url = [NSString
+//      stringWithFormat:@"http://itunes.apple.com/lookup?id=%@", sSoftID];
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:self
+//      ResponseSelector:@selector(getSoftInfoFromVersionEnd:)];
+//}
+//
+//- (BOOL)ProcRecvData:(id)rcvData Error:(NSError **)err {
+//  NSDictionary *objJson = nil;
+//  if (![BussInterImplBase prepareUnpackRecvData:rcvData
+//                                      ToJsonObj:&objJson
+//                                     HttpStatus:self.iHttpCode
+//                                          Error:err]) {
+//    // LOG_ERROR(@"登录：收到数据预处理错误");
+//    return NO;
+//  }
+//
+//  if (!objJson || *err) {
+//    // LOG_ERROR(@"登录：收到数据预处理错误");
+//    return NO;
+//  }
+//
+//  [self UnPackLoginJYEXSoftUpdataJsonStr:objJson];
+//  return YES;
+//}
+//
+//- (void)UnPackLoginJYEXSoftUpdataJsonStr:(NSDictionary *)jsObj {
+//  if (!jsObj) {
+//    return;
+//  }
+//  NSLog(@"%@\r\n", [jsObj description]);
+//  NSNumber *n = (NSNumber *)[jsObj objectForKey:@"resultCount"];
+//  if ([n intValue] == 0) {
+//    return;
+//  }
+//  NSArray *array = (NSArray *)[jsObj objectForKey:@"results"];
+//  NSDictionary *dic = (NSDictionary *)[array objectAtIndex:0];
+//  NSString *strVersion = (NSString *)[dic objectForKey:@"version"];
+//
+//  NSString *strLocalVer = [NSString
+//      stringWithFormat:
+//          @"%@", [[NSBundle mainBundle]
+//                     objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
+//
+//  NSString *strUrl = (NSString *)[dic objectForKey:@"trackViewUrl"];
+//  strUrl = [strUrl stringByReplacingOccurrencesOfString:@"https://"
+//                                             withString:@"itms://"];
+//  strUrl = [strUrl stringByReplacingOccurrencesOfString:@"HTTPS://"
+//                                             withString:@"itms://"];
+//  strUrl = [strUrl stringByReplacingOccurrencesOfString:@"http://"
+//                                             withString:@"itms://"];
+//  strUrl = [strUrl stringByReplacingOccurrencesOfString:@"HTTP://"
+//                                             withString:@"itms://"];
+//
+//  TheGlobal.sUpdataSoftUrl = strUrl;
+//
+//  NSComparisonResult compResult =
+//      [BussCheckVersion compareVersion:strVersion:strLocalVer];
+//  if (NSOrderedDescending == compResult) {
+//    [TheGlobal setUpdataSoftFlag];
+//  } else {
+//    [TheGlobal resetUpdataSoftFlag];
+//  }
+//}
+//
+//- (void)getSoftInfoFromVersionEnd:(id)err {
+//  if (retObj && [retObj respondsToSelector:retFunc]) {
+//    [retObj performSelector:retFunc withObject:err];
+//  }
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  return @"";
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 家园E线 查询更新文章数
+//@implementation BussJYEXGetUpdateNumber
+//
+//- (void)dealloc {
+//  [super dealloc];
+//}
+//
+//- (void)getUpdateNumber:(int)dateline
+//         ResponseTarget:(id)target
+//       ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//
+//  // NSString* param = [NSString
+//  // stringWithFormat:@"mobile.php?mod=article_total&dateline=%d",dateline];
+//  NSString *param =
+//      [NSString stringWithFormat:@"mobile.php?mod=article_total_v5&dateline=%d",
+//                                 dateline];
+//  NSString *url = [BussInterImplBase makeQueryURLWithCgi:param];
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_GET
+//        ResponseTarget:target
+//      ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  return @"";
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 登出
+//@implementation BussLogout
+//
+//@synthesize sSID;
+//
+//- (void)dealloc {
+//  self.sSID = nil;
+//  [super dealloc];
+//}
+//
+//- (void)Logout:(NSString *)sessID
+//      ResponseTarget:(id)target
+//    ResponseSelector:(SEL)selector {
+//  if ([PubFunction stringIsNullOrEmpty:sessID]) {
+//    return;
+//  }
+//
+//  self.sSID = sessID;
+//
+//  NSString *url =
+//      [BussInterImplBase makeQueryURLWithCgiSID:@"logout" UserSID:self.sSID];
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:target
+//      ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  NSMutableDictionary *obj = [NSMutableDictionary dictionary];
+//  if (!obj)
+//    return @"";
+//
+//  [obj setObject:CS_SOFT_ID forKey:@"vercode"];
+//
+//  NSString *strJson = [obj JSONRepresentation];
+//  return strJson;
+//}
+//
+//- (BOOL)ProcRecvData:(id)rcvData Error:(NSError **)err {
+//  // LOG_DEBUG(@"返回数据：%@", rcvData);
+//  NSDictionary *objJson = nil;
+//  if (![BussInterImplBase prepareUnpackRecvData:rcvData
+//                                      ToJsonObj:&objJson
+//                                     HttpStatus:self.iHttpCode
+//                                          Error:err]) {
+//    LOG_ERROR(@"登出：收到数据预处理错误");
+//    return NO;
+//  }
+//
+//  if (!objJson || *err) {
+//    LOG_ERROR(@"登出：收到数据预处理错误");
+//    return NO;
+//  }
+//
+//  //更新数据库
+//  TJYEXLoginUserInfo *user = [AstroDBMng getJYEXLoginUserByUID:self.sSID];
+//  if (user) {
+//    LOG_DEBUG(@"用户(name=%@, uid=%@)登出成功", user.sUserName, user.sUserID);
+//    user.sSID = @"";
+//    user.iLoginType = ELoginType_OffLine;
+//    //[AstroDBMng replaceJYEXLoginUser:user];
+//  }
+//
+//  if ([TheCurUser.sSID isEqualToString:self.sSID]) {
+//    TheCurUser.sSID = @"";
+//    TheCurUser.iLoginType = ELoginType_OffLine;
+//  }
+//
+//  return YES;
+//}
+//
+//@end
+//
+///*
+//#pragma mark -
+//#pragma mark 验证session
+//@implementation BussCheckSession
+//
+//@synthesize sSID;
+//
+//-(void)dealloc
+//{
+//        self.sSID = nil;
+//        [super dealloc];
+//}
+//
+//
+//-(void) checkSession:(NSString*)sessID ResponseTarget:(id)target
+//ResponseSelector:(SEL)selector
+//{
+//        if ([PubFunction stringIsNullOrEmpty:sessID])
+//        {
+//                return;
+//        }
+//
+//        TLoginUserInfo* user = [AstroDBMng getLoginUserBySID:sessID];
+//        if (!user || [PubFunction stringIsNullOrEmpty:user.sSID])
+//        {
+//                return;
+//        }
+//
+//        self.sSID = sessID;
+//
+//        NSString* url;
+//#ifdef TARGET_IPHONE_SIMULATOR
+//        #if ACCESS_OUTER_SERVICE
+//                url = [NSString stringWithFormat:@"%@checksession?sid=%@",
+//CS_CHECKSESSION_URLBASE_OUT, sessID];
+//        #else
+//                url = [NSString stringWithFormat:@"%@checksession?sid=%@",
+//CS_CHECKSESSION_URLBASE_IN, sessID];
+//        #endif
+//#else
+//        url = [NSString stringWithFormat:@"%@checksession?sid=%@",
+//CS_CHECKSESSION_URLBASE_OUT, sessID];
+//#endif
+//
+//        [self HttpRequest:url Method:HTTP_METHOD_POST ResponseTarget:target
+//ResponseSelector:selector];
+//}
+//
+//-(BOOL) ProcRecvData:(id) rcvData Error:(NSError**) err
+//{
+//        //LOG_DEBUG(@"返回数据：%@", rcvData);
+//        NSDictionary* objJson = nil;
+//        if ( ![BussInterImplBase prepareUnpackRecvData:rcvData
+//ToJsonObj:&objJson HttpStatus:self.iHttpCode Error:err] )
+//        {
+//                LOG_ERROR(@"验证SID：收到数据预处理错误");
+//                return NO;
+//        }
+//
+//        if (!objJson || *err)
+//        {
+//                LOG_ERROR(@"验证SID：收到数据预处理错误");
+//                return NO;
+//        }
+//
+//        return YES;
+//}
+//
+//
+//@end
+//*/
+//
+//#pragma mark -
+//#pragma mark 注册新用户
+//@implementation BussRegisterUser
+//@synthesize UserName, Password, NickName;
+//
+//- (void)dealloc {
+//  self.UserName = nil;
+//  self.Password = nil;
+//  self.NickName = nil;
+//  [super dealloc];
+//}
+//
+//- (void)registerUser:(NSString *)userName
+//            Password:(NSString *)password
+//            Nickname:(NSString *)nickname
+//          RespTarget:(id)target
+//        RespSelector:(SEL)selector {
+//  self.delgtPackData = self;
+//  self.UserName = userName;
+//  self.Password = password;
+//  self.NickName = nickname;
+//
+//  NSString *url = @"";
+//  NSString *cginame = @"user";
+//
+//  url = [CS_URL_BASE stringByAppendingString:cginame];
+//
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:target
+//      ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//
+//  NSMutableDictionary *jobjUser = [NSMutableDictionary dictionary];
+//  if (jobjUser) {
+//    [jobjUser setObject:self.UserName forKey:@"username"];
+//    [jobjUser setObject:self.Password forKey:@"password"];
+//    [jobjUser setObject:self.NickName forKey:@"nickname"];
+//  }
+//
+//  NSString *strJson = [jobjUser JSONRepresentation];
+//  return strJson;
+//}
+//
+//- (BOOL)ProcRecvData:(id)rcvData Error:(NSError **)err {
+//  // LOG_DEBUG(@"注册请求返回数据：%@", rcvData);
+//  NSDictionary *objJson = nil;
+//  if (![BussInterImplBase prepareUnpackRecvData:rcvData
+//                                      ToJsonObj:&objJson
+//                                     HttpStatus:self.iHttpCode
+//                                          Error:err]) {
+//    LOG_ERROR(@"注册：收到数据预处理错误");
+//    return NO;
+//  }
+//
+//  if (!objJson || *err) {
+//    if (self.iHttpCode == 200) {
+//      *err = nil;
+//      return YES;
+//    }
+//
+//    LOG_ERROR(@"注册：收到数据预处理错误");
+//    return NO;
+//  }
+//
+//  return YES;
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 检查新版本
+//@implementation BussCheckVersion
+//
+//@synthesize sCheckDate;
+//
+//- (void)dealloc {
+//  self.sCheckDate = nil;
+//  [super dealloc];
+//}
+//
+//- (void)checkNewVersion:(id)target:(SEL)selector {
+//  self.delgtPackData = self;
+//  self.sCheckDate = [PubFunction getTodayStr];
+//  NSString *url = [BussInterImplBase makeQueryURLWithCgi:@"getverinfo"];
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:target
+//      ResponseSelector:selector];
+//}
+//
+////
+//- (NSString *)PackSendOutJsonString {
+//  NSString *strJson =
+//      [NSString stringWithFormat:@"{\"iSoftware\":\"%@\"}", CS_SOFT_ID];
+//  return strJson;
+//}
+//
+//- (BOOL)ProcRecvData:(id)rcvData Error:(NSError **)err {
+//  NSMutableArray *jsAryObj = nil;
+//  if (![BussInterImplBase prepareUnpackRecvData:rcvData
+//                                      ToJsonObj:&jsAryObj
+//                                     HttpStatus:self.iHttpCode
+//                                          Error:err]) {
+//    if (self.iHttpCode == 200) {
+//      *err = nil;
+//      return YES;
+//    }
+//
+//    LOG_ERROR(@"检查新版本：收到数据预处理错误");
+//    return NO;
+//  }
+//
+//  if ([PubFunction isObjNull:jsAryObj] || ![PubFunction isObjNull:*err]) {
+//    LOG_ERROR(@"检查新版本：收到数据预处理错误");
+//    return NO;
+//  }
+//
+//  // TODO: 保存数据
+//  /*2015.7.20
+//      [AstroDBMng replaceVerCheckResult:rcvData];
+//  */
+//
+//  return YES;
+//}
+//
+//+ (BOOL)unpackJsonCheckVersion:(NSString *)sJson:(TCheckVersionResult *)dout {
+//  if (!dout) {
+//    return NO;
+//  }
+//
+//  if ([PubFunction stringIsNullOrEmpty:sJson]) {
+//    LOG_ERROR(@"版本检查:JSON数据为空");
+//    return NO;
+//  }
+//  NSMutableArray *objAryVerInf = [sJson JSONValue];
+//  if (!objAryVerInf) {
+//    LOG_ERROR(@"JSON数据为空");
+//    return NO;
+//  }
+//  if (![PubFunction isArrayObj:objAryVerInf]) {
+//    LOG_ERROR(@"JSON数据结构出错");
+//    return NO;
+//  }
+//  if ([objAryVerInf count] < 1) {
+//    LOG_ERROR(@"JSON数据为空");
+//    return NO;
+//  }
+//
+//  NSDictionary *objVerInf = [objAryVerInf objectAtIndex:0];
+//
+//  dout.sVerCode = [objVerInf objectForKey:@"sVerCode"];
+//  dout.sDownURL = [objVerInf objectForKey:@"sDownUrl"];
+//  return YES;
+//}
+//
+//// 比较版本大小，value1>value2
+//+ (NSComparisonResult)compareVersion:(NSString *)value1:(NSString *)value2 {
+//  value1 = [[value1 stringByReplacingOccurrencesOfString:@"V" withString:@""]
+//      stringByReplacingOccurrencesOfString:@"v"
+//                                withString:@""];
+//  value2 = [[value2 stringByReplacingOccurrencesOfString:@"V" withString:@""]
+//      stringByReplacingOccurrencesOfString:@"v"
+//                                withString:@""];
+//
+//  NSArray *value1Array = [value1 componentsSeparatedByString:@"."];
+//  NSArray *value2Array = [value2 componentsSeparatedByString:@"."];
+//
+//  NSComparisonResult compareResult;
+//  for (NSInteger i = 0; i < [value1Array count]; i++) {
+//    if ([value2Array count] >= i + 1) {
+//      NSString *oneWord1 = [value1Array objectAtIndex:i];
+//      NSString *oneWord2 = [value2Array objectAtIndex:i];
+//      NSInteger intValue1 = [oneWord1 intValue];
+//      NSInteger intValue2 = [oneWord2 intValue];
+//      if (intValue1 > intValue2) {
+//        compareResult = NSOrderedDescending;
+//        break;
+//      } else if (intValue1 < intValue2) {
+//        compareResult = NSOrderedAscending;
+//        break;
+//      } else
+//        compareResult = NSOrderedSame;
+//    }
+//  }
+//  if (compareResult == NSOrderedSame) {
+//    if ([value1Array count] > [value2Array count])
+//      return NSOrderedDescending;
+//    else if ([value1Array count] == [value2Array count])
+//      return NSOrderedSame;
+//    else if ([value1Array count] < [value2Array count])
+//      return NSOrderedAscending;
+//  }
+//  return compareResult;
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 签到换积分
+//
+//@implementation BussQianDao
+//@synthesize sReqDate;
+//
+//- (void)dealloc {
+//  self.sReqDate = nil;
+//  [super dealloc];
+//}
+//
+//- (void)RequestQiandao:(NSString *)strDate
+//        ResponseTarget:(id)target
+//      ResponseSelector:(SEL)selector {
+//
+//  self.sReqDate = strDate;
+//  self.delgtPackData = self;
+//
+//  NSString *url = [BussInterImplBase makeQueryURLWithCgiSID:@"checkForScore"
+//                                                    UserSID:TheCurUser.sSID];
+//  // LOG_DEBUG(@"URL=%@", url);
+//
+//  //调试
+//  // LOG_ERROR(url);
+//
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:target
+//      ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//
+//  NSString *sSource = [NSString
+//      stringWithFormat:@"%@|%@|%@|%@", XUANSHANG_ID, TheCurUser.member.uid,
+//                       self.sReqDate, @"8q3jkasdf2390890232134adfk9012as"];
+//  NSString *chkCode = [PubFunction getMd5Value:sSource];
+//  NSString *jsonRequest = [NSString
+//      stringWithFormat:
+//          @"{\"iSoftware\":\"%@\",\"UserId\":\"%@\",\"ChkCode\":\"%@\"}",
+//          XUANSHANG_ID, TheCurUser.member.uid, chkCode];
+//
+//  //调试
+//  // LOG_ERROR(jsonRequest);
+//
+//  return jsonRequest;
+//}
+//
+//- (BOOL)ProcRecvData:(id)rcvData Error:(NSError **)err {
+//  NSDictionary *jsobj = nil;
+//  if (![BussInterImplBase prepareUnpackRecvData:rcvData
+//                                      ToJsonObj:&jsobj
+//                                     HttpStatus:self.iHttpCode
+//                                          Error:err]) {
+//    LOG_ERROR(@"签到换积分：收到数据预处理错误");
+//    return NO;
+//  }
+//
+//  if (jsobj) {
+//    int code = [((NSNumber *)[jsobj objectForKey:@"code"])intValue];
+//    NSString *content = nil;
+//    if (code == 200) {
+//      content = (NSString *)[jsobj objectForKey:@"msg"];
+//      int sor = [((NSNumber *)[jsobj objectForKey:@"return"])intValue];
+//      content = [NSString stringWithFormat:@"%@:%d\r\n", content, sor];
+//      LOG_ERROR(@"%@", content);
+//      return YES;
+//    }
+//
+//    if (500 == code) {
+//      content = (NSString *)[jsobj objectForKey:@"msg"];
+//      LOG_ERROR(@"%@", content);
+//      return YES;
+//    }
+//
+//    content = (NSString *)[jsobj objectForKey:@"msg"];
+//    LOG_ERROR(@"%@", content);
+//    return NO;
+//  }
+//  //	if ([PubFunction isObjNull:jsobj] /*|| ![PubFunction isObjNull:*err]*/)
+//  //	{
+//  //		if (self.iHttpCode == 200)
+//  //		{
+//  //			*err = nil;
+//  //			return YES;
+//  //		}
+//  //
+//  //		LOG_ERROR(@"签到换积分：收到数据预处理错误");
+//  //		return NO;
+//  //	}
+//  //
+//  //	//解析
+//  //	NSString* sResponse = [BussInterImplBase
+//  //pickResponBufFromRecvJsObj:jsobj];
+//  //	if ([PubFunction stringIsNullOrEmpty:sResponse])
+//  //	{
+//  //		LOG_ERROR(@"签到换积分：收到数据预处理错误");
+//  //		return NO;
+//  //	}
+//
+//  // TODO: 本地缓存
+//  //[AstroDBMng replaceLoveFlower:self.sUserGuid Data:sResponse
+//  //Time:self.sReqDate];
+//
+//  return NO;
+//}
+//
+//@end
+//
+//// add 2012.8.20
+//#pragma mark -
+//#pragma mark 获取服务器时间
+//
+//@implementation BussServerDateTime
+//
+//- (void)dealloc {
+//  [super dealloc];
+//}
+//
+//- (void)RequestServerDateTimeWithResponseTarget:(id)target
+//                               ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//  NSString *url = [BussInterImplBase makeQueryURLWithCgi:@"getServerDateTime"];
+//  // LOG_DEBUG(@"URL=%@", url);
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:target
+//      ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  NSString *strJson =
+//      [NSString stringWithFormat:@"{\"iSoftware\":\"%@\"}", XUANSHANG_ID];
+//  return strJson;
+//}
+//
+//- (BOOL)ProcRecvData:(id)rcvData Error:(NSError **)err {
+//  NSDictionary *jsobj = nil;
+//  if (![BussInterImplBase prepareUnpackRecvData:rcvData
+//                                      ToJsonObj:&jsobj
+//                                     HttpStatus:self.iHttpCode
+//                                          Error:err]) {
+//    LOG_ERROR(@"获取服务器时间：收到数据预处理错误");
+//    return NO;
+//  }
+//
+//  //返回数据：{"sysdate":"2012-08-21 18:03:10"}
+//  if (jsobj) {
+//    NSString *content = (NSString *)[jsobj objectForKey:@"sysdate"];
+//    if (content)
+//      return YES;
+//  }
+//
+//  return NO;
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 上传家园e线笔记
+//@implementation BussUploadJYEXNote
+//@synthesize noteinfo;
+//
+//- (void)dealloc {
+//  self.noteinfo = nil;
+//
+//  [super dealloc];
+//}
+//
+//- (void)UploadNote:(id)param
+//    ResponseTarget:(id)target
+//  ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//
+//  self.noteinfo = param;
+//
+//  NSString *url =
+//      [BussInterImplBase makeQueryURLWithCgi:@"mobile.php?mod=blog&ac=add"];
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:target
+//      ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+//
+//  //公共头
+//  //    [dict setObject:@"IOS" forKey:@"client_type"];
+//
+//  //    subject  —— 日志标题
+//  //    savealbumid —— 0
+//  //    newalbum —— 直接用'请输入相册名称'
+//  //    view_albumid —— none
+//  //    message —— 日志内容
+//  //    classid ——
+//  //    日志类型：公告、教学日志、家园配合、宝宝作品、点点滴滴、教学方法与分享、专题讨论与分享、平安接送
+//  //    tag —— 日志标签
+//  //    friend —— 0表示全部人可以看、1表示好友可以看、3只有自己看
+//  //    isSendsms —— 是否发送消息给好友，1-发送、0-不发送
+//  //    synspaceid —— 需要同步到的用户信息，格式：用户UID#用户名
+//  NSString *tempStr = [noteinfo.strNoteTitle
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//  [dict setObject:tempStr forKey:@"subject"];
+//  [dict setObject:[NSNumber numberWithInt:0] forKey:@"savealbumid"];
+//  tempStr = [[NSString stringWithUTF8String:"请输入相册名称"]
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//
+//  [dict setObject:tempStr forKey:@"newalbum"];
+//  [dict setObject:[NSNull null] forKey:@"view_albumid"];
+//
+//  NSString *strEditFileName =
+//      [CommonFunc getItemPath:noteinfo.strFirstItemGuid fileExt:@"html"];
+//  NSString *strEditAllHTML =
+//      [NSString stringWithContentsOfFile:strEditFileName
+//                                encoding:NSUTF8StringEncoding
+//                                   error:nil];
+//  NSLog(@"%@", strEditAllHTML);
+//  NSString *strHTMLBody = [CommonFunc getHTMLFileBody:strEditFileName];
+//
+//  NSArray *arrNoteXItem =
+//      [AstroDBMng getNote2ItemList:noteinfo.strNoteIdGuid includeDelete:YES];
+//
+//  if (arrNoteXItem) {
+//    TNoteXItem *curNoteXitem;
+//    TItemInfo *curItemInfo;
+//    NSString *filename;
+//    for (int i = 0; i < [arrNoteXItem count]; ++i) {
+//      curNoteXitem = [arrNoteXItem objectAtIndex:i];
+//      curItemInfo = [AstroDBMng getItem:curNoteXitem.strItemIdGuid];
+//
+//      if (curItemInfo && [curItemInfo.strItemIdGuid
+//                             isEqualToString:noteinfo.strFirstItemGuid]) {
+//        continue;
+//      }
+//      filename = [NSString stringWithFormat:@"%@.%@", curItemInfo.strItemIdGuid,
+//                                            curItemInfo.strItemExt];
+//      strHTMLBody = [strHTMLBody
+//          stringByReplacingOccurrencesOfString:filename
+//                                    withString:curItemInfo.strServerPath];
+//    }
+//  }
+//  NSLog(@"%@", strHTMLBody);
+//
+//  strHTMLBody = [strHTMLBody stringByReplacingOccurrencesOfString:@"\""
+//                                                       withString:@"\\\""];
+//
+//  strHTMLBody =
+//      [strHTMLBody stringByReplacingOccurrencesOfString:@"\r" withString:@""];
+//  strHTMLBody = [strHTMLBody stringByReplacingOccurrencesOfString:@"\n"
+//                                                       withString:@"<br>"];
+//  // strHTMLBody = [strHTMLBody stringByReplacingOccurrencesOfString:@" "
+//  // withString:@"&nbsp;"];
+//  NSLog(@"%@\r\n", strHTMLBody);
+//  //[dict setObject:strEditAllHTML forKey:@"message"];
+//  // tempStr = [strEditAllHTML
+//  // stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
+//  tempStr = (NSString *)CFURLCreateStringByAddingPercentEscapes(
+//      NULL, (CFStringRef)strHTMLBody, NULL,
+//      (CFStringRef) @"!*'();:@&=+$,/?%#[]", kCFStringEncodingUTF8);
+//  NSLog(@"%@\r\n", tempStr);
+//  [dict setObject:tempStr forKey:@"message"];
+//
+//  tempStr = [noteinfo.strNoteClassId
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//  [dict setObject:tempStr forKey:@"classid"];
+//
+//  tempStr = @"日志标签";
+//  ;
+//  [dict setObject:tempStr forKey:@"tag"];
+//
+//  [dict setObject:[NSNumber numberWithInt:0] forKey:@"friend"];
+//
+//  [dict setObject:[NSNumber numberWithInt:1] forKey:@"isSendsms"];
+//  NSString *syn = @"";
+//  NSMutableArray *classStrArray = [NSMutableArray array];
+//  tempStr = @"班级公告,班级空间,班级论坛,教学日志,宝宝作品,班级随手拍,"
+//            @"我爱分享,今日作业,黑板报,班级空间,精彩瞬间";
+//  TJYEXLoginUserInfo *u = (TJYEXLoginUserInfo *)TheCurUser;
+//  if (noteinfo.strNoteClassId &&
+//      !([u isInfantsSchoolMaster] || [u isMiddleSchoolMaster]) &&
+//      ([tempStr rangeOfString:noteinfo.strNoteClassId].location !=
+//       NSNotFound)) {
+//
+//    NSArray *classArray = [BizLogic getClassList];
+//
+//    if (classArray && [classArray count]) {
+//      for (TJYEXClass *classInfo in classArray) {
+//        syn = [NSString stringWithFormat:@"%@#%@", classInfo.sClassId,
+//                                         classInfo.sClassName];
+//        NSString *ss = [syn
+//            stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//        [classStrArray addObject:ss];
+//      }
+//    }
+//  }
+//
+//  if ([classStrArray count] == 0) { // syn.length == 0 ) {
+//    // syn = [NSString stringWithFormat:@"%@#%@", TheCurUser.member.uid,
+//    // TheCurUser.member.username];
+//    // syn = @"";
+//    //[classStrArray addObject:syn];
+//  } else {
+//    [dict setObject:classStrArray forKey:@"synspaceid"];
+//  }
+//
+//  NSString *strJson = [dict JSONRepresentation];
+//  NSString *para = [NSString stringWithFormat:@"para=%@", strJson];
+//  NSLog(@"%@\r\n", para);
+//  //    //para = [para
+//  //    stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding/*NSUTF8StringEncoding*/];
+//  //    para = (NSString *)CFURLCreateStringByAddingPercentEscapes(
+//  //                                                        NULL,
+//  //                                                        (CFStringRef)para,
+//  //                                                        NULL,
+//  //                                                        (CFStringRef)@"!*'();:@&=+$,/?%#[]",
+//  //                                                        kCFStringEncodingUTF8
+//  //                                                        );
+//  //
+//  //    NSLog(@"%@\r\n", para);
+//  return para;
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 家园E线 上传日子附件
+//@implementation BussJYEXUploadItemFile
+//@synthesize strItemGuid;
+//@synthesize strExt;
+//@synthesize rs;
+//@synthesize re;
+//
+//- (void)dealloc {
+//  self.strItemGuid = nil;
+//  self.strExt = nil;
+//
+//  [super dealloc];
+//}
+//
+//- (void)UploadItemFile:(id)param_
+//        ResponseTarget:(id)target
+//      ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//
+//  self.strItemGuid = [param_ objectForKey:@"itemguid"];
+//  self.strExt = [param_ objectForKey:@"itemext"];
+//  self.rs = [[param_ objectForKey:@"rs"] intValue];
+//  self.re = [[param_ objectForKey:@"re"] intValue];
+//
+//  NSString *url = [BussInterImplBase
+//      makeQueryURLWithCgi:@"mobile.php?mod=blog&ac=uploadAttachment"];
+//  //[self HttpRequest_uploadFile:url Method:HTTP_METHOD_POST
+//  //contenttype:[CommonFunc getStreamTypeByExt:strExt] ResponseTarget:target
+//  //ResponseSelector:selector];
+//  [self HttpRequest_uploadJYEXFile:url
+//                            Method:HTTP_METHOD_POST
+//                       contenttype:[CommonFunc getStreamTypeByExt:strExt]
+//                          FileName:self.strItemGuid
+//                           FileExt:self.strExt
+//                    ResponseTarget:target
+//                  ResponseSelector:selector];
+//}
+//
+//- (NSData *)PackSendOutByteData {
+//  NSString *strFilename = [CommonFunc getItemPath:strItemGuid fileExt:strExt];
+//  if ([CommonFunc isImageFile:strExt]) {
+//    NSString *strFileNameSrc =
+//        [CommonFunc getItemPathAddSrc:strItemGuid fileExt:strExt];
+//    // NSString *strFileNameSrc = [NSString stringWithFormat:@"%@/%@.%@",
+//    // [[NSBundle mainBundle] resourcePath], strItemGuid, strExt];
+//    if ([CommonFunc isFileExisted:strFileNameSrc])
+//      strFilename = strFileNameSrc;
+//  }
+//  NSLog(@"upload file:%@", strFilename);
+//
+//  long long size = [CommonFunc GetFileSize:strFilename];
+//  int intsize = (int)size;
+//  rs = 0;
+//  re = (int)size - 1;
+//  NSLog(@"upload file:%@ size=%d start=%d end=%d bytes=%d", strFilename,
+//        intsize, rs, re, re - rs + 1);
+//
+//  if (size > 0) {
+//    NSFileHandle *fileHandle =
+//        [NSFileHandle fileHandleForReadingAtPath:strFilename];
+//    [fileHandle seekToFileOffset:rs];
+//    NSData *data = [fileHandle readDataOfLength:re - rs + 1];
+//    return data;
+//  } else {
+//    NSData *data = [NSData dataWithBytes:"0" length:1];
+//    return data;
+//  }
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//
+//  return @"";
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 查询相册列表
+//
+//@implementation BussJYEXQueryAlbumList
+//
+//- (void)QueryAlbumList:(id)target ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//
+//  NSString *cgi = [NSString
+//      stringWithFormat:@"mobile.php?mod=album&ac=getuserallalbum&uid=%@",
+//                       TheCurUser.member.uid];
+//  NSString *url = [BussInterImplBase makeQueryURLWithCgi:cgi];
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_GET
+//        ResponseTarget:target
+//      ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//
+//  return @"";
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 上传图片到相册
+//
+//@implementation BussJYEXUploadPhoto
+//
+//- (void)uploadPhoto:(NSString *)strAlbumId
+//              title:(NSString *)strTitle
+//          albumname:(NSString *)strAlbumName
+//           itemguid:(NSString *)strItemGuid
+//                uid:(NSString *)strUid
+//           username:(NSString *)strUsername
+//     ResponseTarget:(id)target
+//   ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//
+//  NSMutableArray *arr = [NSMutableArray array];
+//
+//  NSString *albumid = strAlbumId;
+//
+//  // 2014.9.23
+//  TJYEXLoginUserInfo *u = (TJYEXLoginUserInfo *)TheCurUser;
+//
+//  //使用日志id
+//  if ([strAlbumId isEqual:@"0"] && [strAlbumName isEqualToString:@"日"
+//                                                                 @"志相册"]) {
+//    if ([u isInfantsSchoolMaster] || [u isMiddleSchoolMaster]) {
+//      albumid = u.sAlbumIdSchool;
+//    } else if ([u isInfantsSchoolTeacher] || [u isMiddleSchoolTeacher]) {
+//      albumid = u.sAlbumIdClass;
+//    } else {
+//      albumid = u.sAlbumIdPerson;
+//    }
+//  }
+//
+//  NSDictionary *dic1 =
+//      [NSDictionary dictionaryWithObjectsAndKeys:albumid, @"value", @"albumid",
+//                                                 @"key", @"data", @"type", nil];
+//  [arr addObject:dic1];
+//
+//  // NSString *strDate = [CommonFunc getCurrentDate];//2014.9.18
+//  NSDictionary *dic2 =
+//      [NSDictionary dictionaryWithObjectsAndKeys:strTitle, @"value", @"title",
+//                                                 @"key", @"data", @"type", nil];
+//  [arr addObject:dic2];
+//
+//  NSString *imagePathSrc =
+//      [CommonFunc getItemPathAddSrc:strItemGuid
+//                            fileExt:[CommonFunc getItemTypeExt:NI_PIC]];
+//  NSDictionary *dic3 = [NSDictionary
+//      dictionaryWithObjectsAndKeys:imagePathSrc, @"value", @"Filedata", @"key",
+//                                   @"file", @"type", nil];
+//  [arr addObject:dic3];
+//
+//  // add 2014.9.29
+//  NSDictionary *dic33 =
+//      [NSDictionary dictionaryWithObjectsAndKeys:@"2", @"value", @"img_come",
+//                                                 @"key", @"data", @"type", nil];
+//  [arr addObject:dic33]; // 0-pc 1-android 2-ios 3-通道服务器
+//
+//  //如果是老师和园长身份，发送到通道服务器。2018.9.23
+//  NSString *url;
+//  /*
+//  if ( ([u isInfantsSchoolMaster] || [u isMiddleSchoolMaster] || [u
+//  isInfantsSchoolTeacher] || [u isMiddleSchoolTeacher]) &&
+//  TheCurUser.sNoteUserId && [TheCurUser.sNoteUserId length]>0) {
+//      //其他域
+//      NSDictionary *dic4 = [NSDictionary
+//  dictionaryWithObjectsAndKeys:@"0",@"value",@"isczda",@"key",@"data",@"type",nil];
+//      [arr addObject:dic4];
+//      NSDictionary *dic5 = [NSDictionary dictionaryWithObjectsAndKeys:albumname
+//  ,@"value",@"albumname",@"key",@"data",@"type",nil];
+//      [arr addObject:dic5];
+//      NSDictionary *dic6 = [NSDictionary
+//  dictionaryWithObjectsAndKeys:@"",@"value",@"src_addr",@"key",@"data",@"type",nil];
+//      [arr addObject:dic6];
+//      NSDictionary *dic7 = [NSDictionary
+//  dictionaryWithObjectsAndKeys:@"",@"value",@"src_path",@"key",@"data",@"type",nil];
+//      [arr addObject:dic7];
+//      NSDictionary *dic8 = [NSDictionary
+//  dictionaryWithObjectsAndKeys:uid,@"value",@"uid",@"key",@"data",@"type",nil];
+//      [arr addObject:dic8];
+//      NSDictionary *dic9 = [NSDictionary
+//  dictionaryWithObjectsAndKeys:username,@"value",@"realname",@"key",@"data",@"type",nil];
+//      [arr addObject:dic9];
+//
+//      if ([CS_URL_BASE isEqualToString:@"http://www.jyex.cn/"] ||
+//          [CS_URL_BASE isEqualToString:@"http://61.144.88.98:6805/"])
+//          url = [NSString
+//  stringWithFormat:@"http://%@/index.php?mod=upload&ac=uploadpic",TheCurUser.sNoteUserId];
+//  //td_ip
+//      else
+//          url = [NSString
+//  stringWithFormat:@"http://%@/tdserver/index.php?mod=upload&ac=uploadpic",TheCurUser.sNoteUserId];
+//  //td_ip
+//  }
+//  else
+//  */
+//  {
+//    url = [BussInterImplBase
+//        makeQueryURLWithCgi:@"mobile.php?mod=album&ac=uploadpic"];
+//  }
+//
+//  NSLog(@"upload photo:photo size=%lld", [CommonFunc GetFileSize:imagePathSrc]);
+//  NSLog(@"upload photo:%@", [arr description]);
+//
+//  [self HttpRequest_uploadFormData:url
+//                            Method:HTTP_METHOD_POST
+//                              data:arr
+//                    ResponseTarget:target
+//                  ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  return @"";
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 创建相册
+//
+//@implementation BussJYEXCreateAlbum
+//@synthesize m_strAlbum;
+//@synthesize m_spaceid;
+//- (void)dealloc {
+//  self.m_strAlbum = nil;
+//  self.m_spaceid = nil;
+//
+//  [super dealloc];
+//}
+//
+//- (void)CreateAlbum:(NSString *)strAlbumName
+//              space:(NSNumber *)spaceid
+//     ResponseTarget:(id)target
+//   ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//
+//  self.m_strAlbum = strAlbumName;
+//  self.m_spaceid = spaceid;
+//
+//  NSString *url = [BussInterImplBase
+//      makeQueryURLWithCgi:@"mobile.php?mod=album&ac=createalbum"];
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:target
+//      ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+//
+//  NSString *str = [m_strAlbum
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//
+//  [dict setObject:str forKey:@"albumname"];
+//  [dict setObject:m_spaceid forKey:@"spacetype"];
+//  [dict setObject:@"" forKey:@"title"];
+//  [dict setObject:[NSNumber numberWithInt:0] forKey:@"friend"];
+//  [dict setObject:@"" forKey:@"target_name"];
+//  [dict setObject:@"" forKey:@"password"];
+//
+//  NSString *strJson = [dict JSONRepresentation];
+//
+//  NSString *para = [NSString stringWithFormat:@"para=%@", strJson];
+//
+//  NSLog(@"%@", para);
+//
+//  return para;
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 注册
+//
+//@implementation BussJYEXRegister
+//
+//@synthesize m_strUser;
+//@synthesize m_strPassword;
+//@synthesize m_strNickname;
+//@synthesize m_strRealname;
+//@synthesize m_strEmail;
+//
+//- (void)dealloc {
+//  self.m_strUser = nil;
+//  self.m_strPassword = nil;
+//  self.m_strNickname = nil;
+//  self.m_strRealname = nil;
+//  self.m_strEmail = nil;
+//
+//  [super dealloc];
+//}
+//
+//- (void)RegisterUser:(NSString *)strUser
+//            password:(NSString *)strPassword
+//            nickname:(NSString *)strNickname
+//           readlname:(NSString *)strRealname
+//               email:(NSString *)strEmail
+//      ResponseTarget:(id)target
+//    ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//
+//  self.m_strUser = strUser;
+//  self.m_strPassword = strPassword;
+//  self.m_strNickname = strNickname;
+//  self.m_strRealname = strRealname;
+//  self.m_strEmail = strEmail;
+//
+//  NSString *url = [BussInterImplBase
+//      makeQueryURLWithCgi:@"mobile.php?mod=member&ac=register"];
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:target
+//      ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+//
+//  NSString *str = [m_strUser
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//  [dict setObject:str forKey:@"username"];
+//
+//  str = [m_strPassword
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//  [dict setObject:str forKey:@"password"];
+//
+//  str = [m_strNickname
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//  [dict setObject:str forKey:@"nickname"];
+//
+//  str = [m_strRealname
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//  [dict setObject:str forKey:@"realname"];
+//
+//  str = [m_strEmail
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//  [dict setObject:str forKey:@"email"];
+//
+//  NSString *strJson = [dict JSONRepresentation];
+//
+//  NSString *para = [NSString stringWithFormat:@"para=%@", strJson];
+//
+//  NSLog(@"%@", para);
+//
+//  return para;
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 修改用户资料，包括密码
+//
+//@implementation BussJYEXUpdateUserInfo
+//
+//@synthesize m_strUid;
+//@synthesize m_strUserName;
+//@synthesize m_strOldPassword;
+//@synthesize m_strNewPassword;
+//@synthesize m_strNickname;
+//@synthesize m_strRealname;
+//@synthesize m_strEmail;
+//@synthesize m_strMobile;
+//
+//- (void)dealloc {
+//  self.m_strUid = nil;
+//  self.m_strUserName = nil;
+//  self.m_strOldPassword = nil;
+//  self.m_strNewPassword = nil;
+//  self.m_strNickname = nil;
+//  self.m_strRealname = nil;
+//  self.m_strEmail = nil;
+//  self.m_strMobile = nil;
+//
+//  [super dealloc];
+//}
+//
+//- (void)UpdateUserInfo:(NSString *)strUid
+//              username:(NSString *)strUserName
+//           oldpassword:(NSString *)strOldPassword
+//           newpassword:(NSString *)strNewPassword
+//              nickname:(NSString *)strNickname
+//             readlname:(NSString *)strRealname
+//                 email:(NSString *)strEmail
+//                mobile:(NSString *)strMobile
+//        ResponseTarget:(id)target
+//      ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//
+//  self.m_strUid = strUid;
+//  self.m_strUserName = strUserName;
+//  self.m_strOldPassword = strOldPassword;
+//  self.m_strNewPassword = strNewPassword;
+//  self.m_strNickname = strNickname;
+//  self.m_strRealname = strRealname;
+//  self.m_strEmail = strEmail;
+//  self.m_strMobile = strMobile;
+//
+//  NSString *url =
+//      [BussInterImplBase makeQueryURLWithCgi:@"mobile.php?mod=member&ac=mod"];
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:target
+//      ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+//
+//  [dict setObject:m_strUid forKey:@"uid"];
+//
+//  NSString *str = [m_strUserName
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//  [dict setObject:str forKey:@"username"];
+//
+//  str = [m_strOldPassword
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//  [dict setObject:str forKey:@"oldpassword"];
+//
+//  str = [m_strNewPassword
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//  [dict setObject:str forKey:@"password"];
+//
+//  str = [m_strNickname
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//  [dict setObject:str forKey:@"nickname"];
+//
+//  str = [m_strRealname
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//  [dict setObject:str forKey:@"realname"];
+//
+//  str = [m_strEmail
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//  [dict setObject:str forKey:@"email"];
+//
+//  str = [m_strMobile
+//      stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//  [dict setObject:str forKey:@"mobile"];
+//
+//  NSString *strJson = [dict JSONRepresentation];
+//
+//  NSString *para = [NSString stringWithFormat:@"para=%@", strJson];
+//
+//  NSLog(@"%@", para);
+//
+//  return para;
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 获取图片列表
+//
+//@implementation BussJYEXGetAlbumPics
+//
+//- (void)dealloc {
+//  [super dealloc];
+//}
+//
+//- (void)GetAlbumPics:(NSString *)strAlbumID
+//      ResponseTarget:(id)target
+//    ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//
+//  NSString *str =
+//      [NSString stringWithFormat:@"mobile.php?mod=album&ac=piclist&albumid=%@",
+//                                 strAlbumID];
+//
+//  NSString *url = [BussInterImplBase makeQueryURLWithCgi:str];
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:target
+//      ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  return @"";
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 下载文件
+//
+//@implementation BussDownloadFile
+//
+//- (void)dealloc {
+//  [super dealloc];
+//}
+//
+//- (void)DownloadFile:(NSString *)strMyUrl
+//            filename:(NSString *)strFilename
+//         contenttype:(NSString *)strContentType
+//      ResponseTarget:(id)target
+//    ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//
+//  NSLog(@"url:%@", strMyUrl);
+//
+//  [self HttpRequest_DownloadFile:strMyUrl
+//                          Method:HTTP_METHOD_GET
+//                        filename:strFilename
+//                     contenttype:strContentType
+//                  ResponseTarget:target
+//                ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  return @"";
+//}
+//
+//@end
+//
+////--------------------------------下载头像部分------------------------------
+//
+//#pragma mark -
+//#pragma mark 查询用户头像更新时间
+//
+//@implementation BussQueryAvatar
+//
+//- (void)QueryAvatar:(NSString *)strUserid
+//     ResponseTarget:(id)target
+//   ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//
+//  NSString *url = [BussInterImplBase
+//      makeQueryURLWithCgi:
+//          @"mobile.php?mod=member&ac=avartar_uptime&size=small"];
+//  [self HttpRequest:url
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:target
+//      ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  return @"";
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 获取用户头像
+//
+//@implementation BussGetAvatar
+//
+//- (void)GetAvatar:(NSString *)strUserid
+//         filename:(NSString *)strFilename
+//      contenttype:(NSString *)strContentType
+//   ResponseTarget:(id)target
+// ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//
+//  NSString *strCGI = [NSString
+//      stringWithFormat:@"uc_server/avatar.php?uid=%@&size=small", strUserid];
+//
+//  NSString *url = [BussInterImplBase makeQueryURLWithCgi:strCGI];
+//
+////调试---------
+//#ifdef LOG_NETINFO
+//  LOG_ERROR(@"URL=%@", url);
+//#else
+//  LOG_DEBUG(@"URL=%@", url);
+//#endif
+//
+//  [self HttpRequest_DownloadFile:url
+//                          Method:HTTP_METHOD_GET
+//                        filename:strFilename
+//                     contenttype:strContentType
+//                  ResponseTarget:target
+//                ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  return @"";
+//}
+//
+//@end
+//
+////上传动态图片到服务器
+//#pragma mark -
+//#pragma mark 上传动态图片到服务器
+//
+//@implementation BussBbqUploadPic
+//
+//- (void)bbqUploadPic:(NSString *)strLocalId
+//            filename:(NSString *)strFileName
+//      ResponseTarget:(id)target
+//    ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//
+//  NSMutableArray *arr = [NSMutableArray array];
+//
+//  NSDictionary *dic1 = [NSDictionary
+//      dictionaryWithObjectsAndKeys:strLocalId, @"value", @"localid", @"key",
+//                                   @"data", @"type", nil];
+//  [arr addObject:dic1];
+//
+//  NSDictionary *dic2 = [NSDictionary
+//      dictionaryWithObjectsAndKeys:strFileName, @"value", @"picfile", @"key",
+//                                   @"file", @"type", nil];
+//  [arr addObject:dic2];
+//
+//  NSLog(@"upload bbq pic:picfile size=%lld",
+//        [CommonFunc GetFileSize:strFileName]);
+//  NSLog(@"upload photo:%@", [arr description]);
+//
+//  NSString *url = [BussInterImplBase makeQueryURLWithCgi:URL_UPLOAD_PIC];
+//
+//  [self HttpRequest_uploadFormData:url
+//                            Method:HTTP_METHOD_POST
+//                              data:arr
+//                    ResponseTarget:target
+//                  ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  return @"";
+//}
+//
+//@end
+//
+//#pragma mark -
+//#pragma mark 提交信息到服务端
+//
+//@implementation BussBbqPostMsg
+//@synthesize m_strUrl;
+//@synthesize m_dicData;
+//
+//- (void)dealloc {
+//  self.m_strUrl = nil;
+//  self.m_dicData = nil;
+//
+//  [super dealloc];
+//}
+//
+//- (void)bbqPostMsg:(NSString *)strPostUrl
+//              data:(NSDictionary *)dicData
+//    ResponseTarget:(id)target
+//  ResponseSelector:(SEL)selector {
+//  super.delgtPackData = self;
+//
+//  self.m_strUrl = strPostUrl;
+//  self.m_dicData = dicData;
+//
+//  NSLog(@"url=%@", strPostUrl);
+//
+//  [self HttpRequest:strPostUrl
+//                Method:HTTP_METHOD_POST
+//        ResponseTarget:target
+//      ResponseSelector:selector];
+//}
+//
+//- (NSString *)PackSendOutJsonString {
+//  NSString *strJson = [m_dicData JSONRepresentation];
+//
+//  NSString *para = [NSString stringWithFormat:@"para=%@", strJson];
+//
+//  NSLog(@"%@", para);
+//
+//  return para;
+//}
+//
+//@end

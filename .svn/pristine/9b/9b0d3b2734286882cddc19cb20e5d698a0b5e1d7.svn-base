@@ -1,0 +1,151 @@
+//
+//  BBQDynamicManager.m
+//  BBQ
+//
+//  Created by 朱琨 on 15/12/10.
+//  Copyright © 2015年 bbq. All rights reserved.
+//
+
+#import "BBQDynamicManager.h"
+#import "Dynamic.h"
+#import "QiniuSDK.h"
+
+@implementation BBQDynamicManager
+
++ (instancetype)sharedManager {
+    static id sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[self alloc] init];
+    });
+    return sharedInstance;
+}
+
+#pragma mark - 数据库操作
+- (void)saveDynamic:(Dynamic *)dynamic {
+    dynamic.primaryKey = [self primaryKeyWithDynamic:dynamic];
+    [dynamic insertUpdateToDB:nil];
+}
+
+- (void)saveDynamicSync:(Dynamic *)dynamic {
+    dynamic.primaryKey = [self primaryKeyWithDynamic:dynamic];
+    [dynamic insertUpdateSyncToDB:nil];
+}
+
+- (void)saveDynamics:(NSArray *)dynamics {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [dynamics bk_each:^(Dynamic *dynamic) {
+            [self saveDynamic:dynamic];
+        }];
+    });
+}
+
+- (void)saveDynamicsSync:(NSArray *)dynamics {
+    [dynamics bk_each:^(Dynamic *dynamic) {
+        [self saveDynamicSync:dynamic];
+    }];
+}
+
+- (void)deleteDynamic:(Dynamic *)dynamic {
+    dynamic.primaryKey = [self primaryKeyWithDynamic:dynamic];
+    [dynamic deleteToDB:nil];
+}
+
+- (void)deleteDynamics:(NSArray *)dynamics {
+    [dynamics bk_each:^(Dynamic *dynamic) {
+        [self deleteDynamic:dynamic];
+    }];
+}
+
+- (void)dynamicWithGuid:(NSString *)guid completion:(SearchCompletion)block {
+    NSString *sql = [NSString stringWithFormat:@"guid = '%@'", guid];
+    [Dynamic searchAllWhere:sql results:^(NSArray *results) {
+        if (block) {
+            block(results);
+        }
+    }];
+}
+
+- (void)dynamicWithLocalid:(NSString *)localid completion:(SearchCompletion)block {
+    NSString *sql = [NSString stringWithFormat:@"localid = '%@'", localid];
+    [self searchDynamicsWhere:sql count:0 completion:block];
+}
+
+- (void)dynamicsWithUploadState:(NSInteger)state completion:(SearchCompletion)block {
+    NSString *sql = [NSString stringWithFormat:@"uploadState = %@", @(state)];
+    [self searchDynamicsWhere:sql count:0 completion:block];
+}
+
+- (void)dynamicsAtBeginningWithCompletion:(SearchCompletion)block {
+    [self searchDynamicsWhere:nil count:10 completion:block];
+}
+
+- (void)dynamicsAfterDynamic:(Dynamic *)dynamic completion:(SearchCompletion)block {
+    NSString *sql = [NSString stringWithFormat:@"graphtime < %@", dynamic.graphtime];
+    [self searchDynamicsWhere:sql count:10 completion:block];
+}
+
+- (void)dynamicsWithParams:(NSDictionary *)dic completion:(SearchCompletion)block {
+    NSMutableDictionary *params = [NSMutableDictionary dictionary];
+    [params setObject:dic[@"dtype"] forKey:@"dtype"];
+    switch ((BBQDynamicGroupType)([dic[@"dtype"] integerValue])) {
+        case BBQDynamicGroupTypeBaby: {
+            if ([dic[@"baobaouid"] isEqualToNumber:@(0)] && [dic[@"classuid"] isEqualToNumber:@(0)]) {
+                [params setObject:dic[@"schoolid"] forKey:@"schoolid"];
+            } else if ([dic[@"baobaouid"] isEqualToNumber:@(0)]) {
+                [params setObject:dic[@"classuid"] forKey:@"classuid"];
+            } else {
+                [params setObject:dic[@"baobaouid"] forKey:@"baobaouid"];
+            }
+            break;
+        }
+        case BBQDynamicGroupTypeClass: {
+            if ([dic[@"classuid"] isEqualToNumber:@(0)] && ![dic[@"schoolid"] isEqualToNumber:@(0)]) {
+                [params setObject:dic[@"schoolid"] forKey:@"schoolid"];
+            }
+            break;
+        }
+        case BBQDynamicGroupTypeSchool: {
+            [params setObject:@[@(2), @(3)] forKey:@"dtype"];
+            [params setObject:dic[@"schoolid"] forKey:@"schoolid"];
+            break;
+        }
+    }
+    [Dynamic searchWhereDic:dic orderBy:@"graphtime DESC" pageNum:0 results:^(NSArray *results) {
+        if (block) {
+            block(results);
+        }
+    }];
+}
+
+- (void)dynamicsWhere:(NSString *)where count:(NSInteger)count completion:(SearchCompletion)block {
+    [self searchDynamicsWhere:where count:count completion:block];
+}
+
+- (void)searchDynamicsWhere:(NSString *)where count:(NSInteger)count completion:(SearchCompletion)block {
+    [Dynamic searchWhere:where orderBy:@"graphtime DESC" count:(int)count results:^(NSArray *results) {
+        if (block) {
+            block(results);
+        }
+    }];
+}
+
+- (NSString *)primaryKeyWithDynamic:(Dynamic *)dynamic {
+    return [dynamic.guid isNotBlank] ? @"guid" : @"localid";
+}
+
+#pragma mark - 发布
+- (void)publishDynamic:(Dynamic *)dynamic {
+    dynamic.primaryKey = [self primaryKeyWithDynamic:dynamic];
+    [dynamic insertUpdateToDB:^(BOOL isSuccess) {
+        if (isSuccess) {
+            [dynamic.attachinfo bk_each:^(Attachment *attachment) {
+                if (attachment.uploadState != BBQAttachmentUploadStateSuccess) {
+                    
+                }
+            }];
+        }
+    }];
+}
+
+@end

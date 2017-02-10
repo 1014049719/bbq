@@ -1,0 +1,17 @@
+//
+//  SchoolModel.h
+//  BBQ
+//
+//  Created by mwt on 15/8/14.
+//  Copyright (c) 2015年 bbq. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface SchoolModel : NSObject
+
+@property(nonatomic,strong) NSString *schoolid;
+@property(nonatomic,strong) NSString *schoolname;
+@property(nonatomic,assign) int dtype;
+
+@end

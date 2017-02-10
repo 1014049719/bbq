@@ -1,0 +1,266 @@
+//
+//  BussData.h
+//  Astro
+//
+//  Created by root on 11-11-18.
+//  Copyright 2011 ND SOFT. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import "CommonDef.h"
+#import "BBQSchoolDataModel.h"
+#import "BBQClassDataModel.h"
+
+#pragma mark -
+#pragma mark 网络数据结构
+
+//操作响应状态
+@interface TBussStatus : NSObject
+{
+	int iCode;
+	NSString* sInfo;
+	id rtnData;
+    id srcParam;  //2015.1.27
+}
+
+@property (nonatomic, assign) int iCode;
+@property (nonatomic, retain) NSString* sInfo;
+@property (nonatomic, retain) id rtnData;
+@property (nonatomic, retain) id srcParam;
+
+@end
+
+@interface TLimitUserInfo : NSObject
+
+/// 名字
+@property (copy, nonatomic) NSString *name;
+/// 与宝宝关系
+@property (copy, nonatomic) NSString *relationship;
+/// 权限
+@property (copy, nonatomic) NSString *qx;
+/// 个人信息
+@property (copy, nonatomic) NSString *myInfo;
+
+@end
+
+//登录用户
+@interface TLoginUserInfo : NSObject <NSCopying>
+{
+@public
+	enum ELoginType
+	{
+		ELoginType_NULL = 0,
+		ELoginType_OffLine,		//脱机登录
+		ELoginType_OnLine		//联机登录
+	};
+	
+	NSString* sUserName;
+	NSString* sPassword;
+	NSString* sUserID;
+	NSString* sNickName;
+	NSString* sRealName;
+	NSString* sUAPID;
+	NSString* sSID;
+	NSString* sSessionID; 
+	NSString* sLoginTime;
+	int iLoginType;  //联机、脱机
+	int iGroupID;
+	int iAppID;
+	NSString* sBlowfish;
+	
+	int iSavePasswd;
+	int iAutoLogin;
+	
+	NSString* sSrvTbName;		//
+	NSString* sMsg;
+    
+    //登录简报业务的参数
+    NSString *sNoteUserId;
+    NSString *sNoteMasterKey;
+    NSString *sNoteIpLocation;
+
+}
+@property(nonatomic, retain) NSString* sUserName;
+@property(nonatomic, retain) NSString* sPassword;
+@property(nonatomic, retain) NSString* sUserID;
+@property(nonatomic, retain) NSString* sNickName;
+@property(nonatomic, retain) NSString* sRealName;
+@property(nonatomic, retain) NSString* sUAPID;
+@property(nonatomic, retain) NSString* sSID;
+@property(nonatomic, retain) NSString* sSessionID;
+@property(nonatomic, retain) NSString* sLoginTime;
+@property(nonatomic, retain) NSString* sBlowfish;
+@property(nonatomic, retain) NSString* sSrvTbName;
+@property(nonatomic, retain) NSString* sMsg;
+@property(nonatomic)	int iLoginType;
+@property(nonatomic)	int iGroupID;
+@property(nonatomic)	int iAppID;
+@property(nonatomic)	int iSavePasswd;
+@property(nonatomic)	int iAutoLogin;
+@property(nonatomic, retain) NSString *sNoteUserId;
+@property(nonatomic, retain) NSString *sNoteMasterKey;
+@property(nonatomic, retain) NSString *sNoteIpLocation;
+
+
+- (BOOL) isDefaultUser;
+- (BOOL) isLogined;
+
+@end
+
+//@interface TJYEXLoginUserInfo : TLoginUserInfo {
+//    NSString *sEmail;
+//    NSString *sMobilephone;
+//    NSString *sTelephone;
+//    NSString *sAddress;
+//    int iLoginFlag;    //0:已退出登录、或未成功登录过   1:成功登录过
+//    int iSchoolType;
+//    
+//    NSString *sAlbumIdPerson; //2014.9.26
+//    NSString *sAlbumNamePerson;
+//    NSString *sAlbumUidPerson;
+//    NSString *sAlbumUsernamePerson;
+//    NSString *sAlbumIdClass; //2014.9.26
+//    NSString *sAlbumNameClass;
+//    NSString *sAlbumUidClass;
+//    NSString *sAlbumUsernameClass;
+//    NSString *sAlbumIdSchool; //2014.9.26
+//    NSString *sAlbumNameSchool;
+//    NSString *sAlbumUidSchool;
+//    NSString *sAlbumUsernameSchool;
+//    
+//    NSString *sAvatarUrl;  //2015.7.8
+//    int nAvatarStatus;
+//    int groupkey;  //身份标示 1:家长  2:老师  3:园长
+//    int gender;  //性别//1:男  2:女
+//}
+//@property(nonatomic, retain) NSString* sEmail;
+//@property(nonatomic, retain) NSString* sMobilephone;
+//@property(nonatomic, retain) NSString* sTelephone;
+//@property(nonatomic, retain) NSString* sAddress;
+//@property(nonatomic, assign)	int iLoginFlag;
+//@property(nonatomic, assign)	int iSchoolType;
+//@property(nonatomic, retain) NSString *sAlbumIdPerson; //2014.9.26
+//@property(nonatomic, retain) NSString *sAlbumNamePerson;
+//@property(nonatomic, retain) NSString *sAlbumUidPerson;
+//@property(nonatomic, retain) NSString *sAlbumUsernamePerson;
+//@property(nonatomic, retain) NSString *sAlbumIdClass; //2014.9.26
+//@property(nonatomic, retain) NSString *sAlbumNameClass;
+//@property(nonatomic, retain) NSString *sAlbumUidClass;
+//@property(nonatomic, retain) NSString *sAlbumUsernameClass;
+//@property(nonatomic, retain) NSString *sAlbumIdSchool; //2014.9.26
+//@property(nonatomic, retain) NSString *sAlbumNameSchool;
+//@property(nonatomic, retain) NSString *sAlbumUidSchool;
+//@property(nonatomic, retain) NSString *sAlbumUsernameSchool;
+//@property(nonatomic, retain) NSString *sAvatarUrl;  //2015.7.8
+//@property(nonatomic, assign) int nAvatarStatus;
+//@property(nonatomic, assign) int groupkey;
+//@property(nonatomic, assign) int gender;
+//@property(nonatomic, assign) int schooltype;
+//
+//-(BOOL)isLoginedSuccUser;
+//
+//-(BOOL)isMiddleSchoolTeacher;
+//-(BOOL)isMiddleSchoolParent;
+//-(BOOL)isMiddleSchoolMaster;
+//-(BOOL)isInfantsSchoolParent;
+//-(BOOL)isInfantsSchoolTeacher;
+//-(BOOL)isInfantsSchoolMaster;
+//-(BOOL)isCommonMember;
+//
+//@end
+//
+
+
+//栏目列表
+@interface TJYEXLanmu : NSObject <NSCopying> {
+@private
+    NSString *sLanmuName;
+}
+@property(nonatomic, retain) NSString* sLanmuName;
+@end
+
+//班级列表
+@interface TJYEXClass : NSObject <NSCopying> {
+@private
+    NSString *sClassId;
+    NSString *sClassName;
+}
+@property(nonatomic, retain) NSString* sClassId;
+@property(nonatomic, retain) NSString* sClassName;
+@end
+
+
+// 定义日期数据结构
+@interface TDateInfo : NSObject
+{
+@public
+	// 年
+	int  year;
+	// 月
+	int  month;
+	// 日
+	int  day;
+	// 时
+	int hour;
+	//分
+	int minute;
+	// 是否闰月
+	int isRunYue;
+}
+@property(nonatomic)int  year;
+@property(nonatomic)int  month;
+@property(nonatomic)int  day;
+@property(nonatomic)int hour;
+@property(nonatomic)int minute;
+@property(nonatomic)int isRunYue;
+
++ (TDateInfo*) getTodayDateInfo;
++ (TDateInfo*) dateinfoFromDate:(NSDate*)dt;
++ (TDateInfo*) dateinfoDayToNow:(int)d;
++ (TDateInfo*) dateinfoMonthToNow:(int)m;
++ (TDateInfo*) dateinfoMonthToSpecificMonth:(int)m date:(NSDate*)dt;  //add 2012.8.20
++ (TDateInfo*) dateinfoYearToNow:(int)y;
++ (TDateInfo*) dateinfoYearToSpecificYear:(int)y date:(NSDate*)dt;  //add 2012.8.20
+
+@end
+
+
+
+
+
+#pragma mark -
+#pragma mark 检查新版本
+@interface TCheckVersionResult : NSObject
+{
+	NSString* sVerCode;		//版本代码
+	NSString* sDownURL;		//下载链接
+}
+
+@property(nonatomic, retain) NSString* sVerCode;	
+@property(nonatomic, retain) NSString* sDownURL;	
+
+@end
+
+
+
+typedef enum {
+    USER_APP_TYPE_BOUGHT,       //以开通应用
+    USER_APP_TYPE_NOMINATE   //推荐应用
+}UserAppType;
+
+@interface JYEXUserAppInfo : NSObject {
+@private
+    NSString *sUserName;
+    NSString *sAppCode;
+    NSString *sAppName;
+    int iAppID;
+    int iAppType;
+}
+
+@property (nonatomic, retain)  NSString *sUserName;
+@property (nonatomic, retain)  NSString *sAppCode;
+@property (nonatomic, retain)  NSString *sAppName;
+@property (nonatomic, assign)  int iAppID;
+@property (nonatomic, assign)  int iAppType;
+@end
+

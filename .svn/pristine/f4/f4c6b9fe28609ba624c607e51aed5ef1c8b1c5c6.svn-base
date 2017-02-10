@@ -1,0 +1,50 @@
+//
+//  BBQPublishStatusBar.m
+//  BBQ
+//
+//  Created by 朱琨 on 15/12/21.
+//  Copyright © 2015年 bbq. All rights reserved.
+//
+
+#import "BBQPublishStatusBar.h"
+#import "UploadRecordViewController.h"
+#import <Masonry.h>
+
+@interface BBQPublishStatusBar ()
+
+@property (strong, nonatomic) UIImageView *arrowImageView;
+@property (assign, nonatomic, getter = isShow) BOOL show;
+
+@end
+
+@implementation BBQPublishStatusBar
+
+- (instancetype)initWithFrame:(CGRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = UIColorHex(ffba00);
+        self.alpha = 0.8;
+        _statusLabel = [UILabel new];
+        [self addSubview:_statusLabel];
+        _statusLabel.textColor = [UIColor whiteColor];
+        _statusLabel.font = [UIFont systemFontOfSize:14];
+        _statusLabel.textAlignment = NSTextAlignmentCenter;
+        @weakify(self)
+        [_statusLabel mas_makeConstraints:^(MASConstraintMaker *make) {
+            @strongify(self)
+            make.center.equalTo(self);
+        }];
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] bk_initWithHandler:^(UIGestureRecognizer *sender, UIGestureRecognizerState state, CGPoint location) {
+            @strongify(self)
+            UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Common" bundle:nil];
+            UploadRecordViewController *urvc =
+            [sb instantiateViewControllerWithIdentifier:@"UploadRecordVC"];
+            [self.vc.navigationController pushViewController:urvc animated:YES];
+        }];
+        [self addGestureRecognizer:tap];
+        self.hidden = YES;
+    }
+    return self;
+}
+
+@end

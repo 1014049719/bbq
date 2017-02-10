@@ -1,0 +1,124 @@
+//
+//  QiniuYun.m
+//  JYEX
+//
+//  Created by mwt on 15/7/17.
+//  Copyright (c) 2015年 广州洋基. All rights reserved.
+//
+
+#import "QiniuYun.h"
+
+//#import "QiniuSDK.h"
+#import "QiniuSDK.h"
+
+@interface QiniuYun ()
+
+@property(nonatomic, strong) QNUploadManager *upManager;
+
+@end
+
+@implementation QiniuYun
+
++ (QiniuYun *)instance {
+    static id _instance = nil;
+    if (!_instance) {
+        @synchronized(self) {
+            if (_instance == nil)
+                _instance = [[QiniuYun alloc] init];
+        }
+    }
+    return _instance;
+}
+
+- (id)init {
+    self = [super init];
+    if (self) {
+        
+        _upManager = [[QNUploadManager alloc] init];
+        
+        /*
+         NSData *data = [@"Hello, World!" dataUsingEncoding : NSUTF8StringEncoding];
+         [upManager putData:data key:@"hello" token:token
+         complete: ^(QNResponseInfo *info, NSString *key, NSDictionary *resp) {
+         NSLog(@"%@", info);
+         NSLog(@"%@", resp);
+         } option:nil];
+         */
+    }
+    return self;
+}
+
+- (void)uploadFile:(NSString *)strFile
+             token:(NSString *)token
+    ResponseTarget:(id)target
+  ResponseSelector:(SEL)selector {
+    QNUploadOption *option = [[QNUploadOption alloc]
+                              initWithProgressHandler:^(NSString *key, float percent){
+                              }];
+    [_upManager
+     putFile:strFile
+     key:nil
+     token:token
+     complete:^(QNResponseInfo *info, NSString *key, NSDictionary *resp) {
+         NSLog(@"info:%@", info);
+         NSLog(@"resp:%@", resp);
+         
+         NSDictionary *dicResult;
+         if (info.ok) {
+             dicResult = @{ @"code" : @200, @"data" : resp };
+         } else {
+             NSNumber *code = @-1;
+             NSString *infomsg = @"error";
+             NSError *err = info.error;
+             if (err) {
+                 code = [NSNumber numberWithInteger:[err code]];
+                 infomsg = [err localizedDescription];
+             }
+             
+             dicResult = @{ @"code" : code, @"data" : infomsg };
+         }
+         
+         if ([target respondsToSelector:selector]) {
+             [target performSelectorOnMainThread:selector
+                                      withObject:dicResult
+                                   waitUntilDone:NO];
+         }
+         
+     } option:option];
+}
+- (void)uploadData:(NSData *)data
+             token:(NSString *)token
+             index:(NSInteger) index
+    ResponseTarget:(id)target
+  ResponseSelector:(SEL)selector {
+    QNUploadOption *option = [[QNUploadOption alloc]
+                              initWithProgressHandler:^(NSString *key, float percent){
+                              }];
+    [_upManager
+     putData:data key:nil token:token complete:^(QNResponseInfo *info, NSString *key, NSDictionary *resp) {
+         NSLog(@"info:%@", info);
+         NSLog(@"resp:%@", resp);
+         
+         NSDictionary *dicResult;
+         if (info.ok) {
+             dicResult = @{ @"code" : @200, @"data" : resp ,@"index":[NSNumber numberWithInteger:index]};
+         } else {
+             NSNumber *code = @-1;
+             NSString *infomsg = @"error";
+             NSError *err = info.error;
+             if (err) {
+                 code = [NSNumber numberWithInteger:[err code]];
+                 infomsg = [err localizedDescription];
+             }
+             
+             dicResult = @{ @"code" : code, @"data" : infomsg };
+         }
+         
+         if ([target respondsToSelector:selector]) {
+             [target performSelectorOnMainThread:selector
+                                      withObject:dicResult
+                                   waitUntilDone:NO];
+         }
+     } option:option];
+}
+@end

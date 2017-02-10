@@ -1,0 +1,17 @@
+//
+//  BBQSetPlaceViewController.h
+//  BBQ
+//
+//  Created by anymuse on 15/11/24.
+//  Copyright © 2015年 bbq. All rights reserved.
+//
+
+#import "MTABaseViewController.h"
+typedef void (^ReturnTextBlock)(NSString *showText);
+
+@interface BBQSetPlaceViewController : BBQBaseViewController
+@property (nonatomic, copy) ReturnTextBlock returnTextBlock;
+
+- (void)returnText:(ReturnTextBlock)block;
+
+@end

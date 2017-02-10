@@ -1,0 +1,211 @@
+//
+//  MasterMainViewController.m
+//  BBQ
+//
+//  Created by wth on 15/8/10.
+//  Copyright (c) 2015年 bbq. All rights reserved.
+//
+
+#import "MasterMainViewController.h"
+#import "ResetPassKeyTableViewController.h"
+#include "MessageViewController.h"
+#include "WebViewController.h"
+#include "NetConstDefine.h"
+#import "BBQSchoolDataModel.h"
+#import <UINavigationController+FDFullscreenPopGesture.h>
+
+@interface MasterMainViewController ()
+
+@property(weak, nonatomic) IBOutlet UILabel *lbTeacherKqNum;
+@property(weak, nonatomic) IBOutlet UILabel *lbStudentKqNum;
+@property(weak, nonatomic) IBOutlet UIImageView *ivTeacherKqImg;
+
+@property(weak, nonatomic) IBOutlet UIImageView *ivStudentKqNum;
+
+@property(nonatomic, assign) int updatemmflag;
+
+//刷新页面计数值
+@property(nonatomic, assign) int nRefreshPageCount;
+//本页面是否是当前页面
+@property(nonatomic, assign) BOOL isCurrentPage;
+
+@end
+
+@implementation MasterMainViewController
+
+- (void)viewDidLoad {
+  [super viewDidLoad];
+  // Do any additional setup after loading the view.
+
+  self.lbStudentKqNum.hidden = YES;
+  self.lbTeacherKqNum.hidden = YES;
+  self.ivStudentKqNum.hidden = YES;
+  self.ivTeacherKqImg.hidden = YES;
+
+  //取提醒数
+  [self curShuaKaNumRequest];
+
+  //登录成功
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(refreshContent)
+                                               name:NOTIFICATION_LOGIN_SUCCESS
+                                             object:nil];
+}
+
+- (BOOL)fd_prefersNavigationBarHidden {
+  return YES;
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+  [self.navigationController setNavigationBarHidden:YES animated:animated];
+  [super viewWillAppear:animated];
+}
+- (void)viewWillDisappear:(BOOL)animated {
+  [self.navigationController setNavigationBarHidden:YES animated:animated];
+  [super viewWillDisappear:animated];
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
+
+  self.isCurrentPage = YES;
+
+//  //判断是否需要刷新
+//  if (self.nRefreshPageCount != [_GLOBAL getRefreshPageCount]) {
+//    self.nRefreshPageCount = [_GLOBAL getRefreshPageCount];
+//    //取提醒数
+//    [self curShuaKaNumRequest];
+//  }
+
+  [self procYinDao];
+}
+
+- (void)didReceiveMemoryWarning {
+  [super didReceiveMemoryWarning];
+  // Dispose of any resources that can be recreated.
+}
+
+- (IBAction)clickLSKQBtn:(id)sender {
+  UIStoryboard *sb = [UIStoryboard storyboardWithName:@"RootTabBar" bundle:nil];
+  WebViewController *vc =
+      [sb instantiateViewControllerWithIdentifier:@"WebViewController"];
+
+  vc.url = URL_MASTER_JSKQ;
+  [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (IBAction)clickXSKQBtn:(id)sender {
+  UIStoryboard *sb = [UIStoryboard storyboardWithName:@"RootTabBar" bundle:nil];
+  WebViewController *vc =
+      [sb instantiateViewControllerWithIdentifier:@"WebViewController"];
+
+  vc.url = URL_HOMEPAGE_GROWING_MASTER;
+  [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)refreshContent {
+  if (self.isCurrentPage) {
+    //取提醒数
+    [self curShuaKaNumRequest];
+
+    [self procYinDao];
+  }
+}
+
+- (void)procYinDao {
+  if (![BBQLoginManager isLogin])
+    return;
+  // if (! TheCurBaoBao )  return;
+
+  //修改密码
+  NSString *key =
+      [@"firstLaunch_" stringByAppendingString:TheCurUser.member.username];
+  if ([TheCurUser needResetPassword]) {
+    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:key];
+
+    UIStoryboard *storyBoard =
+        [UIStoryboard storyboardWithName:@"RootTabBar" bundle:nil];
+    ResetPassKeyTableViewController *ResetPassVcl =
+        [storyBoard instantiateViewControllerWithIdentifier:@"ResetPassVcl"];
+    [self.navigationController pushViewController:ResetPassVcl animated:YES];
+
+    return;
+  }
+
+  //导航
+  /*
+   if (BBQLoginManager isLogin) {
+   if ([[NSUserDefaults standardUserDefaults] boolForKey:@"firstLaunch"]) {
+   [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"firstLaunch"];
+
+   //显示介绍
+   [[NSNotificationCenter defaultCenter]
+   postNotificationName:kProcIntroductionNotification object:nil userInfo:nil];
+   //[self addTutorial];
+   }
+   }
+   */
+}
+
+/*
+ #pragma mark - Navigation
+
+ // In a storyboard-based application, you will often want to do a little
+ preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
+
+#pragma mark - 网络请求
+
+/// 当天刷卡数
+- (void)curShuaKaNumRequest {
+
+  if (![BBQLoginManager isLogin])
+    return;
+  if (!TheCurUser.schooldata)
+    return;
+
+  BBQSchoolDataModel *schoolModel = TheCurUser.schooldata[0];
+
+    NSDictionary *params = @{ @"schoolid" : schoolModel.schoolid ? schoolModel.schoolid:@"0" };
+  [BBQHTTPRequest
+       queryWithType:BBQHTTPRequestTypeGetCurrentDayShuaKaNum
+               param:params
+      successHandler:^(AFHTTPRequestOperation *operation,
+                       NSDictionary *responseObject, bool apiSuccess) {
+        int jiaoshi_sw_sknum =
+            pickJsonIntValue(responseObject[@"data"], @"jiaoshi_sw_sknum");
+        int jiaoshi_xw_sknum =
+            pickJsonIntValue(responseObject[@"data"], @"jiaoshi_xw_sknum");
+        int baobao_sw_sknum =
+            pickJsonIntValue(responseObject[@"data"], @"baobao_sw_sknum");
+        int baobao_xw_sknum =
+            pickJsonIntValue(responseObject[@"data"], @"baobao_xw_sknum");
+
+        if (jiaoshi_sw_sknum + jiaoshi_xw_sknum == 0) {
+          self.lbTeacherKqNum.hidden = YES;
+          self.ivTeacherKqImg.hidden = YES;
+        } else {
+          self.lbTeacherKqNum.text = [NSString
+              stringWithFormat:@"%d", jiaoshi_sw_sknum + jiaoshi_xw_sknum];
+          self.lbTeacherKqNum.hidden = NO;
+          self.ivTeacherKqImg.hidden = NO;
+        }
+
+        if (baobao_sw_sknum + baobao_xw_sknum == 0) {
+          self.lbStudentKqNum.hidden = YES;
+          self.ivStudentKqNum.hidden = YES;
+        } else {
+          self.lbStudentKqNum.text = [NSString
+              stringWithFormat:@"%d", baobao_sw_sknum + baobao_xw_sknum];
+          self.lbStudentKqNum.hidden = NO;
+          self.ivStudentKqNum.hidden = NO;
+        }
+      } errorHandler:nil
+      failureHandler:nil];
+}
+
+@end

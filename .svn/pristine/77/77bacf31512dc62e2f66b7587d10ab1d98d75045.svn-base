@@ -1,0 +1,275 @@
+//
+//  Dynaself.m
+//  JYEX
+//
+//  Created by slovelys on 15/7/20.
+//  Copyright © 2015年 广州洋基. All rights reserved.
+//
+
+#import "DynaModel.h"
+#import "CommonJson.h"
+#import "NSObject+SBJson.h"
+
+@implementation DynaModel
+
+- (instancetype)init {
+    self = [super init];
+    [self onInit];
+    return self;
+}
+
+- (instancetype)initWithMediaType:(BBQDynamicMediaType)mediaType {
+    if (self = [super init]) {
+        _mediaType = mediaType;
+        [self onInit];
+    }
+    return self;
+}
+
+- (instancetype)initWithDic:(NSDictionary *)dic {
+    self = [super init];
+    
+    self.guid = pickJsonStrValue(dic, @"guid");
+    self.localid =
+    [JsonManager replaceNullValue:pickJsonStrValue(dic, @"localid") def:@""];
+    self.tradetable = pickJsonStrValue(dic, @"tradetable");
+    self.updatetime =
+    [NSNumber numberWithInt:[[dic objectForKey:@"updatetime"] intValue]];
+    self.dtype = [NSNumber numberWithInt:[[dic objectForKey:@"dtype"] intValue]];
+    self.shareflag =
+    [NSNumber numberWithInt:[[dic objectForKey:@"shareflag"] intValue]];
+    
+    self.shareusername =
+    [JsonManager replaceNullValue:pickJsonStrValue(dic, @"shareusername")
+                              def:@""];
+    self.shareusergxname =
+    [JsonManager replaceNullValue:pickJsonStrValue(dic, @"shareusergxname")
+                              def:@""];
+    self.baobaouid =
+    [NSNumber numberWithInt:[[dic objectForKey:@"baobaouid"] intValue]];
+    self.classuid =
+    [NSNumber numberWithInt:[[dic objectForKey:@"classuid"] intValue]];
+    self.schoolid =
+    [NSNumber numberWithInt:[[dic objectForKey:@"schoolid"] intValue]];
+    
+    self.ispajs =
+    [NSNumber numberWithInt:[[dic objectForKey:@"ispajs"] intValue]];
+    self.dateline =
+    [NSNumber numberWithInt:[[dic objectForKey:@"dateline"] intValue]];
+    self.creuid =
+    [NSNumber numberWithInt:[[dic objectForKey:@"creuid"] intValue]];
+    self.crenickname =
+    [JsonManager replaceNullValue:pickJsonStrValue(dic, @"crenickname")
+                              def:@""];
+    self.content =
+    [JsonManager replaceNullValue:pickJsonStrValue(dic, @"content") def:@""];
+    
+    NSArray *arr = [dic objectForKey:@"attachinfo"];
+    NSMutableArray *arrAttachModel = [NSMutableArray array];
+    if (arr && [arr isKindOfClass:[NSArray class]]) {
+        for (NSDictionary *dicAttach in arr) {
+            AttachModel *model = [[AttachModel alloc] initWithDic:dicAttach];
+            [arrAttachModel addObject:model];
+        }
+    }
+    self.attachinfo = arrAttachModel;
+    
+    self.piccount =
+    [NSNumber numberWithInt:[[dic objectForKey:@"piccount"] intValue]];
+    self.videocount =
+    [NSNumber numberWithInt:[[dic objectForKey:@"videocount"] intValue]];
+    self.commentcount =
+    [NSNumber numberWithInt:[[dic objectForKey:@"commentcount"] intValue]];
+    self.giftcount =
+    [NSNumber numberWithInt:[[dic objectForKey:@"giftcount"] intValue]];
+    
+    self.flag = [NSNumber numberWithInt:[[dic objectForKey:@"flag"] intValue]];
+    self.contentupdate =
+    [NSNumber numberWithInt:[[dic objectForKey:@"contentupdate"] intValue]];
+    self.commentcount =
+    [NSNumber numberWithInt:[[dic objectForKey:@"commentcount"] intValue]];
+    self.giftupdate =
+    [NSNumber numberWithInt:[[dic objectForKey:@"giftupdate"] intValue]];
+    self.graphtime =
+    [NSNumber numberWithInt:[[dic objectForKey:@"graphtime"] intValue]];
+    
+    self.position = dic[@"positon"];
+    self.dynatag = dic[@"dynatag"];
+    self.fbztx = dic[@"fbztx"];
+    self.baobaousername = dic[@"baobaousername"];
+    self.gxname = dic[@"gxname"];
+    
+    self.user_type =
+    [JsonManager replaceNullValue:pickJsonStrValue(dic, @"user_type")
+                              def:@""];
+    
+    NSArray *tempAry = [dic objectForKey:@"giftdata"];
+    NSMutableArray *giftModelAry = [NSMutableArray arrayWithCapacity:0];
+    for (NSDictionary *tempDic in tempAry) {
+        GiftModel *giftModel = [[GiftModel alloc] initWithDic:tempDic];
+        [giftModelAry addObject:giftModel];
+    }
+    self.giftdata = giftModelAry;
+    
+    NSMutableArray *tempAry2 = [dic objectForKey:@"reply"];
+    NSMutableArray *commentAry = [NSMutableArray arrayWithCapacity:0];
+    for (NSDictionary *tempDic in tempAry2) {
+        CommentModel *commentModel = [[CommentModel alloc] initWithDic:tempDic];
+        [commentAry addObject:commentModel];
+    }
+    self.reply = commentAry;
+    
+    if ([dic objectForKey:@"upflag"]) {
+        self.upflag =
+        [NSNumber numberWithInt:[[dic objectForKey:@"upflag"] intValue]];
+    } else
+        self.upflag = @0;
+    
+    if ([dic objectForKey:@"editflag"]) {
+        self.editflag =
+        [NSNumber numberWithInt:[[dic objectForKey:@"editflag"] intValue]];
+    } else
+        self.editflag = @0;
+    
+    NSArray *arrLocal = [dic objectForKey:@"localattachinfo"];
+    NSMutableArray *arrLocalModel = [NSMutableArray array];
+    if (arrLocal && [arrLocal isKindOfClass:[NSArray class]]) {
+        for (NSDictionary *dicAttach in arrLocal) {
+            AttachModel *model = [[AttachModel alloc] initWithDic:dicAttach];
+            [arrLocalModel addObject:model];
+        }
+    }
+    self.localattachinfo = arrLocalModel;
+    
+    self.schoolname =
+    [JsonManager replaceNullValue:pickJsonStrValue(dic, @"schoolname")
+                              def:@""];
+    self.classname =
+    [JsonManager replaceNullValue:pickJsonStrValue(dic, @"classname")
+                              def:@""];
+    self.groupkey =
+    [NSNumber numberWithInt:[[dic objectForKey:@"groupkey"] intValue]];
+    self.gxid = [NSNumber numberWithInt:[[dic objectForKey:@"gxid"] intValue]];
+    self.baobaoname =
+    [JsonManager replaceNullValue:pickJsonStrValue(dic, @"baobaoname")
+                              def:@""];
+    
+    return self;
+}
+
+- (void)onInit {
+    self.guid = @"";
+    self.localid = @"";
+    self.tradetable = @"";
+    self.updatetime = @0;
+    self.dtype = @0;
+    self.shareflag = @0;
+    
+    self.shareusername = @"";
+    self.shareusergxname = @"";
+    self.baobaouid = @0;
+    self.classuid = @0;
+    self.schoolid = @0;
+    
+    self.ispajs = @0;
+    self.dateline = @0;
+    self.creuid = @0;
+    self.crenickname = @"";
+    self.content = @"";
+    
+    self.attachinfo = [NSMutableArray array];
+    self.piccount = @0;
+    self.videocount = @0;
+    self.commentcount = @0;
+    self.giftcount = @0;
+    
+    self.flag = @0;
+    self.contentupdate = @0;
+    self.commentcount = @0;
+    self.giftupdate = @0;
+    self.graphtime = @0;
+    
+    self.position = @"";
+    self.dynatag = @"";
+    self.fbztx = @"";
+    self.baobaousername = @"";
+    self.gxname = @"";
+    
+    self.user_type = @"";
+    self.reply = [NSMutableArray array];
+    self.giftdata = [NSArray array];
+    self.upflag = @0;
+    self.editflag = @0;
+    
+    self.localattachinfo = [NSArray array];
+    self.schoolname = @"";
+    self.classname = @"";
+    self.groupkey = @1;
+    self.gxid = @0;
+    self.baobaoname = @"";
+    
+    _fb_flag = @0;
+    _oldcreuid = @0;
+    _oldcrenickname = @"";
+}
+
++ (NSDictionary *)modelContainerPropertyGenericClass {
+    return @{
+             @"attachinfo": [AttachModel class],
+             @"giftdata": [GiftModel class],
+             @"reply": [CommentModel class],
+             };
+}
+
+#pragma mark ALAsset
+- (void)setSelectedAssetURLs:(NSMutableArray *)selectedAssetURLs{
+    NSMutableArray *needToAdd = [NSMutableArray new];
+    NSMutableArray *needToDelete = [NSMutableArray new];
+    [self.selectedAssetURLs enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        if (![selectedAssetURLs containsObject:obj]) {
+            [needToDelete addObject:obj];
+        }
+    }];
+    [needToDelete enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        [self deleteASelectedAssetURL:obj];
+    }];
+    [selectedAssetURLs enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        if (![self.selectedAssetURLs containsObject:obj]) {
+            [needToAdd addObject:obj];
+        }
+    }];
+    [needToAdd enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        [self addASelectedAssetURL:obj];
+    }];
+}
+
+- (void)addASelectedAssetURL:(NSURL *)assetURL {
+    if (!_selectedAssetURLs) {
+        _selectedAssetURLs = [NSMutableArray new];
+    }
+    if (!_attachinfo) {
+        _attachinfo = [NSMutableArray new];
+    }
+    [_selectedAssetURLs addObject:assetURL];
+    AttachModel *attach = [AttachModel attachWithAssetURL:assetURL];
+    [_attachinfo addObject:attach];
+}
+
+- (void)deleteASelectedAssetURL:(NSURL *)assetURL {
+    [self.selectedAssetURLs removeObject:assetURL];
+    [_attachinfo enumerateObjectsUsingBlock:^(AttachModel *obj, NSUInteger idx, BOOL *stop) {
+        if (obj.assetURL == assetURL) {
+            [_attachinfo removeObject:obj];
+            *stop = YES;
+        }
+    }];
+}
+
+- (void)deleteAAttach:(AttachModel *)attach {
+    [_attachinfo removeObject:attach];
+    if (attach.assetURL) {
+        [self.selectedAssetURLs removeObject:attach.assetURL];
+    }
+}
+
+@end

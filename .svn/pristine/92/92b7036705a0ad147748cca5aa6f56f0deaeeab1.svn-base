@@ -1,0 +1,71 @@
+////
+////  NoteMgr.m
+////  NoteBook
+////
+////  Created by wangsc on 10-9-15.
+////  Copyright 2010 ND. All rights reserved.
+////
+//
+//#import "PhotoMgr.h"
+//
+//#import "NSObject+SBJson.h"
+//
+//#include "logging.h"
+//#import "CommonDirectory.h"
+//#import "GlobalVar.h"
+//
+//#import "AppMacro.h"
+//#import "JsonManager.h"
+//
+//@implementation AstroDBMng (ForDynaMgr)
+//
+////增加1条
+//+ (BOOL)addPhotoRecord:(NSString *)photoid {
+//  return [self savePhotoToDB_DynaMgr:photoid];
+//}
+//
+//+ (NSArray *)quereyPhotoRecord:(NSString *)strSQL;
+//{
+//  NSMutableArray *aryData = [NSMutableArray array];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:strSQL];
+//    while ([resultSet next]) {
+//      NSString *photoid = [resultSet stringForColumn:@"photoid"];
+//      [aryData addObject:photoid];
+//    }
+//    [fmdb close];
+//  }
+//
+//  return aryData;
+//}
+//
+////查询记录
+//+ (NSArray *)getPhotoRecordList {
+//  NSString *strSQL;
+//
+//  strSQL = [NSString stringWithFormat:@"SELECT * FROM pre_bbq_photo_record;"];
+//
+//  return [self quereyPhotoRecord:strSQL];
+//}
+//
+////数据库操作
+//+ (BOOL)savePhotoToDB_DynaMgr:(NSString *)photoid {
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//
+//    BOOL ret = [fmdb executeUpdate:@"replace into pre_bbq_photo_record"
+//                                    "( [photoid] "
+//                                    ") "
+//                                    "values(?);",
+//                                   photoid];
+//
+//    [fmdb close];
+//    return ret;
+//  }
+//  return NO;
+//}
+//
+//@end

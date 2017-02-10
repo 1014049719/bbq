@@ -1,0 +1,37 @@
+//
+//  BBQDynamicLayoutStyleWelcome.m
+//  BBQ
+//
+//  Created by 朱琨 on 16/1/13.
+//  Copyright © 2016年 bbq. All rights reserved.
+//
+
+#import "BBQDynamicLayoutWelcome.h"
+
+@implementation BBQDynamicLayoutWelcome
+
+- (void)layout {
+    self.marginTop = kDynamicCellTopMargin;
+    self.tagHeight = 0;
+    self.textHeight = 0;
+    self.mediaHeight = 0;
+    self.funcHeight = kDynamicCellFuncHeight;
+    self.giftHeight = 0;
+    self.commentHeight = 0;
+    self.marginBottom = kDynamicCellToolbarBottomMargin;
+    
+    [self layoutDateView];
+    [self layoutProfile];
+    [self layoutTextWithWidth:kDynamicCellContentWidth];
+    
+    self.height = 0;
+    self.height += self.marginTop;
+    self.height += self.profileHeight;
+    self.height += self.textHeight;
+    self.height += self.marginBottom;
+    if ((!self.tagHeight && !self.textHeight) || (self.tagHeight && !self.textHeight)) {
+        self.height += 15;
+    }
+}
+
+@end

@@ -1,0 +1,592 @@
+////
+////  NoteMgr.m
+////  NoteBook
+////
+////  Created by wangsc on 10-9-15.
+////  Copyright 2010 ND. All rights reserved.
+////
+//
+//#import "DynaMgr.h"
+//
+//#import "NSObject+SBJson.h"
+//
+//#include "logging.h"
+////#import "CommonNoteOpr.h"
+//#import "CommonDirectory.h"
+//#import "GlobalVar.h"
+//
+//#import "AppMacro.h"
+//#import "JsonManager.h"
+//
+//#import "DynaModel.h"
+//#import "AttachModel.h"
+//#import "GiftModel.h"
+//#import "CommentModel.h"
+//
+//@implementation AstroDBMng (ForDynaMgr)
+//
+////增加1条动态
+//+ (BOOL)addDyna:(DynaModel *)dyanmodel {
+//  [self saveToDB_DynaMgr:dyanmodel];
+//  return YES;
+//}
+//
+//+ (BOOL)updateDyna:(DynaModel *)dyanmodel {
+//  [self saveToDB_DynaMgr:dyanmodel];
+//  return YES;
+//}
+//
+//+ (BOOL)deleteDyna:(DynaModel *)dyanmodel {
+//  [self saveToDB_DynaMgr:dyanmodel];
+//  return YES;
+//}
+//
+//+ (NSArray *)quereyDyna:(NSString *)strSQL;
+//{
+//  NSMutableArray *aryData = [NSMutableArray array];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:strSQL];
+//    while ([resultSet next]) {
+//      DynaModel *model = [self saveToModel:resultSet];
+//      [aryData addObject:model];
+//    }
+//    [fmdb close];
+//  }
+//
+//  return aryData;
+//}
+//
+////查询本地数据库记录
+///*
+// +(NSArray *)quereyDyna:(NSString *)baobaoid lastdync:(DynaModel *)dynamodel
+// limit:(int)nLimitCount
+// {
+// int updatetime = 0;
+// NSString *strSQL;
+//
+// if ( dynamodel ) {
+// updatetime = [dynamodel.updatetime intValue];
+// strSQL = [NSString stringWithFormat:@"SELECT * FROM %@ WHERE flag=0 AND
+// baobaouid='%@' AND updatetime<%d ORDER BY updatetime
+// DESC;",TB_DYNA_INFO,baobaoid,updatetime];
+// }
+// else {
+// strSQL = [NSString stringWithFormat:@"SELECT * FROM %@ WHERE flag=0 AND
+// baobaouid='%@' ORDER BY updatetime DESC;",TB_DYNA_INFO,baobaoid];
+// }
+//
+// return [self quereyDyna:strSQL];
+// }
+// */
+//
+////查询本地数据库记录
+//+ (NSArray *)getDyna:(NSString *)baobaouid
+//            classuid:(NSString *)classuid
+//            schoolid:(NSString *)schoolid
+//               dtype:(int)dtype
+//            dateline:(int)graphtime {
+//  NSString *strSQL;
+//  NSString *where = @"WHERE flag=0 AND ";
+//
+//  if (dtype == DYNA_TYPE_PERSON) {
+//    //全校所有宝宝
+//    if ([baobaouid isEqualToString:@"0"] && [classuid isEqualToString:@"0"]) {
+//      where = [NSString stringWithFormat:@"%@ dtype=1 AND schoolid='%d' ",
+//                                         where, [schoolid intValue]];
+//    }
+//    //某班所有宝宝
+//    else if ([baobaouid isEqualToString:@"0"]) {
+//      where = [NSString stringWithFormat:@"%@ dtype=1 AND classuid='%d' ",
+//                                         where, [classuid intValue]];
+//    }
+//    //某宝宝
+//    else {
+//      where = [NSString stringWithFormat:@"%@ dtype=1 AND baobaouid='%d' ",
+//                                         where, [baobaouid intValue]];
+//    }
+//  } else if (dtype == DYNA_TYPE_CLASS) {
+//    if ([classuid isEqualToString:@"0"] && ![schoolid isEqualToString:@"0"]) {
+//      where = [NSString stringWithFormat:@"%@ dtype=2 AND schoolid='%d' ",
+//                                         where, [schoolid intValue]];
+//    } else {
+//      where = [NSString stringWithFormat:@"%@ dtype=2 AND classuid='%d' ",
+//                                         where, [classuid intValue]];
+//    }
+//  } else {
+//    //学校返回dtype非宝宝的动态
+//    where = [NSString stringWithFormat:@"%@ dtype!=1 AND schoolid='%d' ", where,
+//                                       [schoolid intValue]];
+//  }
+//
+//  if (graphtime > 0) {
+//    // TODO: 漏掉graphtime相等的动态
+//    strSQL = [NSString stringWithFormat:@"SELECT * FROM %@ %@ AND graphtime<%d "
+//                                        @"ORDER BY graphtime DESC limit 20;",
+//                                        TB_DYNA_INFO, where, graphtime];
+//  } else {
+//    strSQL =
+//        [NSString stringWithFormat:
+//                      @"SELECT * FROM %@ %@ ORDER BY graphtime DESC limit 20;",
+//                      TB_DYNA_INFO, where];
+//  }
+//
+//  return [self quereyDyna:strSQL];
+//}
+//
+////删除所有的旧纪录
+//+ (BOOL)delDyna:(NSString *)baobaouid
+//       classuid:(NSString *)classuid
+//       schoolid:(NSString *)schoolid
+//          dtype:(int)dtype {
+//  NSString *strSQL;
+//  NSString *where = @"WHERE ";
+//
+//  if (dtype == DYNA_TYPE_PERSON) {
+//    if ([baobaouid isEqualToString:@"0"] && [classuid isEqualToString:@"0"]) {
+//      where = [NSString stringWithFormat:@"%@ dtype=1 AND schoolid='%d' ",
+//                                         where, [schoolid intValue]];
+//    } else if ([baobaouid isEqualToString:@"0"]) {
+//      where = [NSString stringWithFormat:@"%@ dtype=1 AND classuid='%d' ",
+//                                         where, [classuid intValue]];
+//    } else {
+//      where = [NSString stringWithFormat:@"%@ dtype=1 AND baobaouid='%d' ",
+//                                         where, [baobaouid intValue]];
+//    }
+//  } else if (dtype == DYNA_TYPE_CLASS) {
+//    if ([classuid isEqualToString:@"0"]) {
+//      where = [NSString stringWithFormat:@"%@ dtype=2 AND schoolid='%d' ",
+//                                         where, [schoolid intValue]];
+//    } else {
+//      where = [NSString stringWithFormat:@"%@ dtype=2 AND classuid='%d' ",
+//                                         where, [classuid intValue]];
+//    }
+//  } else {
+//    where = [NSString stringWithFormat:@"%@ dtype=3 AND schoolid='%d' ", where,
+//                                       [schoolid intValue]];
+//  }
+//
+//  strSQL =
+//      [NSString stringWithFormat:@" DELETE FROM %@ %@;", TB_DYNA_INFO, where];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    BOOL ret = [fmdb executeUpdate:strSQL];
+//    [fmdb close];
+//    return ret;
+//  }
+//  return NO;
+//}
+//
+////
+////查询本地上传记录
+//+ (NSArray *)getLocalUploadDyna:(DynaModel *)dynamodel limit:(int)nLimitCount {
+//  int updatetime = 0;
+//  NSString *strSQL;
+//
+//  if (dynamodel) {
+//    updatetime = [dynamodel.updatetime intValue];
+//    strSQL = [NSString
+//        stringWithFormat:@"SELECT * FROM %@ WHERE flag=0 AND updatetime<%d AND "
+//                         @"(upflag=%d OR upflag=%d OR upflag=%d) ORDER BY "
+//                         @"updatetime DESC limit %d;",
+//                         TB_DYNA_INFO, updatetime, DYNA_NEED_UPLOAD,
+//                         DYNA_UPLOADING, DYNA_UPLOAD_FAILURE, nLimitCount];
+//  } else {
+//    strSQL = [NSString
+//        stringWithFormat:@"SELECT * FROM %@ WHERE flag=0 AND (upflag=%d OR "
+//                         @"upflag=%d OR upflag=%d) ORDER BY updatetime DESC "
+//                         @"limit %d;",
+//                         TB_DYNA_INFO, DYNA_NEED_UPLOAD, DYNA_UPLOADING,
+//                         DYNA_UPLOAD_FAILURE, nLimitCount];
+//  }
+//  return [self quereyDyna:strSQL];
+//}
+//
+////返回需上传的动态localid
+//+ (NSArray *)getNeedUploadDyncListGuid {
+//  //根据更新时间排序
+//  NSString *strSQL = [NSString
+//      stringWithFormat:@"SELECT localid FROM %@ WHERE flag=%d AND (upflag=%d "
+//                       @"OR upflag=%d OR upflag=%d ) ORDER BY updatetime "
+//                       @"desc;",
+//                       TB_DYNA_INFO, DYNA_FLAG_NORMAL, DYNA_NEED_UPLOAD,
+//                       DYNA_UPLOADING, DYNA_UPLOAD_FAILURE];
+//
+//  NSMutableArray *aryData = [NSMutableArray array];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:strSQL];
+//    while ([resultSet next]) {
+//      NSString *guid = [resultSet stringForColumn:@"localid"];
+//      [aryData addObject:guid];
+//    }
+//    [fmdb close];
+//  }
+//
+//  return aryData;
+//}
+//
+////通过localid查询指定动态
+//+ (DynaModel *)getDynaByLocalId:(NSString *)strLocalId {
+//  NSString *sql =
+//      [NSString stringWithFormat:@"SELECT * FROM %@ WHERE localid='%@';",
+//                                 TB_DYNA_INFO, strLocalId];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    while ([resultSet next]) {
+//      DynaModel *model = [self saveToModel:resultSet];
+//      [fmdb close];
+//      return model;
+//    }
+//    [fmdb close];
+//  }
+//
+//  return nil;
+//}
+//
+////通过dyna查询指定动态
+//+ (DynaModel *)getDynaByGuid:(NSString *)guid {
+//  NSString *sql =
+//      [NSString stringWithFormat:@"SELECT * FROM %@ WHERE guid='%@';",
+//                                 TB_DYNA_INFO, guid];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    while ([resultSet next]) {
+//      DynaModel *model = [self saveToModel:resultSet];
+//      [fmdb close];
+//      return model;
+//    }
+//    [fmdb close];
+//  }
+//
+//  return nil;
+//}
+//
+////通过guid数组删除
+//+ (void)DeleteDynaByGuidArr:(NSArray *)arrGuid {
+//  for (NSString *guid in arrGuid) {
+//    [AstroDBMng DeleteDynaByGuid:guid];
+//  }
+//}
+//
+//+ (BOOL)DeleteDynaByGuid:(NSString *)guid {
+//  NSString *strSql = [NSString
+//      stringWithFormat:@"DELETE FROM %@ WHERE guid='%@';", TB_DYNA_INFO, guid];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    BOOL ret = [fmdb executeUpdate:strSql];
+//    [fmdb close];
+//    if (ret) {
+//      [[NSNotificationCenter defaultCenter]
+//          postNotificationName:kDeleteDynamicNotification
+//                        object:self
+//                      userInfo:@{
+//                        @"guid" : guid
+//                      }];
+//    }
+//    return ret;
+//  }
+//  return NO;
+//}
+//
+//+ (DynaModel *)saveToModel:(FMResultSet *)resultSet {
+//  DynaModel *model = [[DynaModel alloc] init];
+//
+//  model.guid = [resultSet stringForColumn:@"guid"];
+//  model.localid = [resultSet stringForColumn:@"localid"];
+//  model.tradetable = [resultSet stringForColumn:@"tradetable"];
+//  model.updatetime =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"dateline"]];
+//  model.dtype = [NSNumber numberWithInt:[resultSet intForColumn:@"dtype"]];
+//  model.shareflag =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"shareflag"]];
+//
+//  model.shareusername =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"shareusername"]
+//                                def:@""];
+//  model.shareusergxname = [JsonManager
+//      replaceNullValue:[resultSet stringForColumn:@"shareusergxname"]
+//                   def:@""];
+//  model.baobaouid =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"baobaouid"]];
+//  model.classuid =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"classuid"]];
+//  model.schoolid =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"schoolid"]];
+//
+//  model.ispajs = [NSNumber numberWithInt:[resultSet intForColumn:@"ispajs"]];
+//  model.dateline =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"dateline"]];
+//  model.creuid = [NSNumber numberWithInt:[resultSet intForColumn:@"creuid"]];
+//  model.crenickname = [resultSet stringForColumn:@"crenickname"];
+//  model.content =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"content"]
+//                                def:@""];
+//
+//  NSString *attchinfo =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"attachinfo"]
+//                                def:@"[]"];
+//  NSArray *arr = [attchinfo JSONValue];
+//  NSMutableArray *arrAttachModel = [NSMutableArray array];
+//  if (arr && [arr isKindOfClass:[NSArray class]]) {
+//    for (NSDictionary *dicAttach in arr) {
+//      AttachModel *model = [[AttachModel alloc] initWithDic:dicAttach];
+//      [arrAttachModel addObject:model];
+//    }
+//  }
+//  model.attachinfo = arrAttachModel;
+//
+//  model.piccount =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"piccount"]];
+//  model.videocount =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"videocount"]];
+//  model.commentcount =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"commentcount"]];
+//  model.giftcount =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"giftcount"]];
+//
+//  model.flag = [NSNumber numberWithInt:[resultSet intForColumn:@"flag"]];
+//  model.contentupdate =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"contentupdate"]];
+//  model.commentcount =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"commentcount"]];
+//  model.giftupdate =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"giftupdate"]];
+//  model.graphtime =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"graphtime"]];
+//
+//  model.position =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"position"]
+//                                def:@""];
+//  model.dynatag =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"dynatag"]
+//                                def:@""];
+//  model.fbztx =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"fbztx"]
+//                                def:@""];
+//  model.baobaousername = [JsonManager
+//      replaceNullValue:[resultSet stringForColumn:@"baobaousername"]
+//                   def:@""];
+//  model.gxname =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"gxname"]
+//                                def:@""];
+//
+//  model.user_type =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"user_type"]
+//                                def:@""];
+//
+//  NSString *replydata =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"reply"]
+//                                def:@"[]"];
+//  NSArray *arrReply = [replydata JSONValue];
+//  NSMutableArray *arrReplyData = [NSMutableArray array];
+//  if (arrReply && [arrReply isKindOfClass:[NSArray class]]) {
+//    for (NSDictionary *dicReply in arrReply) {
+//      CommentModel *model = [[CommentModel alloc] initWithDic:dicReply];
+//      [arrReplyData addObject:model];
+//    }
+//  }
+//  model.reply = arrReplyData;
+//
+//  NSString *giftdata =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"giftdata"]
+//                                def:@"[]"];
+//  NSArray *arrGift = [giftdata JSONValue];
+//  NSMutableArray *arrGiftData = [NSMutableArray array];
+//  if (arrGift && [arrGift isKindOfClass:[NSArray class]]) {
+//    for (NSDictionary *dicGift in arrGift) {
+//      GiftModel *model = [[GiftModel alloc] initWithDic:dicGift];
+//      [arrGiftData addObject:model];
+//    }
+//  }
+//  model.giftdata = arrGiftData;
+//
+//  model.upflag = [NSNumber numberWithInt:[resultSet intForColumn:@"upflag"]];
+//  model.editflag =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"editflag"]];
+//
+//  NSString *localattachinfo = [JsonManager
+//      replaceNullValue:[resultSet objectForColumnName:@"localattachinfo"]
+//                   def:@"[]"];
+//  NSArray *arrLocal = [localattachinfo JSONValue];
+//  NSMutableArray *arrLocalModel = [NSMutableArray array];
+//  if (arrLocal && [arrLocal isKindOfClass:[NSArray class]]) {
+//    for (NSDictionary *dicAttach in arrLocal) {
+//      AttachModel *model = [[AttachModel alloc] initWithDic:dicAttach];
+//      [arrLocalModel addObject:model];
+//    }
+//  }
+//  model.localattachinfo = arrLocalModel;
+//
+//  model.schoolname =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"schoolname"]
+//                                def:@""];
+//  model.classname =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"classname"]
+//                                def:@""];
+//  model.groupkey =
+//      [NSNumber numberWithInt:[resultSet intForColumn:@"groupkey"]];
+//  model.gxid = [NSNumber numberWithInt:[resultSet intForColumn:@"gxid"]];
+//  model.gxname =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"gxname"]
+//                                def:@""];
+//  model.baobaoname =
+//      [JsonManager replaceNullValue:[resultSet stringForColumn:@"baobaoname"]
+//                                def:@""];
+//
+//  return model;
+//}
+//
+////更改上传结果
+//+ (BOOL)updateDynaUploadResult:(NSString *)localid
+//                          guid:(NSString *)guid
+//                        result:(int)result
+//                        reason:(NSString *)reason {
+//  NSString *strSql = [NSString
+//      stringWithFormat:@"UPDATE %@ SET guid='%@',upflag=%d,tradetable='%@' "
+//                       @"WHERE localid='%@';",
+//                       TB_DYNA_INFO, guid, result, reason, localid];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    BOOL ret = [fmdb executeUpdate:strSql];
+//    [fmdb close];
+//    if (ret) {
+//      [[NSNotificationCenter defaultCenter]
+//          postNotificationName:kUpdateDynamicStatusNotification
+//                        object:self
+//                      userInfo:@{
+//                        @"guid" : guid,
+//                        @"localid" : localid,
+//                        @"status" : @(result)
+//                      }];
+//    }
+//    return ret;
+//  }
+//  return NO;
+//}
+//
+////数据库操作
+//+ (BOOL)saveToDB_DynaMgr:(DynaModel *)model {
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    NSMutableArray *attachinfo = [NSMutableArray array];
+//    for (AttachModel *atta in model.attachinfo) {
+//      NSDictionary *dic = [atta toDictionary];
+//      [attachinfo addObject:dic];
+//    }
+//    NSMutableArray *localattachinfo = attachinfo;
+//
+//    NSMutableArray *giftdata = [NSMutableArray array];
+//    for (GiftModel *gift in model.giftdata) {
+//      NSDictionary *dic = [gift toDictionary];
+//      [giftdata addObject:dic];
+//    }
+//
+//    NSMutableArray *replydata = [NSMutableArray array];
+//    for (CommentModel *reply in model.reply) {
+//      NSDictionary *dic = [reply toDictionary];
+//      [replydata addObject:dic];
+//    }
+//
+//    BOOL ret = [fmdb
+//        executeUpdate:@"replace into pre_bbq_dynamic_content"
+//                       "( [guid],"
+//                       "[localid], "
+//                       "[tradetable], "
+//                       "[updatetime], "
+//                       "[dtype], "
+//                       "[shareflag], "
+//
+//                       "[shareusername], "
+//                       "[shareusergxname], "
+//                       "[baobaouid], "
+//                       "[classuid], "
+//                       "[schoolid], "
+//
+//                       "[ispajs], "
+//                       "[dateline], "
+//                       "[creuid], "
+//                       "[crenickname], "
+//                       "[content], "
+//
+//                       "[attachinfo], "
+//                       "[piccount], "
+//                       "[videocount], "
+//                       "[commentcount], "
+//                       "[giftcount], "
+//
+//                       "[flag], "
+//                       "[contentupdate], "
+//                       "[commentupdate], "
+//                       "[giftupdate], "
+//                       "[graphtime], "
+//
+//                       "[position], "
+//                       "[dynatag], "
+//                       "[fbztx], "
+//                       "[baobaousername],"
+//                       "[gxname],"
+//
+//                       "[user_type],"
+//                       "[reply],"
+//                       "[giftdata],"
+//                       "[upflag],"
+//                       "[editflag],"
+//
+//                       "[localattachinfo],"
+//                       "[schoolname],"
+//                       "[classname],"
+//                       "[groupkey],"
+//                       "[gxid],"
+//
+//                       "[gxname],"
+//                       "[baobaoname]"
+//                       ") "
+//                       "values(?,?,?,?,?,?,  ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, "
+//                       "?,?,?,?,?, ?,?,?,?,?,  ?,?,?,?,?, ?,?,?,?,?, ?,?);",
+//
+//                      model.guid, model.localid, model.tradetable,
+//                      model.updatetime, model.dtype, model.shareflag,
+//
+//                      model.shareusername, model.shareusergxname,
+//                      model.baobaouid, model.classuid, model.schoolid,
+//
+//                      model.ispajs, model.dateline, model.creuid,
+//                      model.crenickname, model.content,
+//                      [attachinfo JSONRepresentation], model.piccount,
+//                      model.videocount, model.commentcount, model.giftcount,
+//
+//                      model.flag, model.contentupdate, model.commentupdate,
+//                      model.giftupdate, model.graphtime,
+//
+//                      model.position, model.dynatag, model.fbztx,
+//                      model.baobaousername, model.gxname,
+//
+//                      model.user_type, [replydata JSONRepresentation],
+//                      [giftdata JSONRepresentation], model.upflag,
+//                      model.editflag,
+//
+//                      [localattachinfo JSONRepresentation], model.schoolname,
+//                      model.classname, model.groupkey, model.gxid,
+//
+//                      model.gxname, model.baobaoname
+//
+//    ];
+//
+//    [fmdb close];
+//    return ret;
+//  }
+//  return NO;
+//}
+//
+//@end

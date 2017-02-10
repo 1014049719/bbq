@@ -1,0 +1,36 @@
+//
+//  BBQIndicatorBar.m
+//  BBQ
+//
+//  Created by anymuse on 15/8/18.
+//  Copyright © 2015年 bbq. All rights reserved.
+//
+
+#import "BBQIndicatorBar.h"
+#import <Masonry.h>
+#import "UploadRecordViewController.h"
+#import "AppMacro.h"
+#import "BizLogic_Dyna.h"
+
+@interface BBQIndicatorBar ()
+
+@end
+
+@implementation BBQIndicatorBar
+
+- (void)didTapOnBar:(UITapGestureRecognizer *)recognizer {
+  UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Common" bundle:nil];
+  UploadRecordViewController *urvc =
+      [sb instantiateViewControllerWithIdentifier:@"UploadRecordVC"];
+  [self.vc.navigationController pushViewController:urvc animated:YES];
+}
+
+- (void)show {
+
+}
+
+- (void)dismiss {
+
+}
+
+@end

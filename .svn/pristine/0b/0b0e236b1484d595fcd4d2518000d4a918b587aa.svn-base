@@ -1,0 +1,126 @@
+////
+////  BussMng.h
+////  Astro
+////
+////  Created by liuyfmac on 11-12-22.
+////  Copyright 2011 洋基科技. All rights reserved.
+////
+//
+//#import <Foundation/Foundation.h>
+//#import "BussInterImpl.h"
+//
+////加入影响业务的接口
+//enum
+//{
+//	BMLogin=1, //登录
+//	BMRegister, //注册 可不加
+//    BMCommonNoReg, //通用调用
+//    
+//	BMConsumeCheck,
+//	BMConsumeRequest,
+//	BMConsumePay,
+//    BMServerDateTime, //服务器时间 2012.8.20
+//    
+//    //-------------家园E线------------------------------
+//    //BMJYEXAutoLogin,    //自动登陆
+//    BMJYEXUploadItemFile,
+//    BMJYEXJYEXNote,
+//    BMJYEXUpdataSoft,
+//    BMJYEXGetUpdateNumber,
+//    BMJYEXQueryAlbumList,  //查询相册列表
+//    BMJYEXUploadPhoto,     //上传相片
+//    BMJYEXCreateAlbum,      //创建相册
+//    BMJYEXRegister,         //注册
+//    BMJYEXUpdateUserInfo,   //更改用户资料
+//    BMJYEXGetAlbumPics,     //获取相册照片
+//    BMJYEXDownloadFile,     //下载文件
+//    
+//    BMQueryAvatar,       //查询头像是否存在
+//    BMGetAvatar,         //下载头像
+//    
+//    BMBbqUploadPic,    //bbq上传图片到服务端
+//    BMCommonPostMsg, //通用调用
+//    
+//
+//};
+//
+//
+//
+//
+//@interface TParamRegister : NSObject
+//{
+//	NSString* user;
+//	NSString* pswd;
+//	NSString* nick;
+//}
+//
+//@property (nonatomic, retain) NSString* user;
+//@property (nonatomic, retain) NSString* pswd;
+//@property (nonatomic, retain) NSString* nick;
+//
+//@end
+//
+//
+//@interface TParamLogin : NSObject
+//{
+//	NSString* user;
+//	NSString* pswd;
+//	BOOL	remPswd;
+//    BOOL   autoLogin;
+//}
+//
+//@property (nonatomic, retain) NSString* user;
+//@property (nonatomic, retain) NSString* pswd;
+//@property (nonatomic, assign) BOOL	remPswd;
+//@property (nonatomic, assign) BOOL	autoLogin;
+//
+//@end
+//
+//
+//
+//
+//
+//@interface BussMng : NSObject 
+//{
+//	
+//	int type;
+//	int step;
+//	id param;
+//	
+////	id	callbackObj;
+//	SEL callbackSel;
+//	id	imp;
+//	BOOL didLogin;
+//	
+//	
+//	enum 
+//	{
+//		STEP_LOGIN = 1,
+//		STEP_UILOGIN = 2,
+//		STEP_RELOGIN = 3,
+//		
+//		STEP_BUSS1 = 11,
+//		STEP_BUSS2 = 12,
+//		STEP_BUSS3 = 13,
+//		STEP_BUSS4 = 14,
+//		STEP_BUSS5 = 15,
+//	};
+//}
+//
+//@property (retain, nonatomic) id callbackObj;
+//@property (nonatomic, retain) id imp;
+//@property (nonatomic, retain) id param;
+//
+//+ (id) loadWithType:(int)type;
+//+ (id) loadWithType:(int)type :(id)p;
+//+ (BussMng*) bussWithType:(int)type;
+//
+//
+//- (void) request:(id)obj :(SEL)sel :(id)p;
+//- (void) bussRequest;
+//
+////请求对象销毁、释放
+//-(void)cancelBussRequest;
+//+(void)cancelBussRequest:(BussMng*)buss, ...; //慎用：因为参数列表到nil参数时，可能没有遍历到列表末尾
+//
+//@end

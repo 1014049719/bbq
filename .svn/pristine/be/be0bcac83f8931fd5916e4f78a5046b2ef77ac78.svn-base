@@ -1,0 +1,36 @@
+//
+//  NoteMgr.h
+//  NoteBook
+//
+//  Created by wangsc on 10-9-15.
+//  Copyright 2010 ND. All rights reserved.
+//
+
+#import "DBMng.h"
+
+
+#pragma mark -
+#pragma mark 数据库管理
+@interface AstroDBMng (ForAttachMgr)
+{
+    
+}
+//
+//
+//
+////增加1条附件
+//+(BOOL)addAttach:(AttachModel *)attach;
+//+(BOOL)updateAttach:(AttachModel *)attach;
+//+(BOOL)deleteAttach:(AttachModel *)attach;
+//
+////查询某条动态需上传的附件关联项
+//+ (NSArray *)getNeedUploadAttachListByDynaLocalId:(NSString *)localid;
+//
+////查询某条动态所有的附件关联项
+//+ (NSArray *)getAttachListByDynalocalid:(NSString *)localid;
+//
+//
+//+ (BOOL)updateAttach:(NSString *)attachid guid:(NSString *)attachguid serverip:(NSString*)serverip filepath:(NSString *)strFilePath remote:(NSNumber *)remote data:(NSDictionary *)data size:(NSNumber *)size width:(NSNumber *)width height:(NSNumber *)height;
+
+
+@end

@@ -1,0 +1,15 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script>
+function myFunction()
+{
+testobject.TestNOParameter();
+}
+</script>
+</head>
+
+<body>
+<button onclick="myFunction()">点击这里</button>
+</body>
+</html>

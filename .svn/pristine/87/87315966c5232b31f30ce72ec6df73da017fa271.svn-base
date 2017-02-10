@@ -1,0 +1,564 @@
+////
+////  DBController.m
+////  SparkEnglish
+////
+////  Created by huanghb on 11-1-27.
+////  Copyright 2011 __MyCompanyName__. All rights reserved.
+////
+//
+//#import "CommonDirectory.h"
+//
+//#import "DBMng.h"
+//#import "PubFunction.h"
+//#import "GlobalVar.h"
+////#import "SBJson.h"
+//#import "FMDB.h"
+//
+//#import "NSDictionary+RequestEncoding.h"
+//
+//@implementation AstroDBMng (ForCommonMgr)
+//
+//+ (BOOL)loadDbAstroCommon {
+//  BOOL bExist = [CommonFunc EnsureDbFileExist:EDbTypeAstroCommon UserName:@""];
+//  if (!bExist) {
+//    NSLog(@"数据库文件(astrocommon)不存在");
+//    return NO;
+//  }
+//
+//  return bExist;
+//}
+//
+//+ (NSString *)getLastLoginUser:(TJYEXLoginUserInfo *)user {
+//  NSString *sql =
+////      @"select * from AccountInfo order by sLoginTime desc limit 1;";
+////
+////  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+////  if ([db open]) {
+////    FMResultSet *rs = [db executeQuery:sql];
+////    while ([rs next]) {
+////      [self pickJYEXAccountFromRs:user resultset:rs];
+////      NSString *jsondata = [rs stringForColumn:@"jsoncontent"];
+////      [db close];
+////      return jsondata;
+////    }
+////    [db close];
+////  }
+//  return nil;
+//}
+//
+//+ (NSMutableArray *)getLoginUserList {
+//  NSString *sql =
+//      [NSString stringWithFormat:@"select * from %@ order by sUserName",
+//                                 TBL_ASTRO_ACCOUNTINFO];
+//  NSMutableArray *userList = [NSMutableArray array];
+//
+//  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+//  if ([db open]) {
+//    FMResultSet *rs = [db executeQuery:sql];
+//    while ([rs next]) {TheCurUser.qntoken
+//      TJYEXLoginUserInfo *user = [[TJYEXLoginUserInfo alloc] init];
+//      [self pickJYEXAccountFromRs:user resultset:rs];
+//      [userList addObject:user];
+//    }
+//    [db close];
+//  }
+//  return userList;
+//
+//  /*
+//  CppSQLite3Query query = [[AstroDBMng getDbAstroCommon] execQuery:sql];
+//
+//  NSMutableArray *userList = [NSMutableArray array];
+//
+//  while (!query.Eof())
+//  {
+//      TJYEXLoginUserInfo *user = [[TJYEXLoginUserInfo alloc] init];
+//      [AstroDBMng pickJYEXAccountFromQuery:user Query:&query];
+//      [userList addObject:user];
+//
+//      [user release];
+//      query.NextRow();
+//  }
+//  return userList;
+//  */
+//}
+//
+////本地登录过的帐号数
+//+ (int)getLoginedUserCount {
+//  NSString *sql =
+//      [NSString stringWithFormat:@"select count(*) as count from %@;",
+//                                 TBL_ASTRO_ACCOUNTINFO];
+//  int count = 0;
+//
+//  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+//  if ([db open]) {
+//    FMResultSet *rs = [db executeQuery:sql];
+//    if ([rs next]) {
+//      count = [rs intForColumn:@"count"];
+//    }
+//    [db close];
+//  }
+//  return count;
+//}
+//
+////删除账户
+//+ (BOOL)deleteLoginUserByUserName:(NSString *)sUserName {
+//
+//  NSString *sql = [NSString
+//      stringWithFormat:@"DELETE FROM AccountInfo where sUserName='%@'",
+//                       sUserName];
+//
+//  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+//  if ([db open]) {
+//    BOOL res = [db executeUpdate:sql];
+//    [db close];
+//    return res;
+//  }
+//  return NO;
+//}
+//
+////家园E线
+////查询用户
+//+ (TJYEXLoginUserInfo *)getJYEXLoginUserByUID:(NSString *)sUserID {
+//  NSString *sql = [NSString
+//      stringWithFormat:@"select * from AccountInfo where sUserID='%@'",
+//                       sUserID];
+//
+//  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+//  if ([db open]) {
+//    FMResultSet *rs = [db executeQuery:sql];
+//    while ([rs next]) {
+//      TJYEXLoginUserInfo *user = [TJYEXLoginUserInfo new];
+//      [self pickJYEXAccountFromRs:user resultset:rs];
+//      [db close];
+//      return user;
+//    }
+//    [db close];
+//  }
+//  return nil;
+//}
+//
+//+ (TJYEXLoginUserInfo *)getJYEXLoginUserByUserName:(NSString *)sUserName {
+//  NSString *sql = [NSString
+//      stringWithFormat:@"select * from AccountInfo where sUserName='%@'",
+//                       sUserName];
+//
+//  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+//  if ([db open]) {
+//    FMResultSet *rs = [db executeQuery:sql];
+//    while ([rs next]) {
+//      TJYEXLoginUserInfo *user = [TJYEXLoginUserInfo new];
+//      [self pickJYEXAccountFromRs:user resultset:rs];
+//      [db close];
+//      return user;
+//    }
+//    [db close];
+//  }
+//  return nil;
+//}
+//
+////更新账号 To Do
+//+ (BOOL)replaceJYEXLoginUser:(TJYEXLoginUserInfo *)user
+//                        data:(NSDictionary *)dicData {
+//
+//  NSString *sql = @"replace into AccountInfo values(?,?,?,?,?, ?,?,?,?,?, "
+//                  @"?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, "
+//                  @"?,?,?,?,?, ?,?);";
+//
+//  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+//  if ([db open]) {
+//    BOOL res = [db
+//        executeUpdate:sql, user.sUserName, user.sPassword, user.sUserID,
+//                      user.sNickName, user.sRealName,
+//
+//                      user.sUAPID, user.sSID, user.sSessionID, user.sLoginTime,
+//                      [NSNumber numberWithInt:user.iLoginType],
+//
+//                      [NSNumber numberWithInt:user.iGroupID],
+//                      [NSNumber numberWithInt:user.iAppID], user.sBlowfish,
+//                      [NSNumber numberWithInt:user.iSavePasswd],
+//                      [NSNumber numberWithInt:user.iAutoLogin],
+//
+//                      user.sSrvTbName, user.sMsg, user.sNoteUserId,
+//                      user.sNoteMasterKey, user.sNoteIpLocation,
+//
+//                      user.sEmail, user.sMobilephone, user.sTelephone,
+//                      user.sAddress, [NSNumber numberWithInt:user.iLoginFlag],
+//                      [NSNumber numberWithInt:user.iSchoolType],
+//                      user.sAlbumIdPerson, user.sAlbumNamePerson,
+//                      user.sAlbumUidPerson, user.sAlbumUsernamePerson,
+//
+//                      user.sAlbumIdClass, user.sAlbumNameClass,
+//                      user.sAlbumUidClass, user.sAlbumUsernameClass,
+//                      user.sAlbumIdSchool,
+//
+//                      user.sAlbumNameSchool, user.sAlbumUidSchool,
+//                      user.sAlbumUsernameSchool, user.sAvatarUrl,
+//                      [NSNumber numberWithInt:user.nAvatarStatus],
+//                      [NSNumber numberWithInt:user.groupkey],
+//                      [dicData jsonEncodedKeyValueString]];
+//    [db close];
+//    return res;
+//  }
+//  return NO;
+//}
+//
+////查询用户信息结果转为数据结构
+//+ (void)pickJYEXAccountFromRs:(TJYEXLoginUserInfo *)user
+//                    resultset:(FMResultSet *)rs {
+//  user.sUserName =
+//      [[rs stringForColumn:@"sUserName"] stringByAppendingString:@""];
+//  user.sPassword =
+//      [[rs stringForColumn:@"sUserPasswd"] stringByAppendingString:@""];
+//  user.sUserID = [[rs stringForColumn:@"sUserID"] stringByAppendingString:@""];
+//  user.sNickName =
+//      [[rs stringForColumn:@"sNickName"] stringByAppendingString:@""];
+//  user.sRealName =
+//      [[rs stringForColumn:@"sRealName"] stringByAppendingString:@""];
+//
+//  user.sUAPID = [[rs stringForColumn:@"sUAPID"] stringByAppendingString:@""];
+//  user.sSID = [[rs stringForColumn:@"sSID"] stringByAppendingString:@""];
+//  user.sSessionID =
+//      [[rs stringForColumn:@"sSessionID"] stringByAppendingString:@""];
+//  user.sLoginTime =
+//      [[rs stringForColumn:@"sLoginTime"] stringByAppendingString:@""];
+//  user.iLoginType = [rs intForColumn:@"iLoginType"];
+//
+//  user.iGroupID = [rs intForColumn:@"iGroupID"];
+//  user.iAppID = [rs intForColumn:@"iAppID"];
+//  user.sBlowfish =
+//      [[rs stringForColumn:@"sBlowfish"] stringByAppendingString:@""];
+//  user.iSavePasswd = [rs intForColumn:@"iSavePasswd"];
+//  user.iAutoLogin = [rs intForColumn:@"iAutoLogin"];
+//
+//  user.sSrvTbName =
+//      [[rs stringForColumn:@"sSrvTbName"] stringByAppendingString:@""];
+//  user.sMsg = [[rs stringForColumn:@"sMsg"] stringByAppendingString:@""];
+//  user.sNoteUserId =
+//      [[rs stringForColumn:@"sNoteUserId"] stringByAppendingString:@""];
+//  user.sNoteMasterKey =
+//      [[rs stringForColumn:@"sNoteMasterKey"] stringByAppendingString:@""];
+//  user.sNoteIpLocation =
+//      [[rs stringForColumn:@"sNoteIpLocation"] stringByAppendingString:@""];
+//
+//  user.sEmail = [[rs stringForColumn:@"sEmail"] stringByAppendingString:@""];
+//  user.sMobilephone =
+//      [[rs stringForColumn:@"sMobilephone"] stringByAppendingString:@""];
+//  user.sTelephone =
+//      [[rs stringForColumn:@"sTelephone"] stringByAppendingString:@""];
+//  user.sAddress =
+//      [[rs stringForColumn:@"sAddress"] stringByAppendingString:@""];
+//  user.iLoginFlag = [rs intForColumn:@"iLoginFlag"];
+//
+//  user.iSchoolType = [rs intForColumn:@"iSchoolType"];
+//  user.sAlbumIdPerson =
+//      [[rs stringForColumn:@"albumIdPerson"] stringByAppendingString:@""];
+//  user.sAlbumNamePerson =
+//      [[rs stringForColumn:@"albumNamePerson"] stringByAppendingString:@""];
+//  user.sAlbumUidPerson =
+//      [[rs stringForColumn:@"AlbumUidPerson"] stringByAppendingString:@""];
+//  user.sAlbumUsernamePerson = [[rs stringForColumn:@"albumUsernamePerson"]
+//      stringByAppendingString:@""];
+//  user.sAlbumIdClass =
+//      [[rs stringForColumn:@"albumIdClass"] stringByAppendingString:@""];
+//
+//  user.sAlbumNameClass =
+//      [[rs stringForColumn:@"albumNameClass"] stringByAppendingString:@""];
+//  user.sAlbumUidClass =
+//      [[rs stringForColumn:@"albumUidClass"] stringByAppendingString:@""];
+//  user.sAlbumUsernameClass =
+//      [[rs stringForColumn:@"albumUsernameClass"] stringByAppendingString:@""];
+//  user.sAlbumIdSchool =
+//      [[rs stringForColumn:@"albumIdSchool"] stringByAppendingString:@""];
+//  user.sAlbumNameSchool =
+//      [[rs stringForColumn:@"albumNameSchool"] stringByAppendingString:@""];
+//
+//  user.sAlbumUidSchool =
+//      [[rs stringForColumn:@"albumUidSchool"] stringByAppendingString:@""];
+//  user.sAlbumUsernameSchool = [[rs stringForColumn:@"albumUsernameSchool"]
+//      stringByAppendingString:@""];
+//  user.sAvatarUrl =
+//      [[rs stringForColumn:@"avatarurl"] stringByAppendingString:@""];
+//  user.nAvatarStatus = [rs intForColumn:@"avatarStatus"];
+//  user.groupkey = [rs intForColumn:@"groupkey"];
+//
+//  // user. = [rs stringForColumn:@"jsoncontent"];
+//}
+//
+////自定义数据
+//+ (NSString *)getSystemCfg:(NSString *)sKey
+//                      Cond:(NSString *)sCondition
+//                   Default:(NSString *)sDefValue {
+//  NSString *sql = [[NSString alloc]
+//      initWithFormat:@"select [cfg_value] from %@ where [cfg_key]='%@' and "
+//                     @"[cfg_condition]='%@'",
+//                     TBL_CONFIG, [PubFunction formatNSString4Sqlite:sKey],
+//                     [PubFunction formatNSString4Sqlite:sCondition]];
+//
+//  NSLog(@"%@", sql);
+//
+//  NSString *strValue = @"";
+//
+//  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+//  if ([db open]) {
+//    FMResultSet *rs = [db executeQuery:sql];
+//    if ([rs next]) {
+//      strValue = [rs stringForColumn:@"cfg_value"];
+//    }
+//    [db close];
+//  }
+//  return strValue;
+//}
+//
+//+ (BOOL)setSystemCfg:(NSString *)sKey
+//                Cond:(NSString *)sCondition
+//               Value:(NSString *)sValue {
+//  NSString *sql = [[NSString alloc]
+//      initWithFormat:
+//          @"replace into %@(cfg_key, cfg_condition, cfg_value) values(?,?,?)",
+//          TBL_CONFIG];
+//
+//  NSLog(@"%@", sql);
+//
+//  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+//  if ([db open]) {
+//    BOOL res = [db executeUpdate:sql, sKey, sCondition, sValue];
+//    [db close];
+//    return res;
+//  }
+//  return NO;
+//}
+//
+//+ (BOOL)deleteJYEXAppListByUserName:(NSString *)sUserName {
+//  NSString *sql =
+//      [NSString stringWithFormat:@"DELETE FROM %@ where sUserName='%@'",
+//                                 TBL_APPLIST, sUserName];
+//
+//  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+//  if ([db open]) {
+//    BOOL res = [db executeUpdate:sql];
+//    [db close];
+//    return res;
+//  }
+//  return NO;
+//}
+//
+//+ (NSArray *)getAppListByUserName:(NSString *)sUserName {
+//  NSString *sql =
+//      [NSString stringWithFormat:@"select * from %@ where sUserName='%@'",
+//                                 TBL_APPLIST, sUserName];
+//
+//  NSMutableArray *appList = [NSMutableArray array];
+//
+//  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+//  if ([db open]) {
+//    FMResultSet *rs = [db executeQuery:sql];
+//    while ([rs next]) {
+//      JYEXUserAppInfo *appInfo = [JYEXUserAppInfo new];
+//      [self pickAppInfoFromRs:appInfo resultset:rs];
+//      [appList addObject:appInfo];
+//    }
+//    [db close];
+//  }
+//  return appList;
+//}
+//
+//+ (NSArray *)getAppListByUserName:(NSString *)sUserName
+//                          AppType:(UserAppType)appType {
+//  NSString *sql = [NSString
+//      stringWithFormat:@"select * from %@ where sUserName='%@' AND iAppType=%d",
+//                       TBL_APPLIST, sUserName, appType];
+//
+//  NSMutableArray *appList = [NSMutableArray array];
+//
+//  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+//  if ([db open]) {
+//    FMResultSet *rs = [db executeQuery:sql];
+//    while ([rs next]) {
+//      JYEXUserAppInfo *appInfo = [JYEXUserAppInfo new];
+//      [self pickAppInfoFromRs:appInfo resultset:rs];
+//      [appList addObject:appInfo];
+//    }
+//    [db close];
+//  }
+//  return appList;
+//}
+//
+//+ (JYEXUserAppInfo *)getAppListByUserName:(NSString *)sUserName
+//                                  AppCode:(NSString *)appCode {
+//  NSString *sql =
+//      [NSString stringWithFormat:
+//                    @"select * from %@ where sUserName='%@' AND sAppCode='%@'",
+//                    TBL_APPLIST, sUserName, appCode];
+//
+//  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+//  if ([db open]) {
+//    FMResultSet *rs = [db executeQuery:sql];
+//    while ([rs next]) {
+//      JYEXUserAppInfo *appInfo = [JYEXUserAppInfo new];
+//      [self pickAppInfoFromRs:appInfo resultset:rs];
+//      [db close];
+//      return appInfo;
+//    }
+//    [db close];
+//    return nil;
+//  }
+//  return nil;
+//}
+//
+//+ (BOOL)insertAppListByUserName:(NSString *)sUserName
+//                        AppList:(NSArray *)appList {
+//  if (!appList || ![appList count]) {
+//    return YES;
+//  }
+//
+//  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+//  if ([db open]) {
+//    for (JYEXUserAppInfo *appInfo in appList) {
+//
+//      NSString *sql =
+//          [NSString stringWithFormat:@"replace into "
+//                                     @"%@(sUserName,sAppCode,sAppName,iAppID,"
+//                                     @"iAppType) values(?,?,?,?,?)",
+//                                     TBL_APPLIST];
+//
+//      [db executeUpdate:sql, appInfo.sUserName, appInfo.sAppCode,
+//                        appInfo.sAppName, appInfo.iAppID, appInfo.iAppType];
+//    }
+//    [db close];
+//    return YES;
+//  }
+//  return NO;
+//}
+//
+//+ (BOOL)pickAppInfoFromRs:(JYEXUserAppInfo *)appInfo
+//                resultset:(FMResultSet *)rs {
+//  appInfo.sUserName = [rs stringForColumn:@"sUserName"];
+//  appInfo.sAppCode = [rs stringForColumn:@"sAppCode"];
+//  appInfo.sAppName = [rs stringForColumn:@"sAppName"];
+//  appInfo.iAppID = [rs intForColumn:@"iAppID"];
+//  appInfo.iAppType = [rs intForColumn:@"iAppType"];
+//  return YES;
+//}
+//
+//+ (NSArray *)getLanmuList {
+//  NSString *sql =
+//      [NSString stringWithFormat:@"select * from %@", TB_LANMU_LIST];
+//  NSMutableArray *lanmuList = [NSMutableArray array];
+//
+//  FMDatabase *db = [AstroDBMng getDb91DataBase];
+//  if ([db open]) {
+//    FMResultSet *rs = [db executeQuery:sql];
+//    while ([rs next]) {
+//      TJYEXLanmu *lanmuInfo = [TJYEXLanmu new];
+//      [self pickLanmuInfoFromRs:lanmuInfo resultset:rs];
+//      [lanmuList addObject:lanmuInfo];
+//    }
+//    [db close];
+//  }
+//  return lanmuList;
+//}
+//
+//+ (BOOL)pickLanmuInfoFromRs:(TJYEXLanmu *)lanmuInfo
+//                  resultset:(FMResultSet *)rs {
+//  lanmuInfo.sLanmuName = [rs stringForColumn:@"sLanmuName"];
+//
+//  return YES;
+//}
+//
+//+ (BOOL)cleanLanmuList {
+//  NSString *sql = [NSString stringWithFormat:@"delete from %@", TB_LANMU_LIST];
+//
+//  FMDatabase *db = [AstroDBMng getDb91DataBase];
+//  if ([db open]) {
+//    BOOL res = [db executeUpdate:sql];
+//    [db close];
+//    return res;
+//  }
+//
+//  return NO;
+//}
+//
+//+ (BOOL)insertLanmuListByUserName:(NSArray *)lanmuList {
+//
+//  if (!lanmuList || ![lanmuList count]) {
+//    return YES;
+//  }
+//
+//  FMDatabase *db = [AstroDBMng getDb91DataBase];
+//  if ([db open]) {
+//    for (TJYEXLanmu *lanmuInfo in lanmuList) {
+//
+//      NSString *sql =
+//          [NSString stringWithFormat:@"replace into %@(sLanmuName) values(?)",
+//                                     TB_LANMU_LIST];
+//
+//      [db executeUpdate:sql, lanmuInfo.sLanmuName];
+//    }
+//    [db close];
+//    return YES;
+//  }
+//  return NO;
+//}
+//
+//+ (BOOL)pickClassInfoFromRs:(TJYEXClass *)classInfo resultrs:(FMResultSet *)rs {
+//  classInfo.sClassId = [rs stringForColumn:@"sClassId"];
+//  classInfo.sClassName = [rs stringForColumn:@"sClassName"];
+//
+//  return YES;
+//}
+//
+//+ (NSArray *)getClassList {
+//  NSString *sql =
+//      [NSString stringWithFormat:@"select * from %@", TB_CLASS_INFO];
+//  NSLog(@"getClassList sql:%@\r\n", sql);
+//
+//  NSMutableArray *classList = [NSMutableArray array];
+//
+//  FMDatabase *db = [AstroDBMng getDb91DataBase];
+//  if ([db open]) {
+//    FMResultSet *rs = [db executeQuery:sql];
+//    while ([rs next]) {
+//      TJYEXClass *classInfo = [TJYEXClass new];
+//      [self pickClassInfoFromRs:classInfo resultrs:rs];
+//      [classList addObject:classInfo];
+//    }
+//    [db close];
+//  }
+//  return classList;
+//}
+//
+//+ (BOOL)cleanClassList {
+//  NSString *sql = [NSString stringWithFormat:@"delete from %@", TB_CLASS_INFO];
+//
+//  FMDatabase *db = [AstroDBMng getDb91DataBase];
+//  if ([db open]) {
+//    BOOL res = [db executeUpdate:sql];
+//    [db close];
+//    return res;
+//  }
+//
+//  return NO;
+//}
+//
+//+ (BOOL)insertClassListByUserName:(NSArray *)classList {
+//  if (!classList || ![classList count]) {
+//    return NO;
+//  }
+//
+//  FMDatabase *db = [AstroDBMng getDb91DataBase];
+//  if ([db open]) {
+//    for (TJYEXClass *classInfo in classList) {
+//
+//      NSString *sql = [NSString
+//          stringWithFormat:@"replace into %@(sClassId,sClassName) values(?,?)",
+//                           TB_CLASS_INFO];
+//
+//      [db executeUpdate:sql, classInfo.sClassId, classInfo.sClassName];
+//    }
+//    [db close];
+//    return YES;
+//  }
+//  return NO;
+//}
+//
+//@end

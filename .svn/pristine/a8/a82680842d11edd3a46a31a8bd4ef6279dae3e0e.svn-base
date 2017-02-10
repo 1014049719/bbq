@@ -1,0 +1,589 @@
+//
+//  UploadViewController.m
+//  JYEX
+//
+//  Created by anymuse on 15/7/9.
+//  Copyright (c) 2015年 广州洋基. All rights reserved.
+//
+
+#import "UploadViewController.h"
+#import "UploadCell.h"
+#import <AssetsLibrary/AssetsLibrary.h>
+#import "DynamicCreateTableViewController.h"
+#import "BizLogic_Dyna.h"
+#import <Photos/Photos.h>
+#import "MJPhotoBrowser.h"
+#import "CRMediaPickerController.h"
+
+
+@interface UploadViewController () <
+UICollectionViewDataSource, UICollectionViewDelegate,
+UICollectionViewDelegateFlowLayout, UIImagePickerControllerDelegate,
+UINavigationControllerDelegate,CRMediaPickerControllerDelegate>
+
+@property(weak, nonatomic) IBOutlet UICollectionView *collectionView;
+@property(weak, nonatomic) IBOutlet UICollectionViewFlowLayout *flowLayout;
+@property(weak, nonatomic) IBOutlet UILabel *photosCanSelect;
+@property(weak, nonatomic) IBOutlet UIButton *albumButton;
+
+@property(strong, nonatomic) NSMutableArray *ALAssetArray;
+
+@property(weak, nonatomic) IBOutlet UIBarButtonItem *previewButton;
+@property(weak, nonatomic) IBOutlet UIButton *nextButton;
+
+@property(copy, nonatomic) NSArray *usedPhotosArray;
+@property(strong, nonatomic) ALAssetsGroup *group;
+@property(strong, nonatomic) ALAssetsLibrary *assetsLibrary;
+
+//视频拍摄控制器
+@property (nonatomic, strong) CRMediaPickerController *mediaPickerController;
+
+
+@end
+
+static CGFloat const spaceBetweenItems = 5;
+static CGFloat const collectionViewPin = 10;
+
+@implementation UploadViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    self.assetsLibrary = [[ALAssetsLibrary alloc] init];
+    self.groupTypes = @[
+                        @(ALAssetsGroupSavedPhotos),
+                        @(ALAssetsGroupPhotoStream),
+                        @(ALAssetsGroupAlbum)
+                        ];
+    
+    self.previewButton.enabled = NO;
+    self.previewButton.title = @"预览";
+    
+    self.albumButton.layer.masksToBounds = YES;
+    self.albumButton.layer.cornerRadius =
+    CGRectGetHeight(self.albumButton.frame) / 2.0;
+    
+    // self.usedPhotosArray = [BizLogic getPhotoRecord];
+    
+    if (self.selectedAssetURLs && self.selectedAssetURLs.count) {
+        self.nextButton.enabled = YES;
+        self.nextButton.backgroundColor = [UIColor colorWithHexString:@"ff6440"];
+    } else {
+        self.nextButton.enabled = NO;
+        self.nextButton.backgroundColor = [UIColor colorWithHexString:@"999999"];
+    }
+    
+    self.nextButton.layer.masksToBounds = YES;
+    self.nextButton.layer.cornerRadius =
+    CGRectGetHeight(self.nextButton.frame) / 2;
+    // self.itemsArray = [NSMutableArray array];
+    self.ALAssetArray = [NSMutableArray array];
+    // self.ALAssetInfoArray = [NSMutableArray array];
+    
+    switch (self.itemType) {
+        case UploadItemTypePhoto: {
+            [self.albumButton setTitle:@"所有照片" forState:UIControlStateNormal];
+        } break;
+        case UploadItemTypeVideo: {
+            [self.albumButton setTitle:@"所有视频" forState:UIControlStateNormal];
+        } break;
+        case UploadItemTypeAll: {
+            [self.nextButton setTitle:@"完成" forState:UIControlStateNormal];
+        }
+        default:
+            break;
+    }
+    
+    self.navigationItem.leftBarButtonItem =
+    [[UIBarButtonItem alloc] initWithTitle:@"返回"
+                                     style:UIBarButtonItemStyleBordered
+                                    target:self
+                                    action:@selector(back)];
+    
+    self.collectionView.allowsMultipleSelection = YES;
+    
+    self.navigationItem.title = _navTitle;
+    CGFloat itemWidth = ([UIScreen mainScreen].bounds.size.width -
+                         2 * collectionViewPin - 2 * spaceBetweenItems) /
+    3.0;
+    self.flowLayout.itemSize = CGSizeMake(itemWidth, itemWidth);
+    self.flowLayout.minimumLineSpacing = spaceBetweenItems;
+    if (self.itemType == UploadItemTypeVideo) {
+        self.photosCanSelect.text =@"可上传1个视频";
+    }else{
+        self.photosCanSelect.text = [NSString stringWithFormat:@"可继续添加%d张", self.imaxnum];
+    }
+    if ([self checkAuthorizationStatus]) {
+        [self gainItemsFromGroup:nil];
+    }
+}
+
+- (void)back {
+    if (self.cancelblock) {
+        self.cancelblock();
+    } else {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    }
+}
+
+- (void)setGroup:(ALAssetsGroup *)group {
+    _group = group;
+    [self.albumButton setTitle:[group valueForProperty:ALAssetsGroupPropertyName]
+                      forState:UIControlStateNormal];
+    [self gainItemsFromGroup:group];
+}
+
+- (void)gainItemsFromGroup:(ALAssetsGroup *)group {
+    
+    [self.ALAssetArray removeAllObjects];
+    ALAssetsLibrary *assetsLibrary =self.assetsLibrary;
+    dispatch_async(
+                   dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                       [assetsLibrary
+                        enumerateGroupsWithTypes:
+                        group ? [[group
+                                  valueForProperty:
+                                  ALAssetsGroupPropertyType] unsignedIntegerValue]
+                        : ALAssetsGroupSavedPhotos
+                        usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
+                            if (group) {
+                                if (self.itemType == UploadItemTypePhoto ||
+                                    self.itemType == UploadItemTypeAll) {
+                                    [group setAssetsFilter:[ALAssetsFilter allPhotos]];
+                                } else if (self.itemType == UploadItemTypeVideo) {
+                                    [group setAssetsFilter:[ALAssetsFilter allVideos]];
+                                }
+                                [group
+                                 enumerateAssetsWithOptions:NSEnumerationReverse
+                                 usingBlock:^(ALAsset *result,
+                                              NSUInteger index, BOOL *stop) {
+                                     if (result) {
+                                         [self.ALAssetArray addObject:result];
+                                     }
+                                 }];
+                                //                [group enumerateAssetsUsingBlock:^(ALAsset
+                                //                *result, NSUInteger index, BOOL *stop) {
+                                //                    if (result) {
+                                //                        [self.ALAssetArray addObject:result];
+                                //                    }
+                                //                }];
+                            } else {
+                                [self.collectionView
+                                 performSelectorOnMainThread:@selector(reloadData)
+                                 withObject:nil
+                                 waitUntilDone:NO];
+                            }
+                        }
+                        failureBlock:^(NSError *error) {
+                            NSLog(@"获取相册失败");
+                        }];
+                   });
+}
+
+- (BOOL)checkAuthorizationStatus {
+    NSString *tipTextWhenNoPhotosAuthorization;
+    ALAuthorizationStatus authorizationStatus =
+    [ALAssetsLibrary authorizationStatus];
+    if (authorizationStatus == ALAuthorizationStatusRestricted ||
+        authorizationStatus == ALAuthorizationStatusDenied) {
+        NSDictionary *mainInfoDictionary = [[NSBundle mainBundle] infoDictionary];
+        NSString *appName =
+        [mainInfoDictionary objectForKey:@"CFBundleDisplayName"];
+        tipTextWhenNoPhotosAuthorization = [NSString
+                                            stringWithFormat:
+                                            @"请在设备的\"设置-隐私-照片\"选项中，允许%@"
+                                            @"访问你的手机相册",
+                                            appName];
+        NSLog(@"%@", tipTextWhenNoPhotosAuthorization);
+        // 展示提示语
+        return NO;
+    }
+    return YES;
+}
+
+#pragma mark - CollectionView DataSource
+- (NSInteger)collectionView:(UICollectionView *)collectionView
+     numberOfItemsInSection:(NSInteger)section {
+    if (self.itemType == UploadItemTypeAll) {
+        return self.ALAssetArray.count;
+    }
+    return self.ALAssetArray.count + 1;
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView
+                  cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    UploadCell *cell =
+    [collectionView dequeueReusableCellWithReuseIdentifier:@"UploadCell"
+                                              forIndexPath:indexPath];
+    cell.usedFlagView.hidden = YES;
+    if (self.itemType != UploadItemTypeAll) {
+        if (indexPath.row == 0) {
+            cell.selectionImage.hidden = YES;
+            cell.imageView.image = [UIImage imageNamed:@"upload_photo"];
+            return cell;
+        } else {
+            cell.selectionImage.hidden = NO;
+        }
+    }
+    
+    //    cell.selectionImage.hidden = NO;
+    ALAsset *asset;
+    if (self.itemType == UploadItemTypeAll) {
+        asset = self.ALAssetArray[indexPath.item];
+    } else {
+        asset = self.ALAssetArray[indexPath.item - 1];
+    }
+    
+    UIImage *image = [UIImage imageWithCGImage:[asset thumbnail]];
+    cell.imageView.image = image;
+    
+    if (self.usedPhotosArray && self.usedPhotosArray.count) {
+        __block NSString *identifier = nil;
+        
+        dispatch_async(
+                       dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                           NSIndexPath *index = indexPath;
+                           if ([UIDevice currentDevice].systemVersion.doubleValue >= 8.0) {
+                               
+                               PHFetchResult *result = [PHAsset fetchAssetsWithALAssetURLs:@[
+                                                                                             [asset valueForProperty:ALAssetPropertyAssetURL]
+                                                                                             ] options:nil];
+                               __block NSString *localIdentifier = nil;
+                               
+                               [result enumerateObjectsUsingBlock:^(PHAsset *asset, NSUInteger idx,
+                                                                    BOOL *stop) {
+                                   localIdentifier = asset.localIdentifier;
+                               }];
+                               identifier = localIdentifier;
+                               
+                           } else {
+                               identifier = [[asset
+                                              valueForProperty:ALAssetPropertyAssetURL] absoluteString];
+                           }
+                           dispatch_async(dispatch_get_main_queue(), ^{
+                               UploadCell *cell =
+                               (UploadCell *)[collectionView cellForItemAtIndexPath:index];
+                               if ([self.usedPhotosArray containsObject:identifier]) {
+                                   cell.usedFlagView.hidden = NO;
+                               } else {
+                                   cell.usedFlagView.hidden = YES;
+                               }
+                           });
+                       });
+    }
+    
+    if (self.selectedAssetURLs && self.selectedAssetURLs.count) {
+        if ([self.selectedAssetURLs
+             containsObject:[asset valueForProperty:ALAssetPropertyAssetURL]]) {
+            [collectionView selectItemAtIndexPath:indexPath
+                                         animated:NO
+                                   scrollPosition:UICollectionViewScrollPositionNone];
+            cell.selected = YES;
+        }
+    }
+    
+    return cell;
+}
+
+//转换时间格式
+-(NSString *)getTimeStringOfTimeInterval:(NSTimeInterval)timeInterval
+{
+    NSCalendar *calendar = [NSCalendar currentCalendar];
+    
+    NSDate *dateRef = [[NSDate alloc] init];
+    NSDate *dateNow = [[NSDate alloc] initWithTimeInterval:timeInterval sinceDate:dateRef];
+    
+    unsigned int uFlags =
+    NSSecondCalendarUnit | NSMinuteCalendarUnit | NSHourCalendarUnit |
+    NSDayCalendarUnit | NSMonthCalendarUnit | NSYearCalendarUnit;
+    
+    
+    NSDateComponents *components = [calendar components:uFlags
+                                               fromDate:dateRef
+                                                 toDate:dateNow
+                                                options:0];
+    NSString *retTimeInterval;
+    if (components.hour > 0)
+    {
+        retTimeInterval = [NSString stringWithFormat:@"%ld:%02ld:%02ld", (long)components.hour, (long)components.minute, (long)components.second];
+    }
+    
+    else
+    {
+        retTimeInterval = [NSString stringWithFormat:@"%ld:%02ld", (long)components.minute, (long)components.second];
+    }
+    return retTimeInterval;
+}
+
+#pragma mark - 下一步
+- (IBAction)didClickNextButton:(id)sender {
+    [self getAssetFromSelectedURLs];
+    if (self.finishblock) {
+        self.finishblock(nil, self.photosArray, self.selectedAssetURLs);
+    }
+}
+
+#pragma mark - CollectionView Delegate
+//超过了张数，就不能选了。
+- (BOOL)collectionView:(UICollectionView *)collectionView
+shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    
+    NSInteger max = 0;
+    if (self.itemType == UploadItemTypeAll) {
+        max = 50;
+    }else if(self.itemType == UploadItemTypeVideo){
+        max = 1;
+    } else {
+        max = 9;
+    }
+    if (self.selectedAssetURLs.count >= max) {
+        
+        if (self.itemType == UploadItemTypeAll) {
+            [SVProgressHUD showErrorWithStatus:@"最多批量上传50张照片"];
+        } else if(self.itemType == UploadItemTypeVideo){
+            [SVProgressHUD showErrorWithStatus:@"一个动态只能上传1个视频"];
+        } else{
+            [SVProgressHUD showErrorWithStatus:@"一个动态最多9张照片"];
+        }
+        return NO;
+    }
+    if (self.itemType != UploadItemTypeAll) {
+        if (indexPath.row == 0) { //拍照
+            
+            if (self.itemType==UploadItemTypePhoto) {
+                UIImagePickerController *picker =
+                [[UIImagePickerController alloc] init];
+                picker.delegate = self;
+                picker.sourceType = UIImagePickerControllerSourceTypeCamera;
+                
+                if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 8.0) {
+                    self.modalPresentationStyle = UIModalPresentationOverCurrentContext;
+                }
+                [self presentViewController:picker animated:YES completion:nil];
+            }else if (self.itemType==UploadItemTypeVideo){
+                
+                NSLog(@"。。。。拍摄视频。。。。");
+                self.mediaPickerController=[[CRMediaPickerController alloc] init];
+                self.mediaPickerController.delegate=self;
+                self.mediaPickerController.mediaType=CRMediaPickerControllerMediaTypeVideo;
+                self.mediaPickerController.sourceType=CRMediaPickerControllerSourceTypeCamera;
+                self.mediaPickerController.allowsEditing=YES;
+                self.mediaPickerController.cameraDevice=UIImagePickerControllerCameraDeviceRear;
+                //视频时长
+                self.mediaPickerController.videoMaximumDuration=60;
+                self.mediaPickerController.videoQualityType=UIImagePickerControllerQualityTypeHigh;
+                [self.mediaPickerController show];
+            }
+            
+            return NO;
+        }
+    }
+    
+    return YES;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView
+didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
+    ALAsset *asset;
+    if (self.itemType == UploadItemTypeAll) {
+        asset = self.ALAssetArray[indexPath.item];
+    } else {
+        asset = self.ALAssetArray[indexPath.item - 1];
+    }
+    
+    [self.selectedAssetURLs
+     addObject:[asset valueForProperty:ALAssetPropertyAssetURL]];
+    
+    if (self.nextButton.enabled == NO) {
+        self.nextButton.backgroundColor = [UIColor colorWithHexString:@"ff6440"];
+        self.nextButton.enabled = YES;
+    }
+    if (self.previewButton.enabled == NO) {
+        self.previewButton.enabled = YES;
+    }
+    self.previewButton.title = [NSString
+                                stringWithFormat:@"预览（%ld）", self.selectedAssetURLs.count];
+    
+    NSInteger max = 0;
+    if (self.itemType == UploadItemTypeAll) {
+        max = 50;
+    } else if(self.itemType == UploadItemTypeVideo){
+        max = 1;
+    }else {
+        max = 9;
+    }
+    self.photosCanSelect.text =
+    [NSString stringWithFormat:@"可继续添加%ld张",
+     max - self.selectedAssetURLs.count];
+}
+
+- (void)collectionView:(UICollectionView *)collectionView
+didDeselectItemAtIndexPath:(NSIndexPath *)indexPath {
+    ALAsset *asset;
+    if (self.itemType == UploadItemTypeAll) {
+        asset = self.ALAssetArray[indexPath.item];
+    } else {
+        asset = self.ALAssetArray[indexPath.item - 1];
+    }
+    
+    [self.selectedAssetURLs
+     removeObject:[asset valueForProperty:ALAssetPropertyAssetURL]];
+    
+    if (self.selectedAssetURLs.count == 0) {
+        self.nextButton.enabled = NO;
+        self.nextButton.backgroundColor = [UIColor colorWithHexString:@"999999"];
+        self.previewButton.enabled = NO;
+        self.previewButton.title = @"预览";
+    } else {
+        self.previewButton.title = [NSString
+                                    stringWithFormat:@"预览（%ld）", self.selectedAssetURLs.count];
+    }
+    
+    NSInteger max = 0;
+    if (self.itemType == UploadItemTypeAll) {
+        max = 50;
+    }else if(self.itemType == UploadItemTypeVideo){
+        max = 1;
+    } else {
+        max = 9;
+    }
+    self.photosCanSelect.text =
+    [NSString stringWithFormat:@"可继续添加%ld张",
+     max - self.selectedAssetURLs.count];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+#pragma mark - 预览照片
+- (IBAction)didClickPreviewButton:(id)sender {
+    //选中的照片
+    NSMutableArray *arrSelect = [NSMutableArray array];
+    
+    if ([UIDevice currentDevice].systemVersion.doubleValue > 8.0) {
+        
+        PHFetchResult *result =
+        [PHAsset fetchAssetsWithALAssetURLs:self.selectedAssetURLs options:nil];
+        [result enumerateObjectsUsingBlock:^(PHAsset *asset, NSUInteger idx,
+                                             BOOL *stop) {
+            PHImageRequestOptions *options = [[PHImageRequestOptions alloc] init];
+            options.deliveryMode = PHImageRequestOptionsDeliveryModeFastFormat;
+            options.synchronous = YES;
+            CGSize imageSize = CGSizeMake(asset.pixelWidth, asset.pixelHeight);
+            [[PHImageManager defaultManager]
+             requestImageForAsset:asset
+             targetSize:imageSize
+             contentMode:PHImageContentModeDefault
+             options:options
+             resultHandler:^(UIImage *image, NSDictionary *info) {
+                 [arrSelect addObject:image];
+             }];
+        }];
+    } else {
+        ALAssetsLibrary *assetslibrary =self.assetsLibrary;
+        [self.selectedAssetURLs
+         enumerateObjectsUsingBlock:^(NSURL *url, NSUInteger idx, BOOL *stop) {
+             [assetslibrary assetForURL:url
+                            resultBlock:^(ALAsset *asset) {
+                                UIImage *image =
+                                [UIImage imageWithCGImage:asset.defaultRepresentation
+                                 .fullScreenImage];
+                                [arrSelect addObject:image];
+                            }
+                           failureBlock:^(NSError *error) {
+                               NSLog(@"%@", error.localizedDescription);
+                           }];
+         }];
+    }
+    
+    NSMutableArray *photos = [NSMutableArray array];
+    for (UIImage *image in arrSelect) {
+        MJPhoto *photo = [[MJPhoto alloc] init];
+        photo.image = image;
+        [photos addObject:photo];
+    }
+    
+    MJPhotoBrowser *browser = [[MJPhotoBrowser alloc] init];
+    browser.showSaveBtn = NO;
+    browser.photos = photos;
+    [browser show];
+}
+
+//拍照的代理
+#pragma mark -
+#pragma mark UIImagePickerControllerDelegate methods
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+    
+    [self dismissViewControllerAnimated:NO completion:nil];
+}
+
+- (void)imagePickerController:(UIImagePickerController *)picker
+didFinishPickingMediaWithInfo:(NSDictionary *)info {
+    //原来在后面
+    NSString *mediaType = [info objectForKey:UIImagePickerControllerMediaType];
+    if ([mediaType isEqualToString:@"public.image"]) {
+        UIImage *image = [info objectForKey:UIImagePickerControllerOriginalImage];
+        
+        ALAssetsLibrary *assetsLibrary = [[ALAssetsLibrary alloc] init];
+        [assetsLibrary
+         writeImageToSavedPhotosAlbum:[image CGImage]
+         orientation:(ALAssetOrientation)image.imageOrientation
+         completionBlock:^(NSURL *assetURL, NSError *error) {
+             [self.selectedAssetURLs addObject:assetURL];
+             [self getAssetFromSelectedURLs];
+             [self dismissViewControllerAnimated:NO completion:nil];
+             if (self.finishblock) {
+                 self.finishblock(nil, self.photosArray,
+                                  self.selectedAssetURLs);
+             }
+             
+         }];
+        
+        self.photoimg = image;
+        //        [self getAssetFromSelectedURLs];
+        //        if ( self.finishblock ) {
+        //            self.finishblock(nil,self.photosArray,
+        //            self.selectedAssetURLs);
+        //        }
+    }
+}
+
+- (void)getAssetFromSelectedURLs {
+    if (self.selectedAssetURLs.count) {
+        NSMutableArray *arrSelect = [NSMutableArray array];
+        if ([UIDevice currentDevice].systemVersion.doubleValue >= 8.0) {
+            PHFetchResult *result =
+            [PHAsset fetchAssetsWithALAssetURLs:self.selectedAssetURLs
+                                        options:nil];
+            [result enumerateObjectsUsingBlock:^(PHAsset *asset, NSUInteger idx,
+                                                 BOOL *stop) {
+                [arrSelect addObject:asset];
+            }];
+            
+        } else {
+            ALAssetsLibrary *assetslibrary = self.assetsLibrary;
+            dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+            dispatch_queue_t queue =
+            dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+            
+            for (NSURL *urls in self.selectedAssetURLs) {
+                dispatch_async(queue, ^{
+                    [assetslibrary assetForURL:urls
+                                   resultBlock:^(ALAsset *asset) {
+                                       [arrSelect addObject:asset];
+                                       dispatch_semaphore_signal(sema);
+                                   }
+                                  failureBlock:^(NSError *error) {
+                                      dispatch_semaphore_signal(sema);
+                                  }];
+                });
+                dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+            }
+            
+            NSLog(@"%lu", (unsigned long)arrSelect.count);
+        }
+        self.photosArray = arrSelect;
+    }
+}
+@end

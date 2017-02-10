@@ -1,0 +1,1118 @@
+////
+////  NoteMgr.m
+////  NoteBook
+////
+////  Created by wangsc on 10-9-15.
+////  Copyright 2010 ND. All rights reserved.
+////
+//
+//#import "NoteMgr.h"
+//#import "Note2ItemMgr.h"
+//#import "ItemMgr.h"
+//#import "CateMgr.h"
+//#import "CfgMgr.h"
+//
+//#include <algorithm>
+//#include <map>
+//
+//#include "logging.h"
+////#import "CommonNoteOpr.h"
+//#import "CommonDirectory.h"
+//#import "GlobalVar.h"
+//
+//#define GUID_ZERO @"00000000-0000-0000-0000-000000000000"
+//#define isGuidNull(p) (p == nil || [p isEqualToString:GUID_ZERO])
+//
+//// static std::map<GUID, WORK_KEY_INFO> decrypedNoteMap;    //已解密笔记
+//
+///*
+//bool compareByModifyTime(NoteInfo ele1, NoteInfo ele2)
+//{
+////    return unistring(ele1.tHead.wszModTime) <
+//unistring(ele2.tHead.wszModTime);
+//    return unistring(ele2.tHead.wszModTime) < unistring(ele1.tHead.wszModTime);
+//}
+//*/
+//
+//@implementation AstroDBMng (ForNoteMgr)
+//
+//+ (BOOL)loadDb91Note {
+//  return [AstroDBMng loadDb91Note:TheCurUser.member.username];
+//}
+//
+//+ (BOOL)loadDb91Note:(NSString *)userName {
+//  BOOL bExist = [CommonFunc EnsureDbFileExist:EDbType91Note UserName:userName];
+//  if (!bExist) {
+//    LOG_ERROR(@"数据库文件不存在。 username=%@", userName);
+//    return NO;
+//  }
+//  return YES;
+//}
+//
+//+ (BOOL)CloseDb91Note //关闭
+//{
+//  return TRUE;
+//  // return [[AstroDBMng getDb91DataBase] close];
+//}
+//
+//+ (BOOL)addNote:(TNoteInfo *)objNote {
+//  return [self saveNote:objNote];
+//}
+//
+//+ (TNoteInfo *)getNote:(NSString *)strNoteGuid {
+//  NSString *sql = [NSString
+//      stringWithFormat:@"SELECT * FROM tb_note_info WHERE note_id='%@';",
+//                       strNoteGuid];
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  NoteModel *model = [[NoteModel alloc] init];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    while ([resultSet next]) {
+//      model.user_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"user_id"]];
+//      model.curr_ver =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"curr_ver"]];
+//      model.create_ver =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"create_ver"]];
+//      model.create_time = [resultSet stringForColumn:@"create_time"];
+//      model.modify_time = [resultSet stringForColumn:@"modify_time"];
+//
+//      model.delete_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"delete_state"]];
+//      model.edit_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"edit_state"]];
+//      model.conflict_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"conflict_state"]];
+//      model.sync_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"sync_state"]];
+//      model.need_upload =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"need_upload"]];
+//
+//      model.catalog_id = [resultSet stringForColumn:@"catalog_id"];
+//      model.note_id = [resultSet stringForColumn:@"note_id"];
+//      model.note_title = [resultSet stringForColumn:@"note_title"];
+//      model.note_type =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_type"]];
+//      model.note_size =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_size"]];
+//
+//      model.file_path = [resultSet stringForColumn:@"file_path"];
+//      model.file_ext = [resultSet stringForColumn:@"file_ext"];
+//      model.edit_location = [resultSet stringForColumn:@"edit_location"];
+//      model.note_src = [resultSet stringForColumn:@"note_src"];
+//      model.first_item = [resultSet stringForColumn:@"first_item"];
+//
+//      model.share_mode =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"share_mode"]];
+//      model.encrypt_flag =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"encrypt_flag"]];
+//      model.need_downlord =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"need_downlord"]];
+//      model.owner_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"owner_id"]];
+//      model.from_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"from_id"]];
+//
+//      model.star_level =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"star_level"]];
+//      model.expire_date = [resultSet stringForColumn:@"expire_date"];
+//      model.finish_date = [resultSet stringForColumn:@"finish_date"];
+//      model.finish_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"finish_state"]];
+//      model.content = [resultSet stringForColumn:@"content"];
+//
+//      model.fail_times =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"fail_times"]];
+//      model.note_class_id = [resultSet stringForColumn:@"note_class_id"];
+//      model.note_friend =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_friend"]];
+//      model.send_sms =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"send_sms"]];
+//      model.note_tag = [resultSet stringForColumn:@"note_tag"];
+//    }
+//  }
+//  [fmdb close];
+//
+//  TRecHead *pHead = [TRecHead new];
+//  TNoteInfo *pNoteInfo = [TNoteInfo new];
+//  pNoteInfo.tHead = pHead;
+//
+//  [self objFromFMDBQuery_NoteMgr:pNoteInfo model:model];
+//
+//  return pNoteInfo;
+//}
+//
+//+ (BOOL)updateNote:(TNoteInfo *)objNote {
+//  //[CommonFunc updateHead:objNote.tHead];
+//  return [self saveToDB_NoteMgr:objNote];
+//}
+//
+//+ (BOOL)resetNote:(TNoteInfo *)objNote {
+//  //[CommonFunc resetHead:objNote.tHead];
+//  return [self saveToDB_NoteMgr:objNote];
+//}
+//
+//+ (BOOL)deleteNote:(NSString *)guidNote {
+//  TNoteInfo *noteInfo;
+//  if (!(noteInfo = [self getNote:guidNote])) {
+//    return NO;
+//  }
+//
+//  if (noteInfo.tHead.nCurrVerID == 0) {
+//    //直接删除
+//    [self deleteNoteFromDB:guidNote];
+//  } else {
+//    //[CommonFunc updateHead:noteInfo.tHead];
+//    noteInfo.tHead.nDelState = DELETESTATE_DELETE;
+//
+//    [self saveNote:noteInfo];
+//  }
+//
+//  //删除Note2Item 和 Item;
+//  [AstroDBMng deleteNote2ItemAndItemByNote:guidNote];
+//
+//  return YES;
+//}
+//
+//+ (BOOL)deleteNoteFromDB:(NSString *)strNoteGuid {
+//  BOOL bRet = NO;
+//
+//  NSString *sql =
+//      [NSString stringWithFormat:@"DELETE FROM tb_note_info WHERE note_id='%@'",
+//                                 strNoteGuid];
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    [fmdb executeUpdate:sql];
+//    bRet = YES;
+//  }
+//
+//  return bRet;
+//}
+//
+//+ (BOOL)saveNote:(TNoteInfo *)objNote {
+//  return [self saveToDB_NoteMgr:objNote];
+//}
+//
+//+ (NSArray *)getNoteListBySQL:(NSString *)strSQL count:(int)nLimitCount {
+//  NSMutableArray *aryData = [NSMutableArray array];
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  NoteModel *model = [[NoteModel alloc] init];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:strSQL];
+//    while ([resultSet next]) {
+//      model.user_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"user_id"]];
+//      model.curr_ver =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"curr_ver"]];
+//      model.create_ver =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"create_ver"]];
+//      model.create_time = [resultSet stringForColumn:@"create_time"];
+//      model.modify_time = [resultSet stringForColumn:@"modify_time"];
+//
+//      model.delete_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"delete_state"]];
+//      model.edit_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"edit_state"]];
+//      model.conflict_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"conflict_state"]];
+//      model.sync_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"sync_state"]];
+//      model.need_upload =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"need_upload"]];
+//
+//      model.catalog_id = [resultSet stringForColumn:@"catalog_id"];
+//      model.note_id = [resultSet stringForColumn:@"note_id"];
+//      model.note_title = [resultSet stringForColumn:@"note_title"];
+//      model.note_type =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_type"]];
+//      model.note_size =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_size"]];
+//
+//      model.file_path = [resultSet stringForColumn:@"file_path"];
+//      model.file_ext = [resultSet stringForColumn:@"file_ext"];
+//      model.edit_location = [resultSet stringForColumn:@"edit_location"];
+//      model.note_src = [resultSet stringForColumn:@"note_src"];
+//      model.first_item = [resultSet stringForColumn:@"first_item"];
+//
+//      model.share_mode =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"share_mode"]];
+//      model.encrypt_flag =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"encrypt_flag"]];
+//      model.need_downlord =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"need_downlord"]];
+//      model.owner_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"owner_id"]];
+//      model.from_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"from_id"]];
+//
+//      model.star_level =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"star_level"]];
+//      model.expire_date = [resultSet stringForColumn:@"expire_date"];
+//      model.finish_date = [resultSet stringForColumn:@"finish_date"];
+//      model.finish_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"finish_state"]];
+//      model.content = [resultSet stringForColumn:@"content"];
+//
+//      model.fail_times =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"fail_times"]];
+//      model.note_class_id = [resultSet stringForColumn:@"note_class_id"];
+//      model.note_friend =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_friend"]];
+//      model.send_sms =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"send_sms"]];
+//      model.note_tag = [resultSet stringForColumn:@"note_tag"];
+//    }
+//  }
+//  [fmdb close];
+//
+//  TRecHead *pHead = [TRecHead new];
+//  TNoteInfo *noteInfo = [TNoteInfo new];
+//  noteInfo.tHead = pHead;
+//
+//  [self objFromFMDBQuery_NoteMgr:noteInfo model:model];
+//  [aryData addObject:noteInfo];
+//
+//  return aryData;
+//}
+//
+//+ (NSArray *)getNoteListByCate:(NSString *)strCateGuid {
+//  //根据更新时间排序
+//
+//  // NSString* sql = [NSString stringWithFormat:@"SELECT * FROM tb_note_info
+//  // WHERE catalog_id='%@' AND delete_state=%d ORDER BY modify_time
+//  // desc;",strCateGuid,DELETESTATE_NODELETE];
+//
+//  NSString *sql =
+//      [NSString stringWithFormat:@"SELECT * FROM tb_note_info WHERE "
+//                                 @"catalog_id='%@' ORDER BY modify_time desc;",
+//                                 strCateGuid];
+//
+//  return [self getNoteListBySQL:sql count:0];
+//
+//  // sort(pNoteList->begin(), pNoteList->end(), compareByModifyTime);
+//  // return YES;
+//}
+//
+///*
+//+ (NSArray *)getMostRecentNotes:(int)count
+//{
+//    //根据更新时间排序
+//    NSString* sql = [NSString stringWithFormat:@"SELECT * FROM tb_note_info
+//WHERE delete_state=%d ORDER BY modify_time desc;",DELETESTATE_NODELETE];
+//    return [self getNoteListBySQL:sql count:count];
+//}
+//*/
+//
+///*
+//+ (NSArray *)getUnuploadNoteList:(BOOL)includeDelete
+//{
+//    NSString* sql;
+//
+//    if ( includeDelete )
+//        sql =[NSString stringWithFormat:@"select * from tb_note_info where
+//edit_state=%d;",EDITSTATE_EDITED];
+//    else sql = [NSString stringWithFormat:@"select * from tb_note_info where
+//edit_state=%d AND delete_state=%d;",EDITSTATE_EDITED,DELETESTATE_NODELETE];
+////不包括删除的
+//
+//    return [self getNoteListBySQL:sql count:0];
+//
+//}
+//*/
+//
+////获取一条需上传的笔记
+///*
+//+ (TNoteInfo*)getOneNoteNeedUpload
+//{
+//    NSString* sql;
+//
+//    sql =[NSString stringWithFormat:@"select * from tb_note_info where
+//edit_state=%d;",EDITSTATE_EDITED];
+//
+//    NSArray *arrNote = [self getNoteListBySQL:sql count:1];
+//    if ( arrNote && [arrNote count]> 0 ) return [arrNote objectAtIndex:0];
+//    return nil;
+//}
+//*/
+//
+///*
+//+ (NSArray *)getNoteByFirstItemID:(NSString *)guidFirstItem
+//{
+//
+//    NSString* sql = [NSString stringWithFormat:@"select * from tb_note_info
+//where first_item= '%@';",guidFirstItem];
+//    return [self getNoteListBySQL:sql count:0];
+//}
+//*/
+//
+///*
+//+ (int)needUploadNotesCount
+//{
+//    NSString* sql = [NSString stringWithFormat:@"select count(note_id) from
+//tb_note_info where edit_state=%d;",EDITSTATE_EDITED];
+//
+//    try
+//    {
+//        CppSQLite3Query query = [[AstroDBMng getDb91Note] execQuery:sql];
+//                if ( !query.Eof())
+//        {
+//            int nRet = query.GetIntField(0, 0);
+//            return nRet;
+//        }
+//    }
+//    catch (CppSQLite3Exception e)
+//    {
+//        return 0;
+//    }
+//    return 0;
+//}
+//*/
+//
+////返回需同步的记录数(包括上传和下载)
+//+ (BOOL)needSyncNotesCount {
+//  // NSString* sql = [NSString stringWithFormat:@"SELECT count(*) FROM
+//  // tb_note_info;"];
+//  NSString *sql =
+//      [NSString stringWithFormat:
+//                    @"SELECT count(*) FROM tb_note_info WHERE edit_state=%d;",
+//                    EDITSTATE_EDITED];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    BOOL ret = [fmdb executeQuery:sql] != nil;
+//    return ret;
+//  }
+//
+//  return NO;
+//
+//  //    try
+//  //    {
+//  //        CppSQLite3Query query = [[AstroDBMng getDb91Note] execQuery:sql];
+//  //		if ( !query.Eof())
+//  //        {
+//  //            int nRet = query.GetIntField(0, 0);
+//  //            return nRet;
+//  //        }
+//  //    }
+//  //    catch (CppSQLite3Exception e)
+//  //    {
+//  //        return 0;
+//  //    }
+//  //    return 0;
+//}
+//
+////返回需上传的笔记的Guid
+//+ (NSArray *)getNeedUploadNoteListGuid {
+//  NSMutableArray *aryData = [NSMutableArray array];
+//
+//  //根据更新时间排序
+//  NSString *strSQL =
+//      [NSString stringWithFormat:@"SELECT note_id FROM tb_note_info WHERE "
+//                                 @"edit_state=%d ORDER BY modify_time desc;",
+//                                 EDITSTATE_EDITED];
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  NoteModel *model = [[NoteModel alloc] init];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:strSQL];
+//    while ([resultSet next]) {
+//      model.note_id = [resultSet stringForColumn:@"note_id"];
+//      [aryData addObject:model.note_id];
+//    }
+//  }
+//  return aryData;
+//}
+//
+/////////////////////////////////
+////+ (NSArray *)getNeedDownNoteList:(NSString *)guidCate
+////recursive:(BOOL)recursive
+////{
+////
+////    NSString *strSQL = [NSString stringWithFormat:@"SELECT * FROM tb_note_info
+////    WHERE need_downlord=%d AND
+////    delete_state=%d;",DOWNLOAD_NEED,DELETESTATE_NODELETE];
+////
+////
+////
+////    @try
+////	{
+////        NSMutableArray* aryData = [NSMutableArray array];
+////
+////		CppSQLite3Query query = [[AstroDBMng getDb91Note]
+////execQuery:strSQL];
+////		while ( !query.Eof())
+////		{
+////            TRecHead *pHead = [[TRecHead new] autorelease];
+////            TNoteInfo *noteInfo = [[TNoteInfo new] autorelease];
+////            noteInfo.tHead = pHead;
+////
+////            [self objFromQuery_NoteMgr:noteInfo query:&query];
+////
+////
+////            //if (noteInfo.tHead.nDelState == DELETESTATE_NODELETE &&
+////            noteInfo.nNeedDownlord)
+////            //{
+////                if ( !guidCate || [guidCate isEqualToString:@""] )
+////                {
+////                    NSString *strNote = [noteInfo.strNoteIdGuid copy];
+////                    [aryData addObject:strNote];
+////                    [strNote release];
+////                }
+////                else if ([guidCate isEqualToString:noteInfo.strCatalogIdGuid])
+////                {
+////                    NSString *strNote = [noteInfo.strNoteIdGuid copy];
+////                    [aryData addObject:strNote];
+////                    [strNote release];
+////                }
+////                else if (recursive && ![guidCate isEqualToString:GUID_ZERO] &&
+////                [AstroDBMng isSubCate_CateMgr:guidCate
+////                subCate:noteInfo.strCatalogIdGuid])
+////                {
+////                    NSString *strNote = [noteInfo.strNoteIdGuid copy];
+////                    [aryData addObject:strNote];
+////                    [strNote release];
+////                }
+////            //}
+////
+////			query.NextRow();
+////		}
+////
+////		return aryData;
+////	}
+////	@catch (NSException * e)
+////	{
+////		LOG_ERROR(@"查询笔记信息表失败!");
+////		return nil;
+////	}
+////	return nil;
+////}
+//
+////返回目录所有笔记的Guid
+//+ (NSArray *)getNoteListGuidByCate:(NSString *)strCateGuid {
+//  NSMutableArray *aryData = [NSMutableArray array];
+//
+//  //根据更新时间排序
+//  NSString *strSQL = [NSString
+//      stringWithFormat:@"SELECT note_id FROM tb_note_info WHERE "
+//                       @"catalog_id='%@' AND delete_state=%d ORDER BY "
+//                       @"modify_time desc;",
+//                       strCateGuid, DELETESTATE_NODELETE]; //不包括删除的
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  NoteModel *model = [[NoteModel alloc] init];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:strSQL];
+//    while ([resultSet next]) {
+//      model.note_id = [resultSet stringForColumn:@"note_id"];
+//      [aryData addObject:model.note_id];
+//    }
+//  }
+//  return aryData;
+//}
+//
+////返回目录所有的笔记（包括子目录)
+//+ (NSArray *)getNoteListByCateIncludeSub:(NSString *)guidCate {
+//  NSString *strSQL = [NSString
+//      stringWithFormat:@"SELECT * FROM tb_note_info WHERE delete_state=%d;",
+//                       DELETESTATE_NODELETE];
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  NoteModel *model = [[NoteModel alloc] init];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:strSQL];
+//    while ([resultSet next]) {
+//      model.user_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"user_id"]];
+//      model.curr_ver =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"curr_ver"]];
+//      model.create_ver =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"create_ver"]];
+//      model.create_time = [resultSet stringForColumn:@"create_time"];
+//      model.modify_time = [resultSet stringForColumn:@"modify_time"];
+//
+//      model.delete_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"delete_state"]];
+//      model.edit_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"edit_state"]];
+//      model.conflict_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"conflict_state"]];
+//      model.sync_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"sync_state"]];
+//      model.need_upload =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"need_upload"]];
+//
+//      model.catalog_id = [resultSet stringForColumn:@"catalog_id"];
+//      model.note_id = [resultSet stringForColumn:@"note_id"];
+//      model.note_title = [resultSet stringForColumn:@"note_title"];
+//      model.note_type =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_type"]];
+//      model.note_size =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_size"]];
+//
+//      model.file_path = [resultSet stringForColumn:@"file_path"];
+//      model.file_ext = [resultSet stringForColumn:@"file_ext"];
+//      model.edit_location = [resultSet stringForColumn:@"edit_location"];
+//      model.note_src = [resultSet stringForColumn:@"note_src"];
+//      model.first_item = [resultSet stringForColumn:@"first_item"];
+//
+//      model.share_mode =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"share_mode"]];
+//      model.encrypt_flag =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"encrypt_flag"]];
+//      model.need_downlord =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"need_downlord"]];
+//      model.owner_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"owner_id"]];
+//      model.from_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"from_id"]];
+//
+//      model.star_level =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"star_level"]];
+//      model.expire_date = [resultSet stringForColumn:@"expire_date"];
+//      model.finish_date = [resultSet stringForColumn:@"finish_date"];
+//      model.finish_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"finish_state"]];
+//      model.content = [resultSet stringForColumn:@"content"];
+//
+//      model.fail_times =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"fail_times"]];
+//      model.note_class_id = [resultSet stringForColumn:@"note_class_id"];
+//      model.note_friend =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_friend"]];
+//      model.send_sms =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"send_sms"]];
+//      model.note_tag = [resultSet stringForColumn:@"note_tag"];
+//    }
+//  }
+//
+//  NSMutableArray *aryData = [NSMutableArray array];
+//
+//  TRecHead *pHead = [TRecHead new];
+//  TNoteInfo *noteInfo = [TNoteInfo new];
+//  noteInfo.tHead = pHead;
+//
+//  [self objFromFMDBQuery_NoteMgr:noteInfo model:model];
+//  if ([guidCate isEqualToString:noteInfo.strCatalogIdGuid]) {
+//    [aryData addObject:noteInfo];
+//  } else if (![guidCate isEqualToString:GUID_ZERO] &&
+//             [AstroDBMng isSubCate_CateMgr:guidCate
+//                                   subCate:noteInfo.strCatalogIdGuid]) {
+//    [aryData addObject:noteInfo];
+//  }
+//
+//  [fmdb close];
+//  return aryData;
+//}
+//
+////搜索目录的标题和内容是否含有关键字
+//+ (NSArray *)getNoteListBySearch:(NSString *)strKey
+//                         catalog:(NSString *)strCatalog {
+//  NSString *strSQL = [NSString
+//      stringWithFormat:@"select * from tb_note_info where delete_state=%d AND "
+//                       @"(note_title like '%%%@%%' OR content like '%%%@%%');",
+//                       DELETESTATE_NODELETE, strKey, strKey]; // download
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  NoteModel *model = [[NoteModel alloc] init];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:strSQL];
+//    while ([resultSet next]) {
+//      model.user_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"user_id"]];
+//      model.curr_ver =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"curr_ver"]];
+//      model.create_ver =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"create_ver"]];
+//      model.create_time = [resultSet stringForColumn:@"create_time"];
+//      model.modify_time = [resultSet stringForColumn:@"modify_time"];
+//
+//      model.delete_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"delete_state"]];
+//      model.edit_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"edit_state"]];
+//      model.conflict_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"conflict_state"]];
+//      model.sync_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"sync_state"]];
+//      model.need_upload =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"need_upload"]];
+//
+//      model.catalog_id = [resultSet stringForColumn:@"catalog_id"];
+//      model.note_id = [resultSet stringForColumn:@"note_id"];
+//      model.note_title = [resultSet stringForColumn:@"note_title"];
+//      model.note_type =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_type"]];
+//      model.note_size =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_size"]];
+//
+//      model.file_path = [resultSet stringForColumn:@"file_path"];
+//      model.file_ext = [resultSet stringForColumn:@"file_ext"];
+//      model.edit_location = [resultSet stringForColumn:@"edit_location"];
+//      model.note_src = [resultSet stringForColumn:@"note_src"];
+//      model.first_item = [resultSet stringForColumn:@"first_item"];
+//
+//      model.share_mode =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"share_mode"]];
+//      model.encrypt_flag =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"encrypt_flag"]];
+//      model.need_downlord =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"need_downlord"]];
+//      model.owner_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"owner_id"]];
+//      model.from_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"from_id"]];
+//
+//      model.star_level =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"star_level"]];
+//      model.expire_date = [resultSet stringForColumn:@"expire_date"];
+//      model.finish_date = [resultSet stringForColumn:@"finish_date"];
+//      model.finish_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"finish_state"]];
+//      model.content = [resultSet stringForColumn:@"content"];
+//
+//      model.fail_times =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"fail_times"]];
+//      model.note_class_id = [resultSet stringForColumn:@"note_class_id"];
+//      model.note_friend =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_friend"]];
+//      model.send_sms =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"send_sms"]];
+//      model.note_tag = [resultSet stringForColumn:@"note_tag"];
+//    }
+//  }
+//
+//  NSMutableArray *aryData = [NSMutableArray array];
+//
+//  TRecHead *pHead = [TRecHead new];
+//  TNoteInfo *noteInfo = [TNoteInfo new];
+//  noteInfo.tHead = pHead;
+//
+//  [self objFromFMDBQuery_NoteMgr:noteInfo model:model];
+//
+//  if (strCatalog && strCatalog.length > 0 &&
+//      ![strCatalog isEqualToString:noteInfo.strCatalogIdGuid]) {
+//    TCateInfo *pCateInfo =
+//        [AstroDBMng getCate_CateMgr:noteInfo.strCatalogIdGuid];
+//    if ([strCatalog isEqualToString:pCateInfo.strCatalogPaht1Guid] ||
+//        [strCatalog isEqualToString:pCateInfo.strCatalogPaht2Guid] ||
+//        [strCatalog isEqualToString:pCateInfo.strCatalogPaht3Guid] ||
+//        [strCatalog isEqualToString:pCateInfo.strCatalogPaht4Guid] ||
+//        [strCatalog isEqualToString:pCateInfo.strCatalogPaht5Guid] ||
+//        [strCatalog isEqualToString:pCateInfo.strCatalogPaht6Guid]) {
+//      [aryData addObject:noteInfo];
+//    }
+//  } else {
+//    [aryData addObject:noteInfo];
+//  }
+//
+//  [fmdb close];
+//  return aryData;
+//}
+//
+////获得指定目录的记录总数
+//+ (int)getNoteCountByCate:(NSString *)strCateGuid {
+//  NSString *sql;
+//  if (!strCateGuid || [strCateGuid length] == 0)
+//    sql = [NSString stringWithFormat:@"select count(*) as count from "
+//                                     @"tb_note_info where delete_state=%d;",
+//                                     DELETESTATE_NODELETE];
+//  else
+//    sql = [NSString stringWithFormat:@"select count(*) as count from "
+//                                     @"tb_note_info where catalog_id='%@' AND "
+//                                     @"delete_state=%d;",
+//                                     strCateGuid, DELETESTATE_NODELETE];
+//
+//  int count = 0;
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    while ([resultSet next]) {
+//      count = [resultSet intForColumn:@"count"];
+//      break;
+//    }
+//    [fmdb close];
+//  }
+//
+//  return count;
+//}
+//
+////获得指定目录当天时间的记录总数
+//+ (int)getNoteCountByCateByDate:(NSString *)strCateGuid
+//                           date:(NSString *)strDate {
+//  NSString *sql;
+//
+//  if (!strCateGuid || [strCateGuid length] == 0)
+//    sql = [NSString stringWithFormat:@"select count(*) as count from "
+//                                     @"tb_note_info where delete_state=%d AND "
+//                                     @"modify_time like '%@%%';",
+//                                     DELETESTATE_NODELETE, strDate];
+//  else
+//    sql = [NSString
+//        stringWithFormat:@"select count(*) as count from tb_note_info where "
+//                         @"catalog_id='%@' AND delete_state=%d AND "
+//                         @"modify_time like '%@%%';",
+//                         strCateGuid, DELETESTATE_NODELETE, strDate];
+//
+//  int count = 0;
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    while ([resultSet next]) {
+//      count = [resultSet intForColumn:@"count"];
+//      break;
+//    }
+//    [fmdb close];
+//  }
+//  return count;
+//}
+//
+////数据库操作
+//+ (BOOL)saveToDB_NoteMgr:(TNoteInfo *)obj {
+//  /*
+//  string strSQL = string("REPLACE INTO tb_note_info (") + [super commonFields] +
+//  ","
+//  + "note_id, catalog_id, note_title, note_type, note_size, edit_location,
+//  note_src, first_item, file_ext, encrypt_flag, share_mode, need_downlord,
+//  star_level"
+//  + ") values(" + [super commonFieldsValue:obj.tHead] +
+//  + "'" + [CommonFunc guidToString:obj.guid] + "', "			//
+//  自身GUID
+//  + "'" + [CommonFunc guidToString:obj.guidCate] + "', "		//
+//  NOTE存放的文件夹GUID
+//  + "'" + [CommonFunc transSqliteStrW:obj.strTitle] + "', "		//
+//  NOTE的名称
+//  + [CommonFunc ul2a:obj.dwType] + ", "					//
+//  NOTE的类型
+//  + [CommonFunc ul2a:obj.dwSize] + ", "					//
+//  NOTE包含的所有ITEM总长度
+//  + "'" + [CommonFunc transSqliteStrW:obj.strAddr] + "', "		//
+//  NOTE编辑时所在的地理位置
+//  + "'" + [CommonFunc transSqliteStrW:obj.strSrc] + "', "		//
+//  NOTE的URL链接地址
+//  + "'" + [CommonFunc guidToString:obj.guidFirstItem] + "', "	//
+//  当NOTE自身含有文件时，此GUID对应存储实际文件内容的ITEM。
+//  + "'" + [CommonFunc unicodeToUTF8:obj.wszFileExt] + "', "		//
+//  NOTE文件的扩展名, 与FirstItem一致
+//  + [CommonFunc i2a:obj.nEncryptFlag] + ", "				//
+//  加密标识
+//  + [CommonFunc i2a:obj.nShareMode] + ", "				//
+//  共享模式
+//  + [CommonFunc i2a:obj.nNeedDownlord] + ","
+//  + [CommonFunc i2a:obj.nStarLevel] + ");";
+//  //    + CCommon::i2a(obj.dwOwnerID) + ","				//
+//  创建人
+//  //    + CCommon::i2a(obj.dwFromID) + ");";				//
+//  收藏笔记的原始创建人
+//
+//  try
+//  {
+//      CppSQLite3Statement stmt = [[DBObject shareDB]
+//  compileStatement:strSQL.c_str()];
+//      stmt.execDML();
+//  }
+//  catch(CppSQLite3Exception& e)
+//  {
+//      MLOG(@"SQL: %s\n Exception:%s", strSQL.c_str(), e.errorMessage());
+//      return NO;
+//  }
+//
+//  return YES;
+//  */
+//
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  NoteModel *model = [[NoteModel alloc] init];
+//
+//  model.user_id = [NSNumber numberWithInt:obj.tHead.nUserID];
+//  model.curr_ver = [NSNumber numberWithInt:obj.tHead.nCurrVerID];
+//  model.create_ver = [NSNumber numberWithInt:obj.tHead.nCreateVerID];
+//  model.create_time = obj.tHead.strCreateTime;
+//  model.modify_time = obj.tHead.strModTime;
+//
+//  model.delete_state = [NSNumber numberWithInt:obj.tHead.nDelState];
+//  model.edit_state = [NSNumber numberWithInt:obj.tHead.nEditState];
+//  model.conflict_state = [NSNumber numberWithInt:obj.tHead.nConflictState];
+//  model.sync_state = [NSNumber numberWithInt:obj.tHead.nSyncState];
+//  model.need_upload = [NSNumber numberWithInt:obj.tHead.nNeedUpload];
+//
+//  model.catalog_id = obj.strCatalogIdGuid;
+//  model.note_id = obj.strNoteIdGuid;
+//  model.note_title = obj.strNoteTitle;
+//  model.note_type = [NSNumber numberWithInt:obj.nNoteType];
+//  model.note_size = [NSNumber numberWithInt:obj.nNoteSize];
+//
+//  model.file_path = obj.strFilePath;
+//  model.file_ext = obj.strFileExt;
+//  model.edit_location = obj.strEditLocation;
+//  model.note_src = obj.strNoteSrc;
+//  model.first_item = obj.strFirstItemGuid;
+//
+//  model.share_mode = [NSNumber numberWithInt:obj.nShareMode];
+//  model.encrypt_flag = [NSNumber numberWithInt:obj.nEncryptFlag];
+//  model.need_downlord = [NSNumber numberWithInt:obj.nNeedDownlord];
+//  model.owner_id = [NSNumber numberWithInt:obj.nOwnerId];
+//  model.from_id = [NSNumber numberWithInt:obj.nFromId];
+//
+//  model.star_level = [NSNumber numberWithInt:obj.nStarLevel];
+//  model.expire_date = obj.strExpiredDate;
+//  model.finish_date = obj.strFinishDate;
+//  model.finish_state = [NSNumber numberWithInt:obj.nFinishState];
+//  model.content = obj.strContent;
+//
+//  model.fail_times = [NSNumber numberWithInt:obj.nFailTimes];
+//  model.note_class_id = obj.strNoteClassId;
+//  model.note_friend = [NSNumber numberWithInt:obj.nFriend];
+//  model.send_sms = [NSNumber numberWithInt:obj.nSendSMS];
+//  model.note_tag = obj.strJYEXTag;
+//
+//  if ([fmdb open]) {
+//    BOOL ret = [fmdb
+//        executeUpdate:@"replace into %@"
+//                       "( [user_id],"
+//                       "[curr_ver], "
+//                       "[create_ver], "
+//                       "[create_time], "
+//                       "[modify_time], "
+//                       "[delete_state], "
+//                       "[edit_state], "
+//                       "[conflict_state], "
+//                       "[sync_state], "
+//                       "[need_upload], "
+//
+//                       "[note_id], "
+//                       "[catalog_id], "
+//                       "[note_title], "
+//                       "[note_type], "
+//                       "[note_size], "
+//                       "[edit_location], "
+//                       "[note_src], "
+//                       "[first_item], "
+//                       "[file_ext], "
+//                       "[encrypt_flag], "
+//
+//                       "[share_mode], "
+//                       "[need_downlord], "
+//                       "[owner_id], "
+//                       "[from_id], "
+//                       "[star_level], "
+//                       "[expire_date], "
+//                       "[finish_date], "
+//                       "[finish_state], "
+//                       "[content],"
+//                       "[fail_times],"
+//
+//                       "[note_class_id],"
+//                       "[note_friend],"
+//                       "[send_sms],"
+//                       "[note_tag])"
+//                       "values(?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, ?,?,?,?,?, "
+//                       "?,?,?,?,?, ?,?,?,?,?, ?,?,?,?);",
+//                      TB_NOTE_INFO, model.user_id, model.curr_ver,
+//                      model.create_ver, model.create_time, model.modify_time,
+//                      model.delete_state,
+//
+//                      model.edit_state, model.conflict_state, model.sync_state,
+//                      model.need_upload, model.note_id,
+//
+//                      model.catalog_id, model.note_title, model.note_type,
+//                      model.note_size, model.edit_location,
+//
+//                      model.note_src, model.first_item, model.file_ext,
+//                      model.encrypt_flag, model.share_mode,
+//
+//                      model.need_downlord, model.owner_id, model.from_id,
+//                      model.star_level, model.expire_date,
+//
+//                      model.finish_date, model.finish_state, model.content,
+//                      model.fail_times, model.note_class_id,
+//
+//                      model.note_friend, model.send_sms, model.note_tag];
+//
+//    [fmdb close];
+//    return ret;
+//  }
+//
+//  [fmdb close];
+//  return NO;
+//}
+//
+///*
+//+ (BOOL)objFromQuery:(NoteInfo*)obj query:(CppSQLite3Query*)query
+//{
+//    [super headFromQuery:query head:&obj->tHead];
+//
+//    obj->guid = [CommonFunc stringToGUID:query->getStringField("note_id", "")];
+//    obj->guidCate = [CommonFunc stringToGUID:query->getStringField("catalog_id",
+//"")];
+//    obj->guidFirstItem = [CommonFunc
+//stringToGUID:query->getStringField("first_item", "")];
+//    obj->dwType = query->getIntField("note_type", 0);
+//    obj->dwSize = query->getIntField("note_size", 0);
+//    obj->nShareMode = query->getIntField("share_mode", 0);
+//    obj->nEncryptFlag = query->getIntField("encrypt_flag", 0);
+//    obj->nNeedDownlord = query->getIntField("need_downlord", 0);
+//    obj->nStarLevel = query->getIntField("star_level", 0);
+//    obj->strTitle = [CommonFunc
+//utf8ToUnicode:query->getStringField("note_title", "")];
+//    obj->strAddr = [CommonFunc
+//utf8ToUnicode:query->getStringField("edit_location", "")];
+//    obj->strSrc = [CommonFunc utf8ToUnicode:query->getStringField("note_src",
+//"")];
+//    wcscpy_m((char*)obj->wszFileExt, (char*)[CommonFunc
+//utf8ToUnicode:query->getStringField("file_ext", "")].c_str());
+//
+//    return YES;
+//}
+//*/
+//
+//+ (BOOL)objFromFMDBQuery_NoteMgr:(TNoteInfo *)obj model:(NoteModel *)model {
+//  obj.tHead.nUserID = [model.user_id intValue];         // 用户编号
+//  obj.tHead.nCurrVerID = [model.curr_ver intValue];     // 当前版本号
+//  obj.tHead.nCreateVerID = [model.create_ver intValue]; // 创建版本号
+//
+//  obj.tHead.strCreateTime = model.create_time; // 创建时间
+//  obj.tHead.strModTime = model.modify_time;    // 修改时间
+//
+//  obj.tHead.nDelState = [model.delete_state intValue];        // 删除状态
+//  obj.tHead.nEditState = [model.edit_state intValue];         // 编辑状态
+//  obj.tHead.nConflictState = [model.conflict_state intValue]; // 冲突状态
+//  obj.tHead.nSyncState = [model.sync_state intValue]; // 同步状态，1表示正在同步
+//  obj.tHead.nNeedUpload = [model.need_upload intValue]; // 是否上传
+//
+//  obj.strCatalogIdGuid = model.catalog_id;    // 目录编号;
+//  obj.strNoteIdGuid = model.note_id;          //笔记编号
+//  obj.strNoteTitle = model.note_title;        // NOTE的名称
+//  obj.nNoteType = [model.note_type intValue]; // NOTE的类型
+//  obj.nNoteSize =
+//      [model.note_size intValue]; // NOTE包含的所有ITEM总长度，不包含自身
+//
+//  obj.strFilePath = model.file_path;         //文件保存路径
+//  obj.strFileExt = model.file_ext;           //文件扩展名
+//  obj.strEditLocation = model.edit_location; //编辑环境
+//  obj.strNoteSrc = model.note_src;           //文件来源
+//
+//  obj.strFirstItemGuid =
+//      model
+//          .first_item; //第一条item(当NOTE自身含有文件时，此GUID对应存储实际文件内容的ITEM)。
+//
+//  obj.nShareMode =
+//      [model.share_mode
+//              intValue];                            // 共享模式，0不共享，1共享给好友，2共享给所有人（备用）
+//  obj.nEncryptFlag = [model.encrypt_flag intValue]; // 加密标识(是否加密)
+//
+//  obj.nNeedDownlord = [model.need_downlord intValue]; //是否下载
+//  obj.nOwnerId = [model.owner_id intValue];
+//  obj.nFromId = [model.from_id intValue];
+//
+//  //新增星星级别、到期日期、完成状态、完成日期等属性
+//  obj.nStarLevel = [model.star_level intValue]; //星星级别
+//  obj.strExpiredDate = model.expire_date;       //到期日期
+//  obj.strFinishDate = model.finish_date;        //完成日期
+//  obj.nFinishState =
+//      [model.finish_state intValue]; //完成状态 0： 表示未完成 1：表示已完成
+//  obj.strContent = model.content; // HTML内容
+//  //    @property (nonatomic,assign) int	nFailTimes;
+//  //    @property (nonatomic,retain) NSString* strNoteClassId;
+//  //    @property (nonatomic,assign) int	nFriend;
+//  //    @property (nonatomic,assign) int	nSendSMS;
+//  //    @property (nonatomic,retain) NSString* strJYEXTag;
+//  obj.nFailTimes = [model.fail_times intValue];
+//  obj.strNoteClassId = model.note_class_id;
+//  obj.nFriend = [model.note_friend intValue];
+//  obj.nSendSMS = [model.send_sms intValue];
+//  obj.strJYEXTag = model.note_tag;
+//
+//  return YES;
+//}
+//
+//- (NoteModel *)selectFromSql:(NSString *)sql {
+//  FMDatabase *fmdb = [AstroDBMng getDb91DataBase];
+//  NoteModel *model = [[NoteModel alloc] init];
+//  if ([fmdb open]) {
+//    FMResultSet *resultSet = [fmdb executeQuery:sql];
+//    while ([resultSet next]) {
+//      model.user_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"user_id"]];
+//      model.curr_ver =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"curr_ver"]];
+//      model.create_ver =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"create_ver"]];
+//      model.create_time = [resultSet stringForColumn:@"create_time"];
+//      model.modify_time = [resultSet stringForColumn:@"modify_time"];
+//
+//      model.delete_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"delete_state"]];
+//      model.edit_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"edit_state"]];
+//      model.conflict_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"conflict_state"]];
+//      model.sync_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"sync_state"]];
+//      model.need_upload =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"need_upload"]];
+//
+//      model.catalog_id = [resultSet stringForColumn:@"catalog_id"];
+//      model.note_id = [resultSet stringForColumn:@"note_id"];
+//      model.note_title = [resultSet stringForColumn:@"note_title"];
+//      model.note_type =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_type"]];
+//      model.note_size =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_size"]];
+//
+//      model.file_path = [resultSet stringForColumn:@"file_path"];
+//      model.file_ext = [resultSet stringForColumn:@"file_ext"];
+//      model.edit_location = [resultSet stringForColumn:@"edit_location"];
+//      model.note_src = [resultSet stringForColumn:@"note_src"];
+//      model.first_item = [resultSet stringForColumn:@"first_item"];
+//
+//      model.share_mode =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"share_mode"]];
+//      model.encrypt_flag =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"encrypt_flag"]];
+//      model.need_downlord =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"need_downlord"]];
+//      model.owner_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"owner_id"]];
+//      model.from_id =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"from_id"]];
+//
+//      model.star_level =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"star_level"]];
+//      model.expire_date = [resultSet stringForColumn:@"expire_date"];
+//      model.finish_date = [resultSet stringForColumn:@"finish_date"];
+//      model.finish_state =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"finish_state"]];
+//      model.content = [resultSet stringForColumn:@"content"];
+//
+//      model.fail_times =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"fail_times"]];
+//      model.note_class_id = [resultSet stringForColumn:@"note_class_id"];
+//      model.note_friend =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"note_friend"]];
+//      model.send_sms =
+//          [NSNumber numberWithInt:[resultSet intForColumn:@"send_sms"]];
+//      model.note_tag = [resultSet stringForColumn:@"note_tag"];
+//    }
+//  }
+//  [fmdb close];
+//  return model;
+//}
+//
+//+ (int)getNoteMaxVersion {
+//  NSString *strValue;
+//  if (![AstroDBMng getCfg_cfgMgr:TB_NOTE_INFO
+//                            name:@"tableMaxVer"
+//                           value:strValue])
+//    return 0;
+//
+//  int maxVer = [strValue intValue];
+//  return maxVer;
+//}
+//
+//+ (BOOL)setNoteMaxVersion:(int)version {
+//  NSString *strValue = [NSString stringWithFormat:@"%d", version];
+//  return [AstroDBMng setCfg_cfgMgr:TB_NOTE_INFO
+//                              name:@"tableMaxVer"
+//                             value:strValue];
+//}
+//
+//@end

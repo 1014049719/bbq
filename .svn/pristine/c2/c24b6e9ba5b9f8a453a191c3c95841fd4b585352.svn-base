@@ -1,0 +1,50 @@
+//
+//  NoteMgr.h
+//  NoteBook
+//
+//  Created by wangsc on 10-9-15.
+//  Copyright 2010 ND. All rights reserved.
+//
+
+#import "DBMng.h"
+
+#pragma mark -
+#pragma mark 数据库管理
+@interface AstroDBMng (ForDynaMgr)
+{
+    
+}
+
+
+////增加1条动态
+//+(BOOL)addDyna:(DynaModel *)dynamodel;
+//+(BOOL)updateDyna:(DynaModel *)dynamodel;
+//+(BOOL)deleteDyna:(DynaModel *)dynamodel;
+//
+////查询本地数据库记录
+//+(NSArray *)getDyna:(NSString *)baobaouid classuid:(NSString *)classuid schoolid:(NSString *)schoolid dtype:(int)dtype dateline:(int)updatetime;
+////删除所有的旧纪录
+//+(BOOL)delDyna:(NSString *)baobaouid classuid:(NSString *)classuid schoolid:(NSString *)schoolid dtype:(int)dtype;
+//
+////查询本地上传记录
+//+(NSArray *)getLocalUploadDyna:(DynaModel *)dynamodel limit:(int)nLimitCount;
+//
+////返回需上传的动态localid
+//+ (NSArray *)getNeedUploadDyncListGuid;
+//
+//
+////通过localid查询指定动态
+//+ (DynaModel *)getDynaByLocalId:(NSString *)strLocalId;
+//
+////通过dyna查询指定动态
+//+ (DynaModel *)getDynaByGuid:(NSString *)guid;
+//
+////通过guid数组删除
+//+(void)DeleteDynaByGuidArr:(NSArray *)array;
+//+(BOOL)DeleteDynaByGuid:(NSString *)guid;
+//
+////更改上传结果
+//+(BOOL)updateDynaUploadResult:(NSString *)localid guid:(NSString *)guid result:(int)result reason:(NSString *)reason;
+
+
+@end

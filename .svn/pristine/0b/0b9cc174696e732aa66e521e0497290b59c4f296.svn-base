@@ -1,0 +1,59 @@
+////
+////  CfgMgr.m
+////  NoteBook
+////
+////  Created by wangsc on 10-9-20.
+////  Copyright 2010 ND. All rights reserved.
+////
+//
+//#import "CfgMgr.h"
+//
+//#import "DbMngDataDef.h"
+//#import "PubFunction.h"
+//#import "GlobalVar.h"
+//
+//#import "FMDB.h"
+//
+//@implementation AstroDBMng (ForcfgMgr)
+//
+//+ (BOOL)getCfg_cfgMgr:(NSString *)strKey
+//                 name:(NSString *)strName
+//                value:(NSString *)strValue {
+//
+//  NSString *sql = [NSString
+//      stringWithFormat:
+//          @"SELECT * FROM tb_config_info WHERE sKey='%@' AND sName='%@';",
+//          strKey, strName];
+//
+//  FMDatabase *db = [AstroDBMng getDb91DataBase];
+//  if ([db open]) {
+//    FMResultSet *rs = [db executeQuery:sql];
+//    while ([rs next]) {
+//      //            strValue = [rs stringForColumn:@"BData"];
+//      [db close];
+//      return YES;
+//    }
+//    [db close];
+//  }
+//  return NO;
+//}
+//
+//+ (BOOL)setCfg_cfgMgr:(NSString *)strKey
+//                 name:(NSString *)strName
+//                value:(NSString *)strValue {
+//  NSString *sql = @"replace into tb_config_info"
+//                   "( [sKey],"
+//                   "[sName], "
+//                   "[BData] )"
+//                   "values(?,?,?);";
+//
+//  FMDatabase *db = [AstroDBMng getDbCommonDataBase];
+//  if ([db open]) {
+//    BOOL res = [db executeUpdate:sql, strKey, strValue, strValue];
+//    [db close];
+//    return res;
+//  }
+//  return NO;
+//}
+//
+//@end
